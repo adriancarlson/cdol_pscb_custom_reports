@@ -11,7 +11,7 @@
 	$j(document).ready(function () {
 		/* insert custom CDOL fields onto the page. */
 		var potentialContacts = $j('#potentialContacts').closest('tr');
-		$j("tr:first").closest('tr').before(potentialContacts);
+		$j("td:contains('Contacts - Duplicates')").closest('tr').before(potentialContacts);
 		/* remove the hidden tables  and divs */
 		$j("#hiddenTable").remove();
 	});
