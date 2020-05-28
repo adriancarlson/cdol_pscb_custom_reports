@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+    <!-- non framed -->
+
+    <head>
+        <title>CDOL Contacts - Potential Duplicate Contacts</title>
+        ~[wc:commonscripts]
+        <link href="/images/css/screen.css" rel="stylesheet" media="screen">
+        <link href="/images/css/print.css" rel="stylesheet" media="print">
+        ~[wc:pscb_init]
+    </head>
+
+    <body>
+        ~[wc:admin_header_frame_css]
+        <!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a> &gt; <a
+            href="/admin/reports_pscb/pscb_home.html" target="_top">Start Page</a> &gt; <a
+            href="/admin/reports_pscb/pscb_home.html" target="_top">PSCB Custom Reports</a> &gt; <a
+            href="/admin/reports_pscb/pscb_contacts.html" target="_top">Contacts</a> &gt; CDOL Contacts - Potential
+        Duplicate Contacts
+        <!-- breadcrumb end -->~[wc:admin_navigation_frame_css] ~[if.is.a.school]
+        ~[if#sch.~(gpv.sch;sqlText)=]
+        ~[SetPostValue:sch=~(curschoolid)]
+        [/if#sch]
+        [/if.is.a.school]
+
+        <!-- Begin report filters-->
+        <form name="searchform" action="#" method="POST">
+            <h1>CDOL Contacts - Potential Duplicate Contacts</h1>
+            <div class="box-round" style="overflow: hidden;">
+                <h2>Report Filters</h2>
+                <table border="0" cellspacing="0" cellpadding="0" class="linkDescList">
+                    <thead>
+                        <tr>
+                            <th style="white-space: nowrap;">Student Selection</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <select name="ss" id="ss">
+                                    <option value='' ~[if.~[gpv:ss]=]selected[/if]>All Students
+                                    <option value="cur" ~[if.~[gpv:ss]=cur]selected[/if]>Current Selection
+                                        (~[x:studsinset])
+                                </select>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="button-row" style="float: left;">
+                    <input type="hidden" name="showData" value="1">
+                    <span>
+                        <font color="red">&nbsp;&nbsp;Select parameters and click submit</font>
+                    </span>
+                    <button type="submit" id="btnSubmit" name="btnSubmit" onClick="actionChange()">Submit</button>
+                </div>
+            </div>
+        </form>
+        <!-- End report filters-->
+
+        <!-- Start of Results -->
+        ~[if#showData.~(gpv.showData;sqlText)=1]
+        <div class="box-round">
+            <h2>Contacts - Student List<span><label id="lblRecordCount"></label></span></h2>
+            <table border="0" cellspacing="0" cellpadding="4" class="tablesorter grid" id="results">
+                <thead>
+                    <tr>
+                        <th class="left">Contact ID</th>
+                        <th class="left">Contact Name</th>
+                        <th class="left">Access Account Email</th>
+                        <th class="left">Phone Numbers</th>
+                        <th class="left">Email Address</th>
+                        <th class="left">(Relationship / OCT) Student (Grade Level - School)</th>
+                    </tr>
+                </thead>
+                <!-- Report Filters have not been submited -->
+                <tbody>
+                    ~[tlist_sql;
+                    WITH personlist AS (
+                    SELECT DISTINCT
+                    sca.personid
+                    FROM
+                    students s
+                    INNER JOIN studentcontactassoc sca ON ( s.dcid = sca.studentdcid )
+                    ~[if#ss.~(gpv.ss;sqlText)=cur] INNER JOIN ~[temp.table.current.selection:students] temp ON (s.dcid =
+                    temp.dcid) [/if#ss]
+                    WHERE
+                    s.enroll_status <= 0 ~[if.is.a.school] AND s.schoolid=~(curschoolid) [/if] ), duppersonlist AS (
+                        SELECT DISTINCT substr(p.firstname, 1, 3) "FIRSTNAME" , p.lastname, COUNT(*) cnt,
+                        LISTAGG(p.id, ',' ) WITHIN GROUP( ORDER BY p.id ) ids FROM personlist pl INNER JOIN person p ON
+                        ( pl.personid=p.id ) LEFT JOIN u_person_additional_info upai ON p.id=upai.personid WHERE
+                        upai.person_dfp IS NULL OR upai.person_dfp=0 GROUP BY substr(p.firstname, 1, 3), p.lastname
+                        HAVING COUNT(*)> 1
+                        )
+                        SELECT DISTINCT
+                        p.id,
+                        p.lastname,
+                        substr(p.firstname, 1, 3) p_fname_substr,
+                        p.firstname,
+                        p.middlename,
+                        pcae.emailaddress,
+                        (
+                        SELECT
+                        LISTAGG(decode(ppa.phonenumberasentered, NULL, '', ppa.phonenumberasentered
+                        || ' ('
+                        || nvl(cs.code, 'Not Set')
+                        || ')'), ' | ') WITHIN GROUP(
+                        ORDER BY
+                        po.phoneorder
+                        )
+                        FROM
+                        (
+                        SELECT
+                        level AS phoneorder
+                        FROM
+                        dual
+                        CONNECT BY
+                        level <= 3 ) po LEFT JOIN personphonenumberassoc ppa ON
+                            po.phoneorder=ppa.phonenumberpriorityorder AND ( ppa.personid=p.id ) LEFT JOIN codeset cs ON
+                            ( ppa.phonetypecodesetid=cs.codesetid ) ) AS phone_numbers, ( SELECT
+                            LISTAGG(ea.emailaddress, ' | ' ) WITHIN GROUP( ORDER BY pea.emailaddresspriorityorder )
+                            email_addresses FROM personemailaddressassoc pea INNER JOIN emailaddress ea ON (
+                            pea.emailaddressid=ea.emailaddressid ) WHERE pea.personid=p.id GROUP BY pea.personid ) AS
+                            email_addresses, ( SELECT LISTAGG('<li>'
+                            || '('
+                            || nvl(cs.code, 'Not Set')
+                            || ' / '
+                            || nvl(ocm.originalcontacttype, 'Not Set')
+                            || ') '
+                            || s.lastfirst
+                            || ' ('
+                            || s.grade_level
+                            || ' - '
+                            || sch.abbreviation
+                            || ')</li>', '') WITHIN GROUP(
+                            ORDER BY
+                            s.grade_level DESC, s.lastfirst
+                            )
+                            FROM
+                            studentcontactassoc sca
+                            LEFT JOIN codeset cs ON ( sca.currreltypecodesetid = cs.codesetid )
+                            LEFT JOIN originalcontactmap ocm ON ( sca.studentcontactassocid = ocm.studentcontactassocid
+                            )
+                            INNER JOIN students s ON ( sca.studentdcid = s.dcid )
+                            INNER JOIN schools sch ON ( s.schoolid = sch.school_number )
+                            WHERE
+                            sca.personid = p.id
+                            ) studentlist
+                            FROM
+                            person p
+                            LEFT JOIN guardianpersonassoc gp ON p.id = gp.personid
+                            LEFT JOIN guardianstudent gs ON gs.guardianid = gp.guardianid
+                            LEFT JOIN guardian g ON g.guardianid = gs.guardianid
+                            LEFT JOIN pcas_account pcaa ON pcaa.pcas_accounttoken = g.accountidentifier
+                            LEFT JOIN pcas_emailcontact pcae ON pcae.pcas_accountid = pcaa.pcas_accountid
+                            INNER JOIN duppersonlist dpl ON substr(p.firstname, 1, 3) = dpl.firstname
+                            AND p.lastname = dpl.lastname
+                            LEFT OUTER JOIN students ON p.id = students.person_id
+                            WHERE
+                            students.dcid IS NULL
+                            ORDER BY
+                            p.lastname,
+                            p.firstname,
+                            p.middlename
+                            ;alternatecolor;nonemessage=
+                            <tr>
+                                <td colspan="100%">No Duplicate Contacts.</td>
+                            </tr>]
+                            <tr class="Record">
+                                <td>~(id;t)</td>
+                                <td><a href="/admin/contacts/search.html#?lastName=~(LastName;t)&firstName=~(FirstNameSubStr;t)&phoneNumber=&phoneExtension=&emailAddress=&address=&addressUnit=&includeInactive=false&includeAccessAccountsOnly=false&filterByStudents=false"
+                                        target="_blank">~(LastName;t), ~(FirstName;t) ~(MiddleName;t)</a>
+                                </td>
+                                <td>~(access_account;t)</td>
+                                <td>~(phone_numbers;t)</td>
+                                <td>~(Email_Address;t)</td>
+                                <td>~(studentlist;t)</td>
+                            </tr>
+                            [/tlist_sql]
+                </tbody>
+            </table>
+        </div>
+        <!-- End of results -->
+        <div>
+            <p>
+                <center>Report generated at ~[time] on ~[date]</center>
+            </p>
+        </div>
+        [/if#showData]
+        ~[wc:admin_footer_frame_css]
+    </body>
+
+</html>

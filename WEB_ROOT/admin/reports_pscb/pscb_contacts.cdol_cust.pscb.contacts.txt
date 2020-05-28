@@ -1,0 +1,18 @@
+<table id="hiddenTable" style="display: none;">
+	<tr id="potentialContacts">
+		<td><a href="/admin/reports_pscb/contacts/CDOL_Contacts_Potential_Duplicates.html">CDOL Contacts - Potential
+				Duplicates</a></td>
+		<td>View Potential Duplicate Contacts list.</td>
+	</tr>
+</table>
+
+<script>
+	/*checks to make sure page is loaded */
+	$j(document).ready(function () {
+		/* insert custom CDOL fields onto the page. */
+		var potentialContacts = $j('#potentialContacts').closest('tr');
+		$j("tr:first").closest('tr').before(potentialContacts);
+		/* remove the hidden tables  and divs */
+		$j("#hiddenTable").remove();
+	});
+</script>
