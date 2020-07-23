@@ -1,0 +1,17 @@
+<table id="hiddenTable" style="display: none;">
+	<tr id="teacherNoRoom">
+		<td><a href="/admin/reports_pscb/scheduleCY/CDOL_TeachersNoRoom.html">Teachers - No Room Assigned</a></td>
+		<td>Show all teachers that have no room assigned.</td>
+	</tr>
+</table>
+
+<script>
+	/*checks to make sure page is loaded */
+	$j(document).ready(function () {
+		/* insert custom CDOL fields onto the page. */
+		var teacherNoRoom = $j('#teacherNoRoom').closest('tr');
+		$j("td:contains('Teacher - Sections List')").closest('tr').after(teacherNoRoom);
+		/* remove the hidden tables  and divs */
+		$j("#hiddenTable").remove();
+	});
+</script>
