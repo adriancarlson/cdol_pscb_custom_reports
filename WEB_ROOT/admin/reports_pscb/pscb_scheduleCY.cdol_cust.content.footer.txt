@@ -3,6 +3,10 @@
 		<td><a href="/admin/reports_pscb/scheduleCY/CDOL_TeachersNoRoom.html">Teachers - No Room Assigned</a></td>
 		<td>Show all teachers that have no room assigned.</td>
 	</tr>
+	<tr id="studentDoubleBooked">
+		<td><a href="/admin/reports_pscb/scheduleCY/CDOL_StudentsDoubleBooked.html">Students - Double Booked</a></td>
+		<td>Lists students with two or more sections scheduled during the same period at the same term.</td>
+	</tr>
 </table>
 
 <script>
@@ -11,6 +15,9 @@
 		/* insert custom CDOL fields onto the page. */
 		var teacherNoRoom = $j('#teacherNoRoom').closest('tr');
 		$j("td:contains('Teacher - Sections List')").closest('tr').after(teacherNoRoom);
+		/* insert custom CDOL fields onto the page. */
+		var studentDoubleBooked = $j('#studentDoubleBooked').closest('tr');
+		$j("td:contains('Students - Non Scheduled Periods')").closest('tr').after(studentDoubleBooked);
 		/* remove the hidden tables  and divs */
 		$j("#hiddenTable").remove();
 	});
