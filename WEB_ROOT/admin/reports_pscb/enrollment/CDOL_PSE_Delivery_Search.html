@@ -1,0 +1,118 @@
+
+<!DOCTYPE html>
+<html>
+<!-- non framed -->
+	<head>
+		<title>PowerSchool Enrollment Delivery Search</title>
+		~[wc:commonscripts]
+		<link href="/images/css/screen.css" rel="stylesheet" media="screen">
+		<link href="/images/css/print.css" rel="stylesheet" media="print">
+		~[wc:pscb_init]
+		<script>
+		    $j(function(){
+		        $j("table#glsum td:contains('9999')").text("Total");
+		        $j("table#ethsum td:contains('ZZZZ')").text("Total");
+		    })
+		</script>
+	</head>
+	<body>
+		~[wc:admin_header_frame_css]<!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a> &gt; <a href="/admin/reports_pscb/pscb_home.html" target="_top">PSCB Custom Reports</a> &gt; <a href="/admin/reports_pscb/pscb_enrollment.html">Enrollment</a> &gt; PowerSchool Enrollment Delivery Search<!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
+		
+		<!-- start of Options -->
+		<form action="/admin/reports_pscb/enrollment/CDOL_PSE_Delivery_Search.html" method="POST" onsubmit="return formValid('S');">
+			<h1>PowerSchool Enrollment Delivery Search</h1>
+			<div class="box-round">
+				<h2>Report Filters</h2>
+				<table border="0" cellspacing="0" cellpadding="0" class="linkDescList" >
+					<thead>
+						<tr>
+							<th>Start Date</th>
+							<th width="100%"></th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td style="white-space: nowrap;">
+								<input type="text"  name="startingdate" value= "~[if#results1.~[gpv:searchfunction]=1]~[gpv:startingdate][else#results1]~[tlist_sql;SELECT to_char(FirstDay, 'YYYY') as FirstDaySearch FROM terms WHERE id = ~(termid) AND ~[if.is.a.school] Schoolid = ~(curschoolid)[else]schoolid = 0 [/if]]07/01/~(FirstDaySearch)[/tlist_sql][/if#results1]" size="10" class="psDateWidget" />
+							</td>
+							<td></td>
+						</tr>
+					</tbody>
+				</table>
+				<div class="button-row">
+					<span><font color="red">&nbsp;&nbsp;Select parameters and click submit</font></span>
+					<input type="hidden" name="searchfunction" value="1">
+					<input type="hidden" name="ac" value="prim">~[submitbutton]
+				</div>
+				<p>The report lists active and pre-registered students delivered from PowerSchool Enrollment after the selected date. </p>
+			</div>
+		</form>
+
+		<!-- end of Options -->
+	
+		~[if#results.~[gpv:searchfunction]=1]
+		<h2 class="toggle expanded">Enrollment Details</h2>
+		<div class="box-round">
+			<h2>Students Delivered Since: ~[gpv:startingdate]</h2>
+			<table border="0" cellspacing="0" cellpadding="4" class="tablesorter grid" id="results">
+				<thead>
+					<tr>
+						<th class="left">Student Number</th>
+						<th class="left">Student</th>
+						<th class="left">Grade Level</th>
+						<th class="left">Gender</th>
+						<th class="left">Delivery Date</th>
+					</tr>
+				</thead>
+				<tbody>
+					~[tlist_sql;
+					select 
+                        dcid,
+                        student_number,
+                        lastfirst,
+                        grade_level,
+                        gender,
+                        to_char (to_date(col_one,'MM/DD/YY'), 'MM/DD/YY') as sub_date,
+                        to_date(col_one,'MM/DD/YY'),
+                        log
+                        
+                        FROM
+                        
+                                (select 
+                                s.dcid,
+                                s.student_number,
+                                s.lastfirst,
+                                s.grade_level,
+                                s.gender,
+                                substr (log, 2, 8) as col_one,
+                                s.log
+                                
+                                from students s
+                                where s.schoolid =  ~(curschoolid)
+                                and s.log like '%PowerSchool Registration%'
+                                and s.enroll_status in (-1,0)
+                                    )
+                        WHERE to_date(col_one,'MM/DD/YY') >= to_date('~[gpv:startingdate]','MM/DD/YY')
+                        order by sub_date
+					;alternatecolor;nonemessage=
+							<tr nodata><td colspan="100%">No Records Found.</td></tr>]
+					<tr class="Record" data-StudentID="~(dcid)">
+						<td>~(Student_number)</td>
+						<td class="nowrap"><a href="/admin/students/transferinfo.html?frn=001~(dcid;t)" target="_blank">~(LastFirst)</a></td>
+						<td>~(Grade_Level)</td>
+						<td>~(Gender)</td>
+						<td>~(Entry_date)</td>
+					</tr>
+					[/tlist_sql]
+				</tbody>
+			</table>
+		</div>
+		<div style="clear: both;">
+			<p><center>Report generated at ~[time] on ~[date]</center></p>
+		</div>
+		~[wc:admin_footer_frame_css]
+		[/if#results]
+
+<!-- End of results -->
+	</body>
+</html>
