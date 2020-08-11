@@ -1,5 +1,5 @@
 <table id="hiddenTable" style="display: none;">
-	<tr id="PSEDeliveries">
+	<tr id="PSE">
 		<td><a href="/admin/reports_pscb/enrollment/search_student_entry_exit_summary.html">PowerSchool Enrollment Delivery Search</a></td>
 		<td>Lists Active and Pre-Registered students delivered from PowerSchool Enrollment after a selected date.</td>
 	</tr>
@@ -9,7 +9,7 @@
 	/*checks to make sure page is loaded */
 	$j(document).ready(function () {
 		/* insert custom CDOL fields onto the page. */
-		var PSEDeliveries = $j('#PSEDeliveries').closest('tr');
+		var PSE = $j('#PSE').closest('tr');
 		$j("td:contains('Special Program Enrollments - Current Year')").closest('tr').after(potentialContacts);
 		/* remove the hidden tables  and divs */
 		$j("#hiddenTable").remove();
