@@ -69,6 +69,7 @@
 						<th class="left">Grade Level</th>
 						<th class="left">Gender</th>
 						<th class="left">Delivery Date</th>
+						<th class="left">Form</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -80,6 +81,12 @@
 					grade_level,
 					gender,
 					to_char (to_date(col_one,'MM/DD/YY'), 'MM/DD/YY') as sub_date,
+					CASE
+					WHEN log LIKE '%CreatedByAPI:PowerSchool Registration Signature%' THEN 'New Student Registration'
+					WHEN log LIKE '%UpdatedByAPI:PowerSchool Registration Signature%' THEN 'Returning Student
+					Registration'
+					ELSE
+					END,
 					to_date(col_one,'MM/DD/YY'),
 					log
 					FROM
@@ -95,7 +102,7 @@
 					WHERE
 					s.log like '%PowerSchool Registration%'
 					AND s.enroll_status in (-1,0)
-					~[if.is.a.school] AND Schoolid = ~(curschoolid)
+					~[if.is.a.school] AND Schoolid = ~(curschoolid)[else][/if]
 					)
 					WHERE to_date(col_one,'MM/DD/YY') >= to_date('~[gpv:startingdate]','MM/DD/YY')
 					order by sub_date DESC
@@ -105,11 +112,12 @@
 					</tr>]
 					<tr class="Record" data-StudentID="~(dcid)">
 						<td>~(Student_number)</td>
-						<td class="nowrap"><a href="/admin/students/transferinfo.html?frn=001~(dcid;t)"
+						<td class="nowrap"><a href="/admin/students/generaldemographics.html?frn=001~(dcid;t)"
 								target="_blank">~(LastFirst)</a></td>
 						<td>~(Grade_Level)</td>
 						<td>~(Gender)</td>
 						<td>~(Entry_date)</td>
+						<td>~(Form)</td>
 					</tr>
 					[/tlist_sql]
 				</tbody>
