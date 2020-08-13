@@ -84,7 +84,7 @@
 					CASE
 					WHEN log LIKE '%CreatedByAPI%' THEN 'New Student Registration'
 					WHEN log LIKE '%UpdatedByAPI%' THEN 'Returning Student Registration'
-					ELSE
+					ELSE ''
 					END,
 					to_date(col_one,'MM/DD/YY'),
 					log
