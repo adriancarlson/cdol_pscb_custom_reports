@@ -82,9 +82,8 @@
 					gender,
 					to_char (to_date(col_one,'MM/DD/YY'), 'MM/DD/YY') as sub_date,
 					CASE
-					WHEN log LIKE '%CreatedByAPI:PowerSchool Registration Signature%' THEN 'New Student Registration'
-					WHEN log LIKE '%UpdatedByAPI:PowerSchool Registration Signature%' THEN 'Returning Student
-					Registration'
+					WHEN log LIKE '%CreatedByAPI%' THEN 'New Student Registration'
+					WHEN log LIKE '%UpdatedByAPI%' THEN 'Returning Student Registration'
 					ELSE
 					END,
 					to_date(col_one,'MM/DD/YY'),
