@@ -73,7 +73,7 @@
 				</thead>
 				<tbody>
 					~[tlist_sql;
-					select
+					SELECT
 					dcid,
 					student_number,
 					lastfirst,
@@ -91,11 +91,11 @@
 					s.gender,
 					substr (log, 2, 8) as col_one,
 					s.log
-					from students s
-					where
+					FROM students s
+					WHERE
 					s.log like '%PowerSchool Registration%'
-					and s.enroll_status in (-1,0)
-					AND ~[if.is.a.school] Schoolid = ~(curschoolid)
+					AND s.enroll_status in (-1,0)
+					~[if.is.a.school] AND Schoolid = ~(curschoolid)
 					)
 					WHERE to_date(col_one,'MM/DD/YY') >= to_date('~[gpv:startingdate]','MM/DD/YY')
 					order by sub_date DESC
