@@ -75,9 +75,7 @@
                         to_char (to_date(col_one,'MM/DD/YY'), 'MM/DD/YY') as sub_date,
                         to_date(col_one,'MM/DD/YY'),
                         log
-                        
                         FROM
-                        
                                 (select 
                                 s.dcid,
                                 s.student_number,
@@ -87,10 +85,10 @@
                                 substr (log, 2, 8) as col_one,
                                 s.log
                                 
-                                from students s
-                                where s.schoolid =  ~(curschoolid)
-                                and s.log like '%PowerSchool Registration%'
-                                and s.enroll_status in (-1,0)
+                                FROM students s
+                                WHERE s.log like '%PowerSchool Registration%'
+								AND s.enroll_status in (-1,0)
+								~[if.is.a.school] AND s.SchoolID = ~(curschoolid) [/if.is.a.school]
                                     )
                         WHERE to_date(col_one,'MM/DD/YY') >= to_date('~[gpv:startingdate]','MM/DD/YY')
                         order by sub_date
