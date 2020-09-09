@@ -25,7 +25,8 @@
                 <table border="0" cellspacing="0" cellpadding="0" class="linkDescList">
                     <thead>
                         <tr>
-                            <th style="white-space: nowrap;">Student Selection</th>
+                            <th width="180px">Student Selection</th>
+                            <th>Grade Level</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -35,6 +36,28 @@
                                     <option value='' ~[if.~[gpv:s]=]selected[/if]>All Students
                                     <option value="cur" ~[if.~[gpv:s]=cur]selected[/if]>Current Selection
                                         (~[x:studsinset])
+                                </select>
+                            </td>
+                            <td>
+                                <select name="grlvl">
+                                    <option ~[if.~[gpv:grlvl]='' ]selected[/if] value=''>All Grades</option>
+                                    ~[tlist_sql;
+                                    SELECT DISTINCT GRADE_LEVEL, DECODE('~[gpv:grlvl]', GRADE_LEVEL, 'SELECTED', '')
+                                    isselected,
+                                    CASE
+                                    WHEN grade_level = -2 THEN 'PK3'
+                                    WHEN grade_level = -1 THEN 'PK4'
+                                    WHEN grade_level = 0 THEN 'K'
+                                    WHEN grade_level = 99 THEN 'Gr'
+                                    ELSE TO_CHAR(grade_level)
+                                    END pretty_grade
+                                    FROM STUDENTS
+                                    WHERE TO_CHAR(SCHOOLID) LIKE CASE WHEN TO_CHAR(~(curschoolid)) = '0'
+                                    THEN '%' ELSE TO_CHAR(~(curschoolid)) END
+                                    AND ENROLL_STATUS = 0
+                                    ORDER BY GRADE_LEVEL]
+                                    <option value="~(grlvl)" ~(isselected)>~(prettygrlvl)</option>
+                                    [/tlist_sql]
                                 </select>
                             </td>
                         </tr>
@@ -72,7 +95,13 @@
                     ,s.Student_Number
                     ,s.lastfirst
                     ,s.dob
-                    ,s.Grade_Level
+                    ,CASE
+                    WHEN grade_level = -2 THEN 'PK3'
+                    WHEN grade_level = -1 THEN 'PK4'
+                    WHEN grade_level = 0 THEN 'K'
+                    WHEN grade_level = 99 THEN 'Gr'
+                    ELSE TO_CHAR(grade_level)
+                    END pretty_grade
                     ,CASE WHEN NCEA.RELIGIOUSAFFILIATION= 'C' THEN 'Catholic' WHEN NCEA.RELIGIOUSAFFILIATION= 'N' THEN
                     'Non-Catholic'ELSE ''
                     END AS Religion
@@ -85,9 +114,11 @@
                     LEFT OUTER JOIN S_STU_NCEA_X NCEA on (s.dcid = NCEA.studentsdcid)
                     WHERE s.enroll_status = 0
                     ~[if.is.a.school] AND s.schoolid = ~(curschoolid) [/if.is.a.school]
+
                     ~[if#1.~(gpv.s;sqlText)#] AND S.dcid IN (SELECT dcid FROM ~[temp.table.current.selection:students])
-                    [else#1] AND S.Enroll_Status <= 0 [/if#1] ORDER BY s.lastfirst ;alternatecolor;nonemessage=<tr
-                        nodata>
+                    [else#1] AND S.Enroll_Status <= 0 [/if#1] ~[if#2.~(gpv.grlvl;sqlText)='' ] AND
+                        S.Grade_Level=~(gpv.grlvl) [else#2][/if#2] ORDER BY s.Grade_Level,s.lastfirst
+                        ;alternatecolor;nonemessage=<tr nodata>
                         <td colspan="100%">No Records Found.</td>
                         </tr>]
                         <tr class="Record" data-StudentID="~(dcid;t)">
