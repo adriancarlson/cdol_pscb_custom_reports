@@ -4,6 +4,10 @@
 				Duplicates</a></td>
 		<td>View Potential Duplicate Contacts list.</td>
 	</tr>
+	<tr id="motherFatherEmail">
+		<td><a href="/admin/reports_pscb/contacts/CDOL_Mother_Father_Email.html">Students - Mother/Father Email</a></td>
+		<td>List Student with Mother and Father Email</td>
+	</tr>
 </table>
 
 <script>
@@ -12,6 +16,10 @@
 		/* insert custom CDOL fields onto the page. */
 		var potentialContacts = $j('#potentialContacts').closest('tr');
 		$j("td:contains('Contacts - Duplicates')").closest('tr').before(potentialContacts);
+		/* insert custom CDOL fields onto the page. */
+		var motherFatherEmail = $j('#motherFatherEmail').closest('tr');
+		$j("td:contains('Students - Contacts List')").closest('tr').after(motherFatherEmail);
+
 		/* remove the hidden tables  and divs */
 		$j("#hiddenTable").remove();
 	});
