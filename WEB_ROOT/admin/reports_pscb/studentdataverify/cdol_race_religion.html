@@ -70,11 +70,12 @@
                     s.dcid
                     ,s.Student_Number
                     ,s.lastfirst
+                    ,s.dob
                     ,s.Grade_Level
                     ,CASE WHEN NCEA.RELIGIOUSAFFILIATION= 'C' THEN 'Catholic' WHEN NCEA.RELIGIOUSAFFILIATION= 'N' THEN
                     'Non-Catholic'ELSE ''
                     END AS Religion
-                    ,Decode(s.FedEthnicity,-2,'',1,'Yes','No') Hispanic,
+                    ,Decode(s.FedEthnicity,-2,'',1,'Hispanic/Latino','Not Hispanic/Latino') Hispanic,
                     LISTAGG(r.racecd,', ') WITHIN GROUP (ORDER BY r.racecd) OVER (PARTITION BY s.dcid) racecodes
                     FROM students s
                     JOIN schools sch ON (s.schoolid = sch.school_number)
@@ -91,6 +92,7 @@
                         <tr class="Record" data-StudentID="~(dcid;t)">
                             <td>~(student_number;t)</td>
                             <td>~(LastFirst)</td>
+                            <td>~(dob)</td>
                             <td>~(Grade_Level)</td>
                             <td>~(religion)</td>
                             <td>~(hispanic;t)</td>
