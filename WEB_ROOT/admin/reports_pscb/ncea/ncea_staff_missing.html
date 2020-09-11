@@ -38,8 +38,8 @@
                 <tbody>
                     ~[tlist_sql;
                     select
-                    last_name,
-                    first_name,
+                    dcid,
+                    lastfirst,
                     CASE
                     WHEN EXCLUDE_FROM_NCEA IS NULL THEN '#ffb3ba'
                     ELSE ''
@@ -84,6 +84,7 @@
                     --schoolstaff.status,
                     users.last_name,
                     users.first_name,
+                    users.lastfirst,
                     CASE
                     WHEN TO_CHAR(s_ssf_ncea_x.excludefromncea_tf) = '1' then 'Excluded from NCEA'
                     WHEN TO_CHAR(s_ssf_ncea_x.excludefromncea_tf) = '0' then 'Included in NCEA'
@@ -150,8 +151,8 @@
                             <td colspan="100%">All staff have NCEA values.</td>
                         </tr>]
                         <tr class="Record">
-                            <td>~(lastname;t)</td>
-                            <td>~(firstname;t)</td>
+                            <td><a href="/admin/faculty/facultyNCEA.html?frn=005~(dcid;t)"
+                                    target="_top">~(staffname;t)</a>
                             <td style="background-color:~(excludeHighlight;t);">~(exclude;t)</td>
                             <td style="background-color:~(genderHighlight;t);">~(gender;t)</td>
                             <td style="background-color:~(ethnicityHighlight;t);">~(ethnicity;t)</td>
