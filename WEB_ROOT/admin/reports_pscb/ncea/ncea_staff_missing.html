@@ -86,7 +86,7 @@
                     users.first_name,
                     CASE
                     WHEN TO_CHAR(s_ssf_ncea_x.excludefromncea_tf) = '1' then 'Excluded from NCEA'
-                    WHEN TO_CHAR(users.fedethnicity) = '0' then 'Included in NCEA'
+                    WHEN TO_CHAR(s_ssf_ncea_x.excludefromncea_tf) = '0' then 'Included in NCEA'
                     ELSE TO_CHAR(s_ssf_ncea_x.excludefromncea_tf)
                     END as EXCLUDE_FROM_NCEA,
                     CASE
@@ -147,7 +147,7 @@
                         Order BY schoolname, last_name, first_name
                         ;alternatecolor;
                         <tr>
-                            <td colspan="100%">All classes are assigned a room.</td>
+                            <td colspan="100%">All staff have NCEA values.</td>
                         </tr>]
                         <tr class="Record">
                             <td>~(lastname;t)</td>
