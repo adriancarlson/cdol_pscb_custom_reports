@@ -26,6 +26,7 @@
                         <th class="left">Last Name</th>
                         <th class="left">First Name</th>
                         <th class="left">Exclude from NCEA</th>
+                        <th class="left">Gender</th>
                         <th class="left">Ethnicity</th>
                         <th class="left">Race</th>
                         <th class="left">Religion</th>
@@ -36,7 +37,7 @@
                 </thead>
                 <tbody>
                     ~[tlist_sql;
-                    select DISTINCT
+                    select
                     last_name,
                     first_name,
                     EXCLUDE_FROM_NCEA,
@@ -48,7 +49,7 @@
                     FTE,
                     schoolname
                     from
-                    (select
+                    (select DISTINCT
                     schools.name as schoolname,
                     schoolstaff.schoolid,
                     schoolstaff.dcid,
@@ -116,7 +117,7 @@
                         or race is null
                         or staff_type is null
                         or fte is null
-                        order by schoolid, last_name, first_name
+                        Order BY schoolid, last_name, first_name
                         ;alternatecolor;
                         <tr>
                             <td colspan="100%">All classes are assigned a room.</td>
@@ -124,7 +125,7 @@
                         <tr class="Record">
                             <td>~(lastname;t)</td>
                             <td>~(firstname;t)</td>
-                            <td>~(exclued;t)</td>
+                            <td>~(exclude;t)</td>
                             <td>~(gender;t)</td>
                             <td>~(ethnicity;t)</td>
                             <td>~(race;t)</td>
