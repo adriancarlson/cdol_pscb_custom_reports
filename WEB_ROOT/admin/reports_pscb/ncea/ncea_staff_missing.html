@@ -13,7 +13,7 @@
         ~[wc:admin_header_frame_css]
         <!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a> &gt; <a
             href="/admin/reports_pscb/pscb_home.html">PSCB Custom Reports</a> &gt; <a
-            href="/admin/reports_pscb/pscb_ncea.html">NCEA</a> &gt;NCEA - Staff Missing Info
+            href="/admin/reports_pscb/pscb_ncea.html">NCEA</a> &gt; NCEA - Staff Missing Info
         <!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
 
         <!-- Start of Results -->
@@ -23,30 +23,117 @@
             <table border="0" cellspacing="0" cellpadding="4" align="center" class="tablesorter grid" id="results">
                 <thead>
                     <tr>
-                        <th class="left">Teacher Name</th>
-                        <th class="left">Room</th>
-
+                        <th class="left">Last Name</th>
+                        <th class="left">First Name</th>
+                        <th class="left">Exclude from NCEA</th>
+                        <th class="left">Ethnicity</th>
+                        <th class="left">Race</th>
+                        <th class="left">Religion</th>
+                        <th class="left">Staff Type</th>
+                        <th class="left">FTE</th>
+                        <th class="left">School</th>
                     </tr>
                 </thead>
                 <tbody>
                     ~[tlist_sql;
-                    SELECT users.lastfirst, schoolstaff.sched_classroom
-                    FROM schoolstaff
-                    INNER JOIN users
-                    ON schoolstaff.users_dcid = users.dcid
-                    WHERE schoolstaff.status =1
-                    and schoolstaff.staffstatus =1
-                    AND schoolstaff.sched_classroom is null
-                    and schoolstaff.schoolid= ~(curschoolid)
-                    ;alternatecolor;
-                    <tr>
-                        <td colspan="100%">All classes are assigned a room.</td>
-                    </tr>]
-                    <tr class="Record">
-                        <td>~(teacher;t)</td>
-                        <td>~(room;t)</td>
-                    </tr>
-                    [/tlist_sql]
+                    select DISTINCT
+                    last_name,
+                    first_name,
+                    EXCLUDE_FROM_NCEA,
+                    GENDER,
+                    ETHNICITY,
+                    RACE,
+                    religiousaffiliation,
+                    STAFF_TYPE,
+                    FTE,
+                    schoolname
+                    from
+                    (select
+                    schools.name as schoolname,
+                    schoolstaff.schoolid,
+                    schoolstaff.dcid,
+                    --schoolstaff.users_dcid,
+                    --schoolstaff.status,
+                    users.last_name,
+                    users.first_name,
+                    CASE
+                    WHEN TO_CHAR(s_ssf_ncea_x.excludefromncea_tf) = '1' then 'Excluded from NCEA'
+                    WHEN TO_CHAR(users.fedethnicity) = '0' then 'Included in NCEA'
+                    ELSE TO_CHAR(s_ssf_ncea_x.excludefromncea_tf)
+                    END as EXCLUDE_FROM_NCEA,
+                    CASE
+                    WHEN userscorefields.gender = 'f' then 'Female'
+                    WHEN userscorefields.gender = 'm' then 'Male'
+                    ELSE userscorefields.gender
+                    END as GENDER,
+                    CASE
+                    WHEN s_usr_ncea_x.religiousaffiliation = 'C' then 'Catholic'
+                    WHEN s_usr_ncea_x.religiousaffiliation = 'N' then 'Non-Catholic'
+                    ELSE s_usr_ncea_x.religiousaffiliation
+                    END as religiousaffiliation,
+                    CASE
+                    WHEN TO_CHAR(users.fedethnicity) = '1' then 'Hispanic/Latino'
+                    WHEN TO_CHAR(users.fedethnicity) = '0' then 'Not Hispanic/Latino'
+                    ELSE TO_CHAR(users.fedethnicity)
+                    END as ETHNICITY,
+                    LISTAGG(teacherrace.racecd,', ') WITHIN GROUP (ORDER BY teacherrace.racecd) OVER (PARTITION BY
+                    schoolstaff.dcid) RACE,
+                    CASE
+                    WHEN s_usr_ncea_x.religiousclergylay = 'C' then 'Clergy'
+                    WHEN s_usr_ncea_x.religiousclergylay = 'R' then 'Relgious'
+                    WHEN s_usr_ncea_x.religiousclergylay = 'L' then 'Lay'
+                    ELSE s_usr_ncea_x.religiousclergylay
+                    END as STAFF_TYPE,
+                    CASE
+                    WHEN S_SSF_NCEA_X.FTE_CODE = 'FT' then 'Full-Time'
+                    WHEN S_SSF_NCEA_X.FTE_CODE = 'PT' then 'Part-Time'
+                    ELSE S_SSF_NCEA_X.FTE_CODE
+                    END as FTE,
+                    teacherrace.teacherid
+                    from schoolstaff
+                    inner join users
+                    on users.dcid = schoolstaff.users_dcid
+                    left join person
+                    on person.dcid = users.dcid
+                    left join s_ssf_ncea_x
+                    on s_ssf_ncea_x.schoolstaffdcid = schoolstaff.dcid
+                    left join teacherrace
+                    on teacherrace.teacherid = schoolstaff.id
+                    left join schools
+                    on schools.school_number = schoolstaff.schoolid
+                    left join s_usr_ncea_x
+                    on s_usr_ncea_x.usersdcid = users.DCID
+                    left join userscorefields
+                    on userscorefields.usersdcid = users.dcid
+                    where status = '1'
+                    and schoolid <> '0'
+                        ~[if.is.a.school] AND schoolid = ~(curschoolid) [/if.is.a.school]
+                        and (s_ssf_ncea_x.excludefromncea_tf = '0'
+                        or s_ssf_ncea_x.excludefromncea_tf IS NULL)) a
+                        where exclude_from_ncea is null
+                        or gender is null
+                        or religiousaffiliation is null
+                        or race is null
+                        or staff_type is null
+                        or fte is null
+                        order by schoolid, last_name, first_name
+                        ;alternatecolor;
+                        <tr>
+                            <td colspan="100%">All classes are assigned a room.</td>
+                        </tr>]
+                        <tr class="Record">
+                            <td>~(lastname;t)</td>
+                            <td>~(firstname;t)</td>
+                            <td>~(exclued;t)</td>
+                            <td>~(gender;t)</td>
+                            <td>~(ethnicity;t)</td>
+                            <td>~(race;t)</td>
+                            <td>~(religion;t)</td>
+                            <td>~(stafftype;t)</td>
+                            <td>~(fte;t)</td>
+                            <td>~(school;t)</td>
+                        </tr>
+                        [/tlist_sql]
                 </tbody>
             </table>
         </div>
