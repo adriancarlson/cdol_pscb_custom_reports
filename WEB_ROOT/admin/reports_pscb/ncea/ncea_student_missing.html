@@ -57,7 +57,7 @@
                     END genderHighlight,
                     GENDER,
                     CASE
-                    WHEN ETHNICITY IS NULL THEN '#ffdfba'
+                    WHEN ETHNICITY IS NULL THEN '#ffffba'
                     ELSE ''
                     END ETHNICITYHighlight,
                     ETHNICITY,
@@ -124,9 +124,10 @@
                     ELSE TO_CHAR(s_stu_ncea_x.ungraded_tf)
                     END as ungraded,
                     CASE
-                    WHEN TO_CHAR(s_stu_ncea_x.FEDERALNUTRITION) = '1' then 'Yes'
-                    WHEN TO_CHAR(s_stu_ncea_x.FEDERALNUTRITION) = '0' then 'No'
-                    ELSE TO_CHAR(s_stu_ncea_x.FEDERALNUTRITION)
+                    WHEN s_stu_ncea_x.FEDERALNUTRITION = 'BR' then 'Breakfast only'
+                    WHEN s_stu_ncea_x.FEDERALNUTRITION = 'LU' then 'Lunch only'
+                    WHEN s_stu_ncea_x.FEDERALNUTRITION = 'BT' then 'Both breakfast and Lunch'
+                    ELSE s_stu_ncea_x.FEDERALNUTRITION
                     END as federalnutrition,
                     CASE
                     WHEN TO_CHAR(s_stu_ncea_x.subsidizedtrans_tf) = '1' then 'Yes'
