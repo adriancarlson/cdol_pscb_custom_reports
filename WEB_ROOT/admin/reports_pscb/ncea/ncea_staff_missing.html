@@ -40,12 +40,39 @@
                     select
                     last_name,
                     first_name,
+                    CASE
+                    WHEN EXCLUDE_FROM_NCEA IS NULL THEN '#ffb3ba'
+                    ELSE ''
+                    END excludeHighlight,
                     EXCLUDE_FROM_NCEA,
+                    CASE
+                    WHEN GENDER IS NULL THEN '#ffdfba'
+                    ELSE ''
+                    END genderHighlight,
                     GENDER,
+                    CASE
+                    WHEN ETHNICITY IS NULL THEN '#ffdfba'
+                    ELSE ''
+                    END ETHNICITYHighlight,
                     ETHNICITY,
+                    CASE WHEN RACE IS NULL THEN '#baffc9'
+                    ELSE ''
+                    END raceHighlight,
                     RACE,
+                    CASE
+                    WHEN religiousaffiliation IS NULL THEN '#bae1ff'
+                    ELSE ''
+                    END religiousaffiliationHighlight,
                     religiousaffiliation,
+                    CASE
+                    WHEN STAFF_TYPE IS NULL THEN '#ffb3ba'
+                    ELSE ''
+                    END STAFF_TYPEHighlight,
                     STAFF_TYPE,
+                    CASE
+                    WHEN FTE IS NULL THEN '#ffdfba'
+                    ELSE ''
+                    END FTEHighlight,
                     FTE,
                     schoolname
                     from
@@ -63,8 +90,8 @@
                     ELSE TO_CHAR(s_ssf_ncea_x.excludefromncea_tf)
                     END as EXCLUDE_FROM_NCEA,
                     CASE
-                    WHEN userscorefields.gender = 'f' then 'Female'
-                    WHEN userscorefields.gender = 'm' then 'Male'
+                    WHEN UPPER(userscorefields.gender) = 'F' then 'Female'
+                    WHEN UPPER(userscorefields.gender) = 'M' then 'Male'
                     ELSE userscorefields.gender
                     END as GENDER,
                     CASE
@@ -117,7 +144,7 @@
                         or race is null
                         or staff_type is null
                         or fte is null
-                        Order BY schoolid, last_name, first_name
+                        Order BY schoolname, last_name, first_name
                         ;alternatecolor;
                         <tr>
                             <td colspan="100%">All classes are assigned a room.</td>
@@ -125,13 +152,13 @@
                         <tr class="Record">
                             <td>~(lastname;t)</td>
                             <td>~(firstname;t)</td>
-                            <td>~(exclude;t)</td>
-                            <td>~(gender;t)</td>
-                            <td>~(ethnicity;t)</td>
-                            <td>~(race;t)</td>
-                            <td>~(religion;t)</td>
-                            <td>~(stafftype;t)</td>
-                            <td>~(fte;t)</td>
+                            <td style="background-color:~(excludeHighlight;t);">~(exclude;t)</td>
+                            <td style="background-color:~(genderHighlight;t);">~(gender;t)</td>
+                            <td style="background-color:~(ethnicityHighlight;t);">~(ethnicity;t)</td>
+                            <td style="background-color:~(raceHighlight;t);">~(race;t)</td>
+                            <td style="background-color:~(religionHlight;t);">~(religion;t)</td>
+                            <td style="background-color:~(staffHighlight;t);">~(stafftype;t)</td>
+                            <td style="background-color:~(fteHighlight;t);">~(fte;t)</td>
                             <td>~(school;t)</td>
                         </tr>
                         [/tlist_sql]
