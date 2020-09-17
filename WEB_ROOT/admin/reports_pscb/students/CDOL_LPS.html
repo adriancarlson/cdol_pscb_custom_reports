@@ -139,7 +139,8 @@
                     ) GROUP BY DCID, LASTFIRST, DOB, PRETTY_GRADE, GENDER, HOME_PHONE, ADDRESS, SCHOOLID, GRADE_LEVEL
                     ORDER BY SCHOOLID, GRADE_LEVEL, LASTFIRST; ;]
                     <tr data-StudentID="~(dcid)">
-                        <td class="nowrap"><a href="/admin/students/contacts.html?frn=001~(dcid)">~(lastfirst;t)</a>
+                        <td class="nowrap"><a href="/admin/students/contacts.html?frn=001~(dcid)"
+                                target="_blank">~(lastfirst;t)</a>
                         </td>
                         <td>~(dob;t)</td>
                         <td>~(grade_level;t)</td>
