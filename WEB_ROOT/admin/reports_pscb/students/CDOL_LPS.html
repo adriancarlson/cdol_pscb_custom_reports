@@ -91,7 +91,7 @@
                     ~[tlist_sql;
                     SELECT DCID, LASTFIRST, DOB, GRADE_LEVEL, GENDER, HOME_PHONE, ADDRESS, LISTAGG(Contact, ' | ')
                     WITHIN GROUP(ORDER BY
-                    DCID) as Adults_students_live_with
+                    DCID, contactpriorityorder) as Adults_students_live_with
                     FROM (
                     SELECT
                     s.dcid ,
@@ -114,6 +114,7 @@
                     CASE WHEN p.firstname IS NULL AND p.lastname IS NULL THEN '-No Name-' ELSE p.firstname||'
                     '||p.lastname ||' - '|| cs.code
                     END as Contact,
+                    sca.contactpriorityorder contactpriorityorder,
                     s.schoolid
                     FROM Students s
                     ~[if#ss.~(gpv.ss;sqlText)=cur] INNER JOIN ~[temp.table.current.selection:students] temp ON (s.dcid =
@@ -130,7 +131,7 @@
                     AND scd.liveswithflg = 1
                     ~[if.is.a.school] AND s.schoolid = ~(curschoolid) [/if.is.a.school]
                     ~[if#gr.~(gpv.gr;sqlText)#] AND s.grade_level = ~(gpv.gr) [/if#gr]
-                    ORDER BY s.lastfirst
+                    ORDER BY s.lastfirst, sca.contactpriorityorder
                     ) GROUP BY DCID, LASTFIRST, DOB, GRADE_LEVEL, GENDER, HOME_PHONE, ADDRESS, SCHOOLID
                     ORDER BY SCHOOLID, GRADE_LEVEL, LASTFIRST; ;]
                     <tr data-StudentID="~(dcid)">
