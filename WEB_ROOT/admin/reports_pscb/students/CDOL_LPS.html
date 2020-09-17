@@ -9,7 +9,7 @@
         <link href="/images/css/print.css" rel="stylesheet" media="print">
         ~[wc:pscb_init]
         <script>
-            pscbToolButtons = { "copyData": "Yes", "csvFile": "Yes", "pdfFile": "No", "curSel": "Yes" };
+            pscbToolButtons = { "copyData": "Yes", "csvFile": "Yes", "pdfFile": "Yes", "curSel": "Yes" };
         </script>
     </head>
 
@@ -17,7 +17,7 @@
         ~[wc:admin_header_frame_css]
         <!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a> &gt; <a
             href="/admin/reports_pscb/pscb_home.html" target="_top">PSCB Custom Reports</a> &gt; <a
-            href="/admin/reports_pscb/pscb_students.html" target="_top">Contacts</a> &gt; LPS Student Report
+            href="/admin/reports_pscb/pscb_students.html" target="_top">Students</a> &gt; LPS Student Report
         <!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
         <!-- start of Options -->
         <h1>LPS Student Report</h1>
@@ -27,7 +27,8 @@
                 <table border="0" cellspacing="0" cellpadding="0" class="linkDescList">
                     <thead>
                         <tr>
-                            <th style="white-space: nowrap;">Student Selection</th>
+                            <th style="white-space: nowrap;" width="180px">Student Selection</th>
+                            <th style="white-space: nowrap;">Grade Selection</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -39,20 +40,24 @@
                                         (~[x:studsinset])</option>
                                 </select>
                             </td>
-                        </tr>
-                        <tr>
                             <td>
                                 <select name="gr" name="gr">
-                                    <option value="'66'" selected>All</option>
+                                    <option value='' ~[if.~[gpv:gr]=]selected[/if]>All Grades</option>
                                     ~[tlist_sql;
-                                    SELECT DISTINCT GRADE_LEVEL
+                                    SELECT DISTINCT GRADE_LEVEL,
+                                    CASE
+                                    WHEN TO_CHAR(grade_level) = -2 then 'PK3'
+                                    WHEN TO_CHAR(grade_level) = -1 then 'PK4'
+                                    WHEN TO_CHAR(grade_level) = 0 then 'K'
+                                    WHEN TO_CHAR(grade_level) = 99 then 'Graduated'
+                                    ELSE TO_CHAR(grade_level)
+                                    END as prettygrade
                                     FROM STUDENTS
                                     WHERE TO_CHAR(SCHOOLID) LIKE CASE WHEN TO_CHAR(~(curschoolid)) = '0'
                                     THEN '%' ELSE TO_CHAR(~(curschoolid)) END
                                     AND ENROLL_STATUS = 0
                                     ORDER BY GRADE_LEVEL]
-                                    <option value='' ~[if.~[gpv:gr]=]selected[/if]>All Grades</option>
-                                    <option value="'~(gr)'">~(gr)</option>
+                                    <option value="'~(gr)'">~(prettygrade)</option>
                                     [/tlist_sql]
                                 </select>
                             </td>
@@ -107,7 +112,7 @@
                     s.home_phone,
                     s.street || ' ' || s.city || ' ' || s.state || ' ' || s.zip as ADDRESS,
                     CASE WHEN p.firstname IS NULL AND p.lastname IS NULL THEN '-No Name-' ELSE p.firstname||'
-                    '||p.lastname ||'-'|| cs.code
+                    '||p.lastname ||' - '|| cs.code
                     END as Contact,
                     s.schoolid
                     FROM Students s
@@ -127,16 +132,15 @@
                     ~[if#gr.~(gpv.gr;sqlText)#] AND s.grade_level = ~(gpv.gr) [/if#gr]
                     ORDER BY s.lastfirst
                     ) GROUP BY DCID, LASTFIRST, DOB, GRADE_LEVEL, GENDER, HOME_PHONE, ADDRESS, SCHOOLID
-                    ORDER BY SCHOOLID, GRADE_LEVEL, LASTFIRST;]
+                    ORDER BY SCHOOLID, GRADE_LEVEL, LASTFIRST; ;]
                     <tr data-StudentID="~(dcid)">
-                        <td>~(school;t)</td>
                         <td class="nowrap">~(lastfirst;t)</td>
                         <td>~(dob;t)</td>
                         <td>~(grade_level;t)</td>
                         <td>~(gender;t)</td>
                         <td>~(phone)</td>
                         <td class="nowrap">~(address;t)</td>
-                        <td class="nowrap">~(contacts;t)</td>
+                        <td class="nowrap">~(contacts)</td>
                     </tr>
                     [/tlist_sql]
                 </tbody>
