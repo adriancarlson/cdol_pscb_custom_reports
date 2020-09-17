@@ -79,16 +79,16 @@
             <table border="0" cellspacing="0" cellpadding="4" align="center" class="tablesorter grid" id="results">
                 <thead>
                     <tr>
-                        <th class="left filter-select">Number</th>
-                        <th class="left">Name</th>
-                        <th class="left filter-select">Grade</th>
-                        <th class="left filter-select">Student Address</th>
-                        <th class="left">Contact</th>
+                        <th class="left">Student Number</th>
+                        <th class="left">Student Name</th>
+                        <th class="left filter-select">Grade Level</th>
+                        <th class="left">Student Address</th>
+                        <th class="left">Contacts</th>
                         <th class="left">Relationship</th>
-                        <th class="left">Receives Mail</th>
-                        <th class="left">Lives With</th>
+                        <th class="left filter-select">Receives Mail</th>
+                        <th class="left filter-select">Lives With</th>
                         <th class="left">Contact Address</th>
-                        ~[if#distCheck.district.office]<th class="left">School</th>[/if#distCheck]
+                        <th class="left filter-select">School</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -97,7 +97,6 @@
                     s.dcid,
                     s.student_number,
                     s.lastfirst,
-                    -- s.grade_level,
                     CASE
                     WHEN TO_CHAR(s.grade_level) = -2 then 'PK3'
                     WHEN TO_CHAR(s.grade_level) = -1 then 'PK4'
@@ -105,7 +104,7 @@
                     WHEN TO_CHAR(s.grade_level) = 99 then 'Graduated'
                     ELSE TO_CHAR(s.grade_level)
                     END as PRETTY_GRADE,
-                    Nvl(s.street,'-') || ' ' || Nvl(s.city,'-') || ' ' || Nvl(s.state,'') || ' ' || Nvl(s.zip,'') as
+                    Nvl(s.street,'-') || ', ' || Nvl(s.city,'-') || ' ' || Nvl(s.state,'') || ' ' || Nvl(s.zip,'') as
                     Student_ADDRESS,
                     p.id,
                     CASE WHEN p.firstname IS NULL AND p.lastname IS NULL THEN '-No Name-' ELSE p.firstname||'
@@ -113,10 +112,10 @@
                     cs.code Relationship,
                     DECODE(scd.receivesmailflg, 1, 'Yes','No') receivesmailflg,
                     DECODE(scd.liveswithflg, 1, 'Yes','No') liveswithflg,
-                    Nvl(pa.street,'-') || ' ' || Nvl(pa.city,'-') || ' ' || Nvl(scs.code,'') || '
+                    Nvl(pa.street,'-') || ', ' || Nvl(pa.city,'-') || ' ' || Nvl(scs.code,'') || '
                     ' ||
                     Nvl(pa.postalcode,'') address,
-                    sch.name
+                    sch.abbreviation
                     FROM Students s
                     ~[if#ss.~(gpv.ss;sqlText)=cur] INNER JOIN ~[temp.table.current.selection:students] temp ON (s.dcid =
                     temp.dcid)
@@ -139,19 +138,19 @@
                         ORDER BY sch.name, s.lastfirst, sca.contactpriorityorder;]
                         <tr data-StudentID="~(dcid)">
                             <td class="nowrap"><a href="/admin/students/contacts.html?frn=001~(dcid)"
-                                    target="_blank">~(lastfirst;t)</a>
+                                    target="_blank">~(stunum)</a>
                             </td>
-                            <td>~(stunum)</td>
-                            <td class="nowrap">~(stuname)</td>
-                            <td>~(grade_level;t)</td>
+                            <td class="nowrap">~(stuname;t)</td>
+                            <td class="center">~(grade_level)</td>
                             <td class="nowrap">~(StuAddress;t)</td>
-                            <td><a href="/admin/contacts/edit.html#?contactid=~(cid)" target="_blank">~(contact;t)</a>
-                            </td>
+                            <td class="nowrap"><a href="/admin/contacts/edit.html#?contactid=~(cid)"
+                                    target="_blank">~(contact;t)</a></td>
                             <td>~(relationship;t)</td>
                             <td>~(mail;t)</td>
                             <td>~(liveswith;t)</td>
                             <td class="nowrap">~(contactaddress;t)</td>
-                            ~[if#distCheck.district.office]<td>~(School)</td>[/if#distCheck]
+                            <td class="nowrap">~(school;t)</td>
+
                         </tr>
                         [/tlist_sql]
                 </tbody>
