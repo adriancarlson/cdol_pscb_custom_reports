@@ -89,7 +89,9 @@
                 </thead>
                 <tbody>
                     ~[tlist_sql;
-                    SELECT DCID, LASTFIRST, DOB, GRADE_LEVEL, GENDER, HOME_PHONE, ADDRESS, LISTAGG(Contact, ' | ')
+                    SELECT DCID, LASTFIRST, DOB, PRETTY_GRADE, GENDER, HOME_PHONE, ADDRESS, LISTAGG(Contact, ' | ')
+                    WITHIN GROUP(ORDER BY
+                    DCID,contactpriorityorder) as Adults_students_live_with, GRADE_LEVEL
                     WITHIN GROUP(ORDER BY
                     DCID, contactpriorityorder) as Adults_students_live_with
                     FROM (
@@ -97,13 +99,14 @@
                     s.dcid ,
                     s.lastfirst,
                     TO_CHAR(s.dob, 'MM/DD/YYYY') as DOB,
+                    s.grade_level,
                     CASE
                     WHEN TO_CHAR(s.grade_level) = -2 then 'PK3'
                     WHEN TO_CHAR(s.grade_level) = -1 then 'PK4'
                     WHEN TO_CHAR(s.grade_level) = 0 then 'K'
                     WHEN TO_CHAR(s.grade_level) = 99 then 'Graduated'
                     ELSE TO_CHAR(s.grade_level)
-                    END as GRADE_LEVEL,
+                    END as PRETTY_GRADE,
                     CASE
                     WHEN UPPER(s.gender) = 'M' THEN 'Male'
                     WHEN UPPER(s.gender) = 'F' THEN 'Female'
@@ -129,13 +132,15 @@
                     LEFT JOIN guardianstudent gs ON (s.dcid = gs.studentsdcid AND gp.guardianid = gs.guardianid)
                     WHERE s.enroll_status = 0
                     AND scd.liveswithflg = 1
+                    AND cs.code NOT IN ('Brother','Friend','Neighbor','Other','Sister','Resource Teacher')
                     ~[if.is.a.school] AND s.schoolid = ~(curschoolid) [/if.is.a.school]
                     ~[if#gr.~(gpv.gr;sqlText)#] AND s.grade_level = ~(gpv.gr) [/if#gr]
                     ORDER BY s.lastfirst, sca.contactpriorityorder
-                    ) GROUP BY DCID, LASTFIRST, DOB, GRADE_LEVEL, GENDER, HOME_PHONE, ADDRESS, SCHOOLID
+                    ) GROUP BY DCID, LASTFIRST, DOB, PRETTY_GRADE, GENDER, HOME_PHONE, ADDRESS, SCHOOLID, GRADE_LEVEL
                     ORDER BY SCHOOLID, GRADE_LEVEL, LASTFIRST; ;]
                     <tr data-StudentID="~(dcid)">
-                        <td class="nowrap">~(lastfirst;t)</td>
+                        <td class="nowrap"><a href="/admin/students/contacts.html?frn=001~(dcid)">~(lastfirst;t)</a>
+                        </td>
                         <td>~(dob;t)</td>
                         <td>~(grade_level;t)</td>
                         <td>~(gender;t)</td>
