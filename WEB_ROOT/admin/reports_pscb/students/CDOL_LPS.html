@@ -92,8 +92,6 @@
                     SELECT DCID, LASTFIRST, DOB, PRETTY_GRADE, GENDER, HOME_PHONE, ADDRESS, LISTAGG(Contact, ' | ')
                     WITHIN GROUP(ORDER BY
                     DCID,contactpriorityorder) as Adults_students_live_with, GRADE_LEVEL
-                    WITHIN GROUP(ORDER BY
-                    DCID, contactpriorityorder) as Adults_students_live_with
                     FROM (
                     SELECT
                     s.dcid ,
