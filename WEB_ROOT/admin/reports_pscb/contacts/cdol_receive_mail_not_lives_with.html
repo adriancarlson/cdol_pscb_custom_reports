@@ -79,11 +79,11 @@
             <table border="0" cellspacing="0" cellpadding="4" align="center" class="tablesorter grid" id="results">
                 <thead>
                     <tr>
-                        <th class="left filter-select">Student Number</th>
-                        <th class="left">Student Name</th>
-                        <th class="left filter-select">Grade Level</th>
+                        <th class="left filter-select">Number</th>
+                        <th class="left">Name</th>
+                        <th class="left filter-select">Grade</th>
                         <th class="left filter-select">Student Address</th>
-                        <th class="left">Contacts</th>
+                        <th class="left">Contact</th>
                         <th class="left">Relationship</th>
                         <th class="left">Receives Mail</th>
                         <th class="left">Lives With</th>
@@ -105,14 +105,15 @@
                     WHEN TO_CHAR(s.grade_level) = 99 then 'Graduated'
                     ELSE TO_CHAR(s.grade_level)
                     END as PRETTY_GRADE,
-                    Nvl(s.street,'-') || ', ' || Nvl(s.city,'-') || ' ' || Nvl(s.state,'') || ' ' || Nvl(s.zip,'') as
+                    Nvl(s.street,'-') || ' ' || Nvl(s.city,'-') || ' ' || Nvl(s.state,'') || ' ' || Nvl(s.zip,'') as
                     Student_ADDRESS,
+                    p.id,
                     CASE WHEN p.firstname IS NULL AND p.lastname IS NULL THEN '-No Name-' ELSE p.firstname||'
                     '||p.lastname END as Contact,
                     cs.code Relationship,
                     DECODE(scd.receivesmailflg, 1, 'Yes','No') receivesmailflg,
                     DECODE(scd.liveswithflg, 1, 'Yes','No') liveswithflg,
-                    scs.code addresstype,Nvl(pa.street,'-') || ', ' || Nvl(pa.city,'-') || ' ' || Nvl(scs.code,'') || '
+                    Nvl(pa.street,'-') || ' ' || Nvl(pa.city,'-') || ' ' || Nvl(scs.code,'') || '
                     ' ||
                     Nvl(pa.postalcode,'') address,
                     sch.name
@@ -144,7 +145,8 @@
                             <td class="nowrap">~(stuname)</td>
                             <td>~(grade_level;t)</td>
                             <td class="nowrap">~(StuAddress;t)</td>
-                            <td>~(contact;t)</td>
+                            <td><a href="/admin/contacts/edit.html#?contactid=~(cid)" target="_blank">~(contact;t)</a>
+                            </td>
                             <td>~(relationship;t)</td>
                             <td>~(mail;t)</td>
                             <td>~(liveswith;t)</td>
