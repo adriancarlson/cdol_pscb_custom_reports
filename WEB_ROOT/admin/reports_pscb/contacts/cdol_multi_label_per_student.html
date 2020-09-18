@@ -85,7 +85,6 @@
                         <th class="left">Student Name</th>
                         <th class="left filter-select">Grade Level</th>
                         <th class="left">Student Address</th>
-                        <th class="left filter-select">Priority Order</th>
                         <th class="left">Contacts</th>
                         <th class="left">Relationship</th>
                         <th class="left">AddressID</th>
@@ -155,7 +154,7 @@
                             END as PRETTY_GRADE,
                             Nvl(STUDENTS.mailing_street,'-') || ', ' || Nvl(STUDENTS.mailing_city,'-') || ' ' ||
                             Nvl(STUDENTS.mailing_state,'') || ' ' || Nvl(STUDENTS.mailing_zip,'') as Student_mailing,
-                            ROW_NUMBER() OVER( PARTITION BY PERSON.ID ORDER BY GRADE_LEVEL DESC) AS STUCONTACTORDER,
+                            --ROW_NUMBER() OVER( PARTITION BY PERSON.ID ORDER BY GRADE_LEVEL DESC) AS STUCONTACTORDER,
                             PERSON.ID AS PERSON_ID,
                             PERSON.FIRSTNAME || ' ' || PERSON.LASTNAME as PERSON,
                             CONTACT_REL.DESCRIPTION,
@@ -207,6 +206,7 @@
                                     )
                                     AND STUDENTS.ENROLL_STATUS IN (-1,0)
                                     ~[if.is.a.school] and STUDENTS.schoolid=~(curschoolid) [/if]
+                                    ~[if#gr.~(gpv.gr;sqlText)#] AND STUDENTS.grade_level = ~(gpv.gr) [/if#gr]
                                     AND STUDENTS.STUDENT_NUMBER IN (
                                     SELECT STUDENT_NUMBER
                                     FROM
@@ -240,7 +240,6 @@
                                         <td class="nowrap">~(stuname;t)</td>
                                         <td class="center">~(grade_level)</td>
                                         <td class="nowrap">~(StuAddress;t)</td>
-                                        <td class="center">~(order)</td>
                                         <td class="nowrap"><a href="/admin/contacts/edit.html#?contactid=~(cid)"
                                                 target="_blank">~(contact;t)</a></td>
                                         <td>~(relationship;t)</td>
