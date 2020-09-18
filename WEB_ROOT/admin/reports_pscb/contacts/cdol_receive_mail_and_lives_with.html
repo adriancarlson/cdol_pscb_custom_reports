@@ -3,7 +3,7 @@
     <!-- non framed -->
 
     <head>
-        <title>Receive Mail But Does Not Live With</title>
+        <title>Receive Mail & Lives With</title>
         ~[wc:commonscripts]
         <link href="/images/css/screen.css" rel="stylesheet" media="screen">
         <link href="/images/css/print.css" rel="stylesheet" media="print">
@@ -17,11 +17,10 @@
         ~[wc:admin_header_frame_css]
         <!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a> &gt; <a
             href="/admin/reports_pscb/pscb_home.html" target="_top">PSCB Custom Reports</a> &gt; <a
-            href="/admin/reports_pscb/pscb_contacts.html" target="_top">Contacts</a> &gt; Receive Mail But Does Not Live
-        With
+            href="/admin/reports_pscb/pscb_contacts.html" target="_top">Contacts</a> &gt; Receive Mail & Lives With
         <!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
         <!-- start of Options -->
-        <h1>Receive Mail But Does Not Live With</h1>
+        <h1>Receive Mail & Lives With</h1>
         <form name="searchform" action="#" method="POST">
             <div class="box-round" style="overflow: hidden;">
                 <h2>Report Filters</h2>
@@ -75,7 +74,7 @@
         <!-- Start of Results -->
         ~[if#showData.~(gpv.showData;sqlText)=1]
         <div class="box-round">
-            <h2>Receive Mail But Does Not Live With</h2>
+            <h2>Receive Mail & Lives With</h2>
             <table border="0" cellspacing="0" cellpadding="4" align="center" class="tablesorter grid" id="results">
                 <thead>
                     <tr>
@@ -135,27 +134,27 @@
                     LEFT JOIN guardianstudent gs ON (s.dcid = gs.studentsdcid AND gp.guardianid = gs.guardianid)
                     WHERE s.enroll_status = 0
                     AND scd.receivesmailflg = 1
-                    AND scd.liveswithflg <> 1
-                        ~[if.is.a.school] AND s.schoolid = ~(curschoolid) [/if.is.a.school]
-                        ~[if#gr.~(gpv.gr;sqlText)#] AND s.grade_level = ~(gpv.gr) [/if#gr]
-                        ORDER BY sch.name, s.lastfirst, sca.contactpriorityorder;]
-                        <tr data-StudentID="~(dcid)">
-                            <td class="nowrap"><a href="/admin/students/contacts.html?frn=001~(dcid)"
-                                    target="_blank">~(stunum)</a>
-                            </td>
-                            <td class="nowrap">~(stuname;t)</td>
-                            <td class="center">~(grade_level)</td>
-                            <td class="nowrap">~(StuAddress;t)</td>
-                            <td class="nowrap"><a href="/admin/contacts/edit.html#?contactid=~(cid)"
-                                    target="_blank">~(contact;t)</a></td>
-                            <td>~(relationship;t)</td>
-                            <td>~(mail;t)</td>
-                            <td>~(liveswith;t)</td>
-                            <td>~(addresstype;t)</td>
-                            <td class="nowrap">~(contactaddress;t)</td>
-                            <td class="nowrap">~(school;t)</td>
-                        </tr>
-                        [/tlist_sql]
+                    AND scd.liveswithflg = 1
+                    ~[if.is.a.school] AND s.schoolid = ~(curschoolid) [/if.is.a.school]
+                    ~[if#gr.~(gpv.gr;sqlText)#] AND s.grade_level = ~(gpv.gr) [/if#gr]
+                    ORDER BY sch.name, s.lastfirst, sca.contactpriorityorder;]
+                    <tr data-StudentID="~(dcid)">
+                        <td class="nowrap"><a href="/admin/students/contacts.html?frn=001~(dcid)"
+                                target="_blank">~(stunum)</a>
+                        </td>
+                        <td class="nowrap">~(stuname;t)</td>
+                        <td class="center">~(grade_level)</td>
+                        <td class="nowrap">~(StuAddress;t)</td>
+                        <td class="nowrap"><a href="/admin/contacts/edit.html#?contactid=~(cid)"
+                                target="_blank">~(contact;t)</a></td>
+                        <td>~(relationship;t)</td>
+                        <td>~(mail;t)</td>
+                        <td>~(liveswith;t)</td>
+                        <td>~(addresstype;t)</td>
+                        <td class="nowrap">~(contactaddress;t)</td>
+                        <td class="nowrap">~(school;t)</td>
+                    </tr>
+                    [/tlist_sql]
                 </tbody>
             </table>
         </div>
