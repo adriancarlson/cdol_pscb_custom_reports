@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <title>Students Attendance - Totals</title>
+        ~[wc:commonscripts]
+        <link href="/images/css/screen.css" rel="stylesheet" media="screen">
+        <link href="/images/css/print.css" rel="stylesheet" media="print">
+        ~[wc:pscb_init]
+    </head>
+
+    <body>
+        ~[wc:admin_header_frame_css]
+        <!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a> &gt; <a
+            href="/admin/reports_pscb/pscb_home.html" target="_top">PSCB Custom Reports</a> &gt; <a
+            href="/admin/reports_pscb/pscb_attendance.html" target="_top">Attendance</a> &gt; Students Attendance -
+        Totals
+        Range
+        <!-- breadcrumb end -->
+        ~[wc:admin_navigation_frame_css]
+        <h1>Students Attendance - Totals</h1>
+
+        <!-- start of Options -->
+        <form id="rptFilters" action="#" method="POST">
+            <div class="box-round">
+                <h2>Report Filters</h2>
+                <table border="0" cellspacing="0" cellpadding="0" class="linkDescList">
+                    <thead>
+                        <tr>
+                            <th style="white-space: nowrap;" align="left">Student Selection</th>
+                            <th style="white-space: nowrap;" align="left">Term</th>
+                            <th style="white-space: nowrap;" align="left">Absent Codes</th>
+                            <th style="white-space: nowrap;" align="left">Tardy Codes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <select name="ss">
+                                    <option value='' ~[if.~[gpv:ss]=]selected[/if]>All Students
+                                    <option value="cur" ~[if.~[gpv:ss]=cur]selected[/if]>Current Selection
+                                        (~[x:studsinset])
+                                </select>
+                            </td>
+                            <td valign="top" nowrap>
+                                <select id="term" name="term">
+                                    <option value="~(curyearid)00" ~[if.~(gpv.term)=]selected[/if]>~(yearname)</option>
+                                    ~[tlist_sql;SELECT terms.id termid, CASE WHEN terms.id = '~(gpv.term;sqlText)' THEN
+                                    'selected' ELSE '' END
+                                    isselected, Upper(Abbreviation) term FROM terms WHERE terms.schoolid =
+                                    ~(curschoolid) AND terms.yearid =
+                                    ~(curyearid) ORDER BY Upper(Trim(term))]
+                                    <option value="~(termid)" ~(isselected;t)>~(term)</option>
+                                    [/tlist_sql]
+                                </select>
+                            </td>
+                            <td>
+                                <select name="attc">
+                                    <option ~[if.~[gpv:attc]=]selected[/if]>All Absent Codes
+                                    </option>
+                                    <option ~[if.~[gpv:attc]=ABSUN]selected[/if] value="ABSUN">Absent Unexcused Codes
+                                    </option>
+                                    <option ~[if.~[gpv:attc]=ABEX]selected[/if] value="ABEX">Absent Excused Codes
+                                    </option>
+                                    ~[tlist_sql;
+                                    SELECT
+                                    DISTINCT Att_Code,
+                                    DECODE('~[gpv:attc]', att_code, 'SELECTED', '')isselected,
+                                    to_char(Description) description
+                                    FROM Attendance_Code
+                                    WHERE
+                                    yearID = ~(curyearid)
+                                    AND schoolID LIKE
+                                    CASE
+                                    WHEN ~(curschoolid) = 0 THEN '%'
+                                    ELSE to_char(~(curschoolid))
+                                    END
+                                    AND presence_status_cd = 'Absent'
+                                    AND att_code is not null
+                                    ORDER BY Att_Code ]
+                                    <option value="~(Att_Code;t)" ~(isselected)>~(Att_Code;t) (~(description;t))
+                                    </option>
+                                    [/tlist_sql]
+                                </select>
+                            </td>
+                            <td>
+                                <select name="tardy">
+                                    <option ~[if.~[gpv:tardy]=]selected[/if]>All Tardy Codes
+                                    </option>
+                                    <option ~[if.~[gpv:tardy]=TARSUN]selected[/if] value="TARSUN">Tardy Unexcused Codes
+                                    </option>
+                                    <option ~[if.~[gpv:tardy]=TAREX]selected[/if] value="TAREX">Tardy Excused Codes
+                                    </option>
+                                    ~[tlist_sql;
+                                    SELECT
+                                    DISTINCT Att_Code,
+                                    DECODE('~[gpv:attc]', att_code, 'SELECTED', '')isselected,
+                                    to_char(Description) description
+                                    FROM Attendance_Code
+                                    WHERE
+                                    yearID = ~(curyearid)
+                                    AND schoolID LIKE
+                                    CASE
+                                    WHEN ~(curschoolid) = 0 THEN '%'
+                                    ELSE to_char(~(curschoolid))
+                                    END
+                                    AND att_code is not null
+                                    AND att_CODE LIKE 'T%'
+                                    AND att_CODE NOT LIKE 'TR%'
+                                    AND att_CODE NOT LIKE 'TM%'
+                                    ORDER BY Att_Code]
+                                    <option value="~(Att_Code;t)" ~(isselected)>~(Att_Code;t) (~(description;t))
+                                    </option>
+                                    [/tlist_sql]
+                                </select>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="button-row">
+                    <input type="hidden" name="showData" value="1">
+                    <span class="red">&nbsp;&nbsp;Select parameters and click submit</span>
+                    <input type="hidden" name="ac" value="prim">~[submitbutton]
+                </div>
+        </form>
+        <!-- end of Options -->
+
+        <!-- Start of Results -->
+        ~[if#showData.~[gpv:showData]=1]
+        <div class="box-round">
+            <h2>Students Attendance - Totals</h2>
+            <table border="0" cellspacing="0" cellpadding="0" class="tablesorter grid" id="results">
+                <thead>
+                    <tr>
+                        <th class="bold">StudNum</th>
+                        <th class="bold">Student</th>
+                        <th class="bold">Exp.</th>
+                        <th class="bold">Course</th>
+                        <th class="bold">Absent Count</th>
+                        <th class="bold">Absent Dates</th>
+                        <th class="bold">Tardy Count</th>
+                        <th class="bold">Tardy Dates</th>
+                        <th class="bold">School</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ~[tlist_sql;
+                    SELECT  
+                        DETAILPERIOD.SDCID,
+                        DETAILPERIOD.STUDENT_NUMBER,
+                        DETAILPERIOD.LASTFIRST, 
+                        --DETAILPERIOD.PERIOD, 
+                        DETAILPERIOD.EXPRESSION, 
+                        DETAILPERIOD.COURSE_NAME,
+                        COUNTOFPERIOD.COUNTOFPERIOD,  
+                        LISTAGG(DETAILPERIOD.att_code || '-' || to_char(DETAILPERIOD.attDate,'MM/DD/YYYY'), ', ') WITHIN GROUP (ORDER BY DETAILPERIOD.attDate ASC) "DATES",
+                        DETAILPERIOD.schoolname
+                    FROM 
+                        (
+                            SELECT
+                                schoolname, 
+                                LASTFIRST, 
+                                PERIOD, 
+                                course_name,
+                                count(ATT_ID) as COUNTOFPERIOD
+                            FROM
+                            (
+                                select
+                                    students.LASTFIRST,
+                                    schools.name as schoolname,
+                                    per.abbreviation AS PERIOD,
+                                    ac.presence_status_cd AS STATUS,
+                                    att.id AS ATT_ID,
+                                    att.studentid,
+                                    att.schoolid,
+                                    att.att_date as attdate,
+                                    courses.course_name,
+                                    att.attendance_codeid,
+                                    ac.att_code,
+                                    att.att_mode_code,
+                                    att.att_interval,
+                                    att.calendar_dayid,
+                                    att.ccid,
+                                    cc.schoolid,
+                                (
+                                        case
+                                        when cc.sectionid < 0 then 1
+                                        else 0
+                                        end
+                                    ),	   
+                                    att.periodid,
+                                    per.abbreviation,
+                                    per.period_number,
+                                    s.id,
+                                    s.section_number,
+                                    att.programid,
+                                    cd.a,
+                                    cd.b,
+                                    cd.c,
+                                    cd.d,
+                                    cd.e,
+                                    cd.f,
+                                    cd.insession,
+                                    ac.calculate_ada_yn,
+                                    ac.presence_status_cd,
+                                    cd.cycle_day_id,
+                                    cy.abbreviation,
+                                    att.total_minutes,
+                                    ac.course_credit_points
+                                from  attendance att
+                                inner join students 
+                                    on students.id = att.studentid
+                                inner join schools 
+                                    on students.schoolid = schools.school_number
+                                inner join cc 
+                                    on att.ccid = cc.id and att.studentid = cc.studentid
+                                inner join sections s 
+                                    on abs(cc.sectionid) = s.id
+                                inner join courses 
+                                    on courses.course_number = s.course_number
+                                inner join calendar_day cd 
+                                    on att.calendar_dayid = cd.id
+                                inner join attendance_code ac 
+                                    on att.attendance_codeid = ac.id
+                                inner join cycle_day cy 
+                                    on cd.cycle_day_id = cy.id
+                                inner join att_code_code_entity acce 
+                                    on acce.attendance_codeid = ac.id
+                                inner join code_entity ce 
+                                    on ce.id = acce.code_entityid
+                                inner join terms t 
+                                    on schools.school_number = t.schoolid 
+                                        and t.id = 3000
+                                left join period per 
+                                    on att.periodid = per.id
+                                where 
+                                    att.att_date >= t.firstday 
+                                    and att.att_date  < t.lastday
+                                    and att.att_mode_code = 'ATT_ModeMeeting'
+                                    and ac.presence_status_cd = 'Absent'
+                                    and ce.ce_code = 'Unexcused'
+                            ) 
+                        GROUP BY 
+                            schoolname, LASTFIRST, PERIOD, course_name
+                        ORDER BY 
+                            schoolname, LASTFIRST
+                        ) 
+                    COUNTOFPERIOD
+                    INNER JOIN
+                        (
+                            SELECT
+                                sdcid,
+                                student_number,
+                                schoolname, 
+                                LASTFIRST, 
+                                PERIOD,
+                                expression,
+                                course_name, 
+                                attdate, 
+                                att_code
+                            FROM
+                                (
+                                    select
+                                        students.DCID as sdcid,
+                                        students.STUDENT_NUMBER,
+                                        students.LASTFIRST,
+                                        schools.name as schoolname,
+                                        per.abbreviation AS PERIOD,
+                                        cc.expression,
+                                        ac.presence_status_cd AS STATUS,
+                                        att.id AS ATT_ID,
+                                        att.studentid,
+                                        att.schoolid,
+                                        att.att_date as attdate,
+                                        courses.course_name,
+                                        att.attendance_codeid,
+                                        ac.att_code,
+                                        att.att_mode_code,
+                                        att.att_interval,
+                                        att.calendar_dayid,
+                                        att.ccid,
+                                        cc.schoolid,
+                                        (
+                                            case
+                                                when cc.sectionid < 0 then 1
+                                                else 0
+                                            end
+                                        ),	   
+                                        att.periodid,
+                                        per.abbreviation,
+                                        per.period_number,
+                                        s.id,
+                                        s.section_number,
+                                        att.programid,
+                                        cd.a,
+                                        cd.b,
+                                        cd.c,
+                                        cd.d,
+                                        cd.e,
+                                        cd.f,
+                                        cd.insession,
+                                        ac.calculate_ada_yn,
+                                        ac.presence_status_cd,
+                                        cd.cycle_day_id,
+                                        cy.abbreviation,
+                                        att.total_minutes,
+                                        ac.course_credit_points
+                                    from  attendance att
+                                    inner join students 
+                                        on students.id = att.studentid
+                                    inner join schools 
+                                        on students.schoolid = schools.school_number
+                                    inner join cc 
+                                        on att.ccid = cc.id and att.studentid = cc.studentid
+                                    inner join sections s 
+                                        on abs(cc.sectionid) = s.id
+                                    inner join courses 
+                                        on courses.course_number = s.course_number
+                                    inner join calendar_day cd 
+                                        on att.calendar_dayid = cd.id
+                                    inner join attendance_code ac 
+                                        on att.attendance_codeid = ac.id
+                                    inner join cycle_day cy 
+                                        on cd.cycle_day_id = cy.id
+                                    inner join att_code_code_entity acce 
+                                        on acce.attendance_codeid = ac.id
+                                    inner join code_entity ce 
+                                        on ce.id = acce.code_entityid
+                                    inner join terms t 
+                                        on schools.school_number = t.schoolid 
+                                        and t.id = 3000
+                                    left join period per 
+                                        on att.periodid = per.id
+                    
+                                    where 
+                                        att.att_date >= t.firstday 
+                                        and att.att_date  < t.lastday
+                                        and att.att_mode_code = 'ATT_ModeMeeting'
+                                        and ac.presence_status_cd = 'Absent'
+                                        and ce.ce_code = 'Unexcused'
+                                    order by students.LASTFIRST, att.att_date, per.abbreviation 
+                                ) 
+                            ORDER BY schoolname, LASTFIRST, attdate
+                    )  
+                    DETAILPERIOD 
+                        ON DETAILPERIOD.LASTFIRST = COUNTOFPERIOD.LASTFIRST
+                        AND DETAILPERIOD.COURSE_NAME = COUNTOFPERIOD.COURSE_NAME
+                    GROUP BY 
+                        DETAILPERIOD.SDCID, DETAILPERIOD.STUDENT_NUMBER, DETAILPERIOD.LASTFIRST, DETAILPERIOD.EXPRESSION, DETAILPERIOD.COURSE_NAME,COUNTOFPERIOD.COUNTOFPERIOD, DETAILPERIOD.schoolname
+                    ORDER BY 
+                        DETAILPERIOD.schoolname, DETAILPERIOD.LASTFIRST, DETAILPERIOD.EXPRESSION
+                        ;alternatecolor;nonemessage=<tr nodata>
+                        <td colspan="100%">No Records Found.</td>
+                        </tr>]
+                        <tr class="Record" data-StudentID="~(dcid;t)">
+                            <td><a href="/admin/students/att_daily.html?frn=001~(dcid)">~(studnum)</a></td>
+                            <td class="nowrap">~(stuname;t)</td>
+                            <td>~(expression;t;externalExpression)</td>
+                            <td>~(coursename)</td>
+                            <td>~(abscnt)</td>
+                            <td class="nowrap">~(absdates;t)</td>
+                            <td>~(tarcnt)</td>
+                            <td class="nowrap">~(absdates;t)</td>
+                            <td>~(school;t)</td>
+                        </tr>
+                        [/tlist_sql]
+                </tbody>
+            </table>
+
+            <!-- End of Results -->
+        </div>
+        <div class="box-round">
+            <h2>Attendance Codes Legend</h2>
+            <table border="0" cellspacing="0" cellpadding="2" align="center">
+                <tr>
+                    <td>~[x:att_code_legend;thisschool;thisyear]</td>
+                </tr>
+            </table>
+        </div>
+        <p align="center">Report generated at ~[time] on ~[date]</p>
+        [/if#showData]
+        ~[wc:admin_footer_frame_css]
+    </body>
+
+</html>
