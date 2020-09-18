@@ -38,7 +38,7 @@
 		</td>
 	</tr>
 	<tr id="missingZip">
-		<td><a href="cdol_contacts_missing_zip.html">Contacts Missing Zip Code</a>
+		<td><a href="/admin/reports_pscb/contacts/cdol_contacts_missing_zip.html">Contacts Missing Zip Code</a>
 		</td>
 		<td>List students and any contacts that have an address but no Zip Code
 		</td>
