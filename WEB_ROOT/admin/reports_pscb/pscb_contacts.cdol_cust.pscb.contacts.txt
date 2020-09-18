@@ -17,6 +17,14 @@
 		</tr>
 	</thead>
 	<tr>
+		<td><a href="/admin/reports_pscb/contacts/cdol_multi_label_per_student.html">Multiple Mailing Labels Per
+				Student</a>
+		</td>
+		<td>List students that are generating more than one mailing label in the SC - Student Contact Mailing Label Per
+			Family Report
+		</td>
+	</tr>
+	<tr>
 		<td><a href="/admin/reports_pscb/contacts/cdol_receive_mail_not_lives_with.html">Receive Mail But Does Not Live
 				With</a>
 		</td>

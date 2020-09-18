@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html>
+    <!-- non framed -->
+
+    <head>
+        <title>Multiple Mailing Labels Per
+            Student</title>
+        ~[wc:commonscripts]
+        <link href="/images/css/screen.css" rel="stylesheet" media="screen">
+        <link href="/images/css/print.css" rel="stylesheet" media="print">
+        ~[wc:pscb_init]
+        <script>
+            pscbToolButtons = { "copyData": "Yes", "csvFile": "Yes", "pdfFile": "Yes", "curSel": "Yes" };
+        </script>
+    </head>
+
+    <body>
+        ~[wc:admin_header_frame_css]
+        <!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a> &gt; <a
+            href="/admin/reports_pscb/pscb_home.html" target="_top">PSCB Custom Reports</a> &gt; <a
+            href="/admin/reports_pscb/pscb_contacts.html" target="_top">Contacts</a> &gt; Multiple Mailing Labels Per
+        Student
+        <!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
+        <!-- start of Options -->
+        <h1>Multiple Mailing Labels Per
+            Student</h1>
+        <form name="searchform" action="#" method="POST">
+            <div class="box-round" style="overflow: hidden;">
+                <h2>Report Filters</h2>
+                <table border="0" cellspacing="0" cellpadding="0" class="linkDescList">
+                    <thead>
+                        <tr>
+                            <th style="white-space: nowrap;" width="180px">Student Selection</th>
+                            <th style="white-space: nowrap;">Grade Selection</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <select name="ss" id="ss">
+                                    <option value='' ~[if.~[gpv:ss]=]selected[/if]>All Students</option>
+                                    <option value="cur" ~[if.~[gpv:ss]=cur]selected[/if]>Current Selection
+                                        (~[x:studsinset])</option>
+                                </select>
+                            </td>
+                            <td>
+                                <select name="gr" name="gr">
+                                    <option value='' ~[if.~[gpv:gr]=]selected[/if]>All Grades</option>
+                                    ~[tlist_sql;
+                                    SELECT DISTINCT GRADE_LEVEL,
+                                    CASE
+                                    WHEN TO_CHAR(grade_level) = -2 then 'PK3'
+                                    WHEN TO_CHAR(grade_level) = -1 then 'PK4'
+                                    WHEN TO_CHAR(grade_level) = 0 then 'K'
+                                    WHEN TO_CHAR(grade_level) = 99 then 'Graduated'
+                                    ELSE TO_CHAR(grade_level)
+                                    END as prettygrade
+                                    FROM STUDENTS
+                                    WHERE TO_CHAR(SCHOOLID) LIKE CASE WHEN TO_CHAR(~(curschoolid)) = '0'
+                                    THEN '%' ELSE TO_CHAR(~(curschoolid)) END
+                                    AND ENROLL_STATUS = 0
+                                    ORDER BY GRADE_LEVEL]
+                                    <option value="'~(gr)'">~(prettygrade)</option>
+                                    [/tlist_sql]
+                                </select>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="button-row" style="float: left;">
+                    <input type="hidden" name="showData" value="1">
+                    <span class="red">&nbsp;&nbsp;Select parameters and click submit</span>
+                    <input type="hidden" name="ac" value="prim">~[submitbutton]
+                </div>
+            </div>
+        </form>
+        <!-- Start of Results -->
+        ~[if#showData.~(gpv.showData;sqlText)=1]
+        <div class="box-round">
+            <h2>Receive Mail But Does Not Live With</h2>
+            <table border="0" cellspacing="0" cellpadding="4" align="center" class="tablesorter grid" id="results">
+                <thead>
+                    <tr>
+                        <th class="left">Student Number</th>
+                        <th class="left">Student Name</th>
+                        <th class="left filter-select">Grade Level</th>
+                        <th class="left">Student Address</th>
+                        <th class="left filter-select">Priority Order</th>
+                        <th class="left">Contacts</th>
+                        <th class="left">Relationship</th>
+                        <th class="left">AddressID</th>
+                        <th class="left filter-select">Address Type</th>
+                        <th class="left">Contact Address</th>
+                        <th class="left filter-select">Has Custody</th>
+                        <th class="left filter-select">Receives Mail</th>
+                        <th class="left filter-select">Lives With</th>
+                        <th class="left filter-select">School</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ~[tlist_sql;
+                    WITH ASSOC AS (
+                    SELECT DISTINCT
+                    PERSONADDRESSASSOC.PERSONADDRESSID,
+                    PERSON.ID AS PERSON_ID,
+                    PERSON.FIRSTNAME || ' ' || PERSON.LASTNAME as PERSON,
+                    STUDENTS.ID AS STUDENT_ID,
+                    STUDENTS.STUDENT_NUMBER,
+                    STUDENTS.GRADE_LEVEL,
+                    STUDENTS.LASTFIRST,
+                    STUDENTCONTACTDETAIL.ISCUSTODIAL,
+                    STUDENTCONTACTDETAIL.RECEIVESMAILFLG,
+                    STUDENTCONTACTDETAIL.liveswithflg,
+                    ROW_NUMBER() OVER( PARTITION BY PERSON.ID ORDER BY GRADE_LEVEL DESC) AS STUCONTACTORDER
+                    FROM STUDENTS
+                    ~[if#ss.~(gpv.ss;sqlText)=cur] INNER JOIN ~[temp.table.current.selection:students] temp ON (s.dcid
+                    =
+                    temp.dcid)[/if#ss]
+                    INNER JOIN SCHOOLS
+                    ON STUDENTS.SCHOOLID = SCHOOLS.SCHOOL_NUMBER
+                    ~[if.is.a.school] and STUDENTS.schoolid=~(curschoolid) [/if]
+                    INNER JOIN STUDENTCONTACTASSOC
+                    ON STUDENTCONTACTASSOC.STUDENTDCID = STUDENTS.DCID
+                    INNER JOIN PERSON
+                    ON PERSON.ID = STUDENTCONTACTASSOC.PERSONID
+                    LEFT JOIN CODESET CONTACT_REL
+                    ON STUDENTCONTACTASSOC.CURRRELTYPECODESETID = CONTACT_REL.CODESETID
+                    INNER JOIN STUDENTCONTACTDETAIL
+                    ON STUDENTCONTACTASSOC.STUDENTCONTACTASSOCID = STUDENTCONTACTDETAIL.STUDENTCONTACTASSOCID
+                    AND (CURRENT_DATE < STUDENTCONTACTDETAIL.ENDDATE OR STUDENTCONTACTDETAIL.ENDDATE IS NULL) AND
+                        (CURRENT_DATE>
+                        STUDENTCONTACTDETAIL.STARTDATE OR STUDENTCONTACTDETAIL.STARTDATE IS NULL)
+                        --~[if#cursel.%param2%=Yes] AND STUDENTCONTACTDETAIL.ISCUSTODIAL = 1 [/if]
+                        --~[if#cursel.%param3%=Yes] AND STUDENTCONTACTDETAIL.RECEIVESMAILFLG = 1 [/if]
+                        LEFT JOIN PERSONADDRESSASSOC
+                        ON PERSONADDRESSASSOC.PERSONID = PERSON.ID
+                        --AND PERSONADDRESSASSOC.ADDRESSTYPECODESETID = 19
+                        AND (CURRENT_DATE < PERSONADDRESSASSOC.ENDDATE OR PERSONADDRESSASSOC.ENDDATE IS NULL) AND
+                            (CURRENT_DATE>
+                            PERSONADDRESSASSOC.STARTDATE OR PERSONADDRESSASSOC.STARTDATE IS NULL)
+                            WHERE
+                            STUDENTS.ENROLL_STATUS IN (-1,0)
+                            ~[if.is.a.school] and STUDENTS.schoolid=~(curschoolid) [/if]
+                            )
+                            SELECT DISTINCT
+                            STUDENTS.DCID AS STUDENT_DCID,
+                            STUDENTS.STUDENT_NUMBER,
+                            STUDENTS.LASTFIRST,
+                            CASE
+                            WHEN TO_CHAR(STUDENTS.grade_level) = -2 then 'PK3'
+                            WHEN TO_CHAR(STUDENTS.grade_level) = -1 then 'PK4'
+                            WHEN TO_CHAR(STUDENTS.grade_level) = 0 then 'K'
+                            WHEN TO_CHAR(STUDENTS.grade_level) = 99 then 'Graduated'
+                            ELSE TO_CHAR(STUDENTS.grade_level)
+                            END as PRETTY_GRADE,
+                            Nvl(STUDENTS.mailing_street,'-') || ', ' || Nvl(STUDENTS.mailing_city,'-') || ' ' ||
+                            Nvl(STUDENTS.mailing_state,'') || ' ' || Nvl(STUDENTS.mailing_zip,'') as Student_mailing,
+                            ROW_NUMBER() OVER( PARTITION BY PERSON.ID ORDER BY GRADE_LEVEL DESC) AS STUCONTACTORDER,
+                            PERSON.ID AS PERSON_ID,
+                            PERSON.FIRSTNAME || ' ' || PERSON.LASTNAME as PERSON,
+                            CONTACT_REL.DESCRIPTION,
+                            PERSONADDRESSASSOC.PERSONADDRESSID,
+                            acs.code Address_type,
+                            Nvl(PERSONADDRESS.STREET,'-') || ', ' || Nvl(PERSONADDRESS.CITY,'-') || ' ' ||
+                            Nvl(scs.code,'') || ' ' ||
+                            Nvl(PERSONADDRESS.POSTALCODE,'') AS PERSON_address,
+                            DECODE(STUDENTCONTACTDETAIL.ISCUSTODIAL, 1, 'Yes','No') ISCUSTODIAL,
+                            DECODE(STUDENTCONTACTDETAIL.RECEIVESMAILFLG, 1, 'Yes','No') RECEIVESMAILFLG,
+                            DECODE(STUDENTCONTACTDETAIL.liveswithflg, 1, 'Yes','No') liveswithflg,
+                            SCHOOLS.abbreviation,
+                            SCHOOLS.name
+                            FROM STUDENTS
+                            ~[if#ss.~(gpv.ss;sqlText)=cur] INNER JOIN ~[temp.table.current.selection:students] temp ON
+                            (s.dcid =
+                            temp.dcid)[/if#ss]
+                            INNER JOIN SCHOOLS
+                            ON STUDENTS.SCHOOLID = SCHOOLS.SCHOOL_NUMBER
+                            ~[if.is.a.school] and STUDENTS.schoolid=~(curschoolid) [/if]
+                            INNER JOIN STUDENTCONTACTASSOC
+                            ON STUDENTCONTACTASSOC.STUDENTDCID = STUDENTS.DCID
+                            INNER JOIN PERSON
+                            ON PERSON.ID = STUDENTCONTACTASSOC.PERSONID
+                            LEFT JOIN CODESET CONTACT_REL
+                            ON STUDENTCONTACTASSOC.CURRRELTYPECODESETID = CONTACT_REL.CODESETID
+                            INNER JOIN STUDENTCONTACTDETAIL
+                            ON STUDENTCONTACTASSOC.STUDENTCONTACTASSOCID = STUDENTCONTACTDETAIL.STUDENTCONTACTASSOCID
+                            AND (CURRENT_DATE < STUDENTCONTACTDETAIL.ENDDATE OR STUDENTCONTACTDETAIL.ENDDATE IS NULL)
+                                AND (CURRENT_DATE>
+                                STUDENTCONTACTDETAIL.STARTDATE OR STUDENTCONTACTDETAIL.STARTDATE IS NULL)
+                                --~[if#cursel.%param2%=Yes] AND STUDENTCONTACTDETAIL.ISCUSTODIAL = 1 [/if]
+                                --~[if#cursel.%param3%=Yes] AND STUDENTCONTACTDETAIL.RECEIVESMAILFLG = 1 [/if]
+                                LEFT JOIN PERSONADDRESSASSOC
+                                ON PERSONADDRESSASSOC.PERSONID = PERSON.ID
+                                AND PERSONADDRESSASSOC.ADDRESSTYPECODESETID = 19
+                                AND (CURRENT_DATE < PERSONADDRESSASSOC.ENDDATE OR PERSONADDRESSASSOC.ENDDATE IS NULL)
+                                    AND (CURRENT_DATE>
+                                    PERSONADDRESSASSOC.STARTDATE OR PERSONADDRESSASSOC.STARTDATE IS NULL)
+                                    LEFT JOIN PERSONADDRESS
+                                    ON PERSONADDRESS.PERSONADDRESSID = PERSONADDRESSASSOC.PERSONADDRESSID
+                                    LEFT JOIN codeset scs ON (PERSONADDRESS.statescodesetid = scs.codesetid)
+                                    LEFT JOIN codeset acs on (PERSONADDRESSASSOC.AddressTypeCodeSetID = acs.codesetid)
+                                    WHERE
+                                    (
+                                    STUDENTCONTACTDETAIL.ISCUSTODIAL = 1
+                                    OR STUDENTCONTACTDETAIL.RECEIVESMAILFLG = 1
+                                    OR STUDENTCONTACTDETAIL.liveswithflg = 1
+                                    )
+                                    AND STUDENTS.ENROLL_STATUS IN (-1,0)
+                                    ~[if.is.a.school] and STUDENTS.schoolid=~(curschoolid) [/if]
+                                    AND STUDENTS.STUDENT_NUMBER IN (
+                                    SELECT STUDENT_NUMBER
+                                    FROM
+                                    (
+                                    SELECT DISTINCT
+                                    STUDENTS.STUDENT_NUMBER,
+                                    STUDENTS.LASTFIRST,
+                                    ASSOC.PERSONADDRESSID
+                                    FROM ASSOC
+                                    LEFT JOIN STUDENTS
+                                    ON ASSOC.STUDENT_ID = STUDENTS.ID
+                                    AND STUDENTS.ENROLL_STATUS = 0
+                                    ~[if.is.a.school] and STUDENTS.schoolid=~(curschoolid) [/if]
+                                    LEFT JOIN PERSON
+                                    ON PERSON.ID = ASSOC.PERSON_ID
+                                    WHERE
+                                    ASSOC.ISCUSTODIAL = 1
+                                    OR ASSOC.RECEIVESMAILFLG = 1
+                                    AND STUDENTS.ENROLL_STATUS in (-1,0)
+                                    ~[if.is.a.school] and STUDENTS.schoolid=~(curschoolid) [/if]
+                                    )
+                                    GROUP BY STUDENT_NUMBER
+                                    HAVING COUNT(*) > 1
+                                    )
+                                    ORDER BY SCHOOLS.NAME , STUDENTS.LASTFIRST
+                                    ;]
+                                    <tr data-StudentID="~(dcid)">
+                                        <td class="nowrap"><a href="/admin/students/contacts.html?frn=001~(dcid)"
+                                                target="_blank">~(stunum)</a>
+                                        </td>
+                                        <td class="nowrap">~(stuname;t)</td>
+                                        <td class="center">~(grade_level)</td>
+                                        <td class="nowrap">~(StuAddress;t)</td>
+                                        <td class="center">~(order)</td>
+                                        <td class="nowrap"><a href="/admin/contacts/edit.html#?contactid=~(cid)"
+                                                target="_blank">~(contact;t)</a></td>
+                                        <td>~(relationship;t)</td>
+                                        <td>~(addressid)</td>
+                                        <td>~(addresstype;t)</td>
+                                        <td class="nowrap">~(contactaddress;t)</td>
+                                        <td>~(custody;t)</td>
+                                        <td>~(mail;t)</td>
+                                        <td>~(liveswith;t)</td>
+                                        <td class="nowrap">~(school;t)</td>
+                                    </tr>
+                                    [/tlist_sql]
+                </tbody>
+            </table>
+        </div>
+        [/if#showData]
+        <!-- end of content of bounding box -->
+        ~[wc:admin_footer_frame_css]
+    </body>
+
+</html><!-- end right frame -->
