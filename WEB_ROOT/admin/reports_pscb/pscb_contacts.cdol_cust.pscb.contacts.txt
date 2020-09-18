@@ -37,6 +37,12 @@
 		<td>List students and any contacts that is marked as receives mail & lives with students
 		</td>
 	</tr>
+	<tr id="missingZip">
+		<td><a href="cdol_contacts_missing_zip.html">Contacts Missing Zip Code</a>
+		</td>
+		<td>List students and any contacts that have an address but no Zip Code
+		</td>
+	</tr>
 </table>
 
 <script>

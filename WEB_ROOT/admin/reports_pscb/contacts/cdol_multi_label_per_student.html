@@ -112,9 +112,7 @@
                     STUDENTCONTACTDETAIL.liveswithflg,
                     ROW_NUMBER() OVER( PARTITION BY PERSON.ID ORDER BY GRADE_LEVEL DESC) AS STUCONTACTORDER
                     FROM STUDENTS
-                    ~[if#ss.~(gpv.ss;sqlText)=cur] INNER JOIN ~[temp.table.current.selection:students] temp ON (s.dcid
-                    =
-                    temp.dcid)[/if#ss]
+                    ~[if#ss.~(gpv.ss;sqlText)=cur] INNER JOIN ~[temp.table.current.selection:students] temp ON (s.dcid = temp.dcid)[/if#ss]
                     INNER JOIN SCHOOLS
                     ON STUDENTS.SCHOOLID = SCHOOLS.SCHOOL_NUMBER
                     ~[if.is.a.school] and STUDENTS.schoolid=~(curschoolid) [/if]
@@ -152,26 +150,21 @@
                             WHEN TO_CHAR(STUDENTS.grade_level) = 99 then 'Graduated'
                             ELSE TO_CHAR(STUDENTS.grade_level)
                             END as PRETTY_GRADE,
-                            Nvl(STUDENTS.mailing_street,'-') || ', ' || Nvl(STUDENTS.mailing_city,'-') || ' ' ||
-                            Nvl(STUDENTS.mailing_state,'') || ' ' || Nvl(STUDENTS.mailing_zip,'') as Student_mailing,
+                            Nvl(STUDENTS.mailing_street,'-') || ', ' || Nvl(STUDENTS.mailing_city,'-') || ' ' || Nvl(STUDENTS.mailing_state,'') || ' ' || Nvl(STUDENTS.mailing_zip,'') as Student_mailing,
                             --ROW_NUMBER() OVER( PARTITION BY PERSON.ID ORDER BY GRADE_LEVEL DESC) AS STUCONTACTORDER,
                             PERSON.ID AS PERSON_ID,
                             PERSON.FIRSTNAME || ' ' || PERSON.LASTNAME as PERSON,
                             CONTACT_REL.DESCRIPTION,
                             PERSONADDRESSASSOC.PERSONADDRESSID,
                             acs.code Address_type,
-                            Nvl(PERSONADDRESS.STREET,'-') || ', ' || Nvl(PERSONADDRESS.CITY,'-') || ' ' ||
-                            Nvl(scs.code,'') || ' ' ||
-                            Nvl(PERSONADDRESS.POSTALCODE,'') AS PERSON_address,
+                            Nvl(PERSONADDRESS.STREET,'-') || ', ' || Nvl(PERSONADDRESS.CITY,'-') || ' ' || Nvl(scs.code,'') || ' ' || Nvl(PERSONADDRESS.POSTALCODE,'') AS PERSON_address,
                             DECODE(STUDENTCONTACTDETAIL.ISCUSTODIAL, 1, 'Yes','No') ISCUSTODIAL,
                             DECODE(STUDENTCONTACTDETAIL.RECEIVESMAILFLG, 1, 'Yes','No') RECEIVESMAILFLG,
                             DECODE(STUDENTCONTACTDETAIL.liveswithflg, 1, 'Yes','No') liveswithflg,
                             SCHOOLS.abbreviation,
                             SCHOOLS.name
                             FROM STUDENTS
-                            ~[if#ss.~(gpv.ss;sqlText)=cur] INNER JOIN ~[temp.table.current.selection:students] temp ON
-                            (s.dcid =
-                            temp.dcid)[/if#ss]
+                            ~[if#ss.~(gpv.ss;sqlText)=cur] INNER JOIN ~[temp.table.current.selection:students] temp ON (s.dcid = temp.dcid)[/if#ss]
                             INNER JOIN SCHOOLS
                             ON STUDENTS.SCHOOLID = SCHOOLS.SCHOOL_NUMBER
                             ~[if.is.a.school] and STUDENTS.schoolid=~(curschoolid) [/if]

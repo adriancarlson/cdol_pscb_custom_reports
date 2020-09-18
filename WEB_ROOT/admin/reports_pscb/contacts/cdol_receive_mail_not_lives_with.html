@@ -105,23 +105,17 @@
                     WHEN TO_CHAR(s.grade_level) = 99 then 'Graduated'
                     ELSE TO_CHAR(s.grade_level)
                     END as PRETTY_GRADE,
-                    Nvl(s.mailing_street,'-') || ', ' || Nvl(s.mailing_city,'-') || ' ' || Nvl(s.mailing_state,'') || '
-                    ' || Nvl(s.mailing_zip,'') as Student_ADDRESS,
+                    Nvl(s.mailing_street,'-') || ', ' || Nvl(s.mailing_city,'-') || ' ' || Nvl(s.mailing_state,'') || ' ' || Nvl(s.mailing_zip,'') as Student_ADDRESS,
                     p.id,
-                    CASE WHEN p.firstname IS NULL AND p.lastname IS NULL THEN '-No Name-' ELSE p.firstname||'
-                    '||p.lastname END as Contact,
+                    CASE WHEN p.firstname IS NULL AND p.lastname IS NULL THEN '-No Name-' ELSE p.firstname||' '||p.lastname END as Contact,
                     cs.code Relationship,
                     DECODE(scd.receivesmailflg, 1, 'Yes','No') receivesmailflg,
                     DECODE(scd.liveswithflg, 1, 'Yes','No') liveswithflg,
                     acs.code Address_type,
-                    Nvl(pa.street,'-') || ', ' || Nvl(pa.city,'-') || ' ' || Nvl(scs.code,'') || '
-                    ' ||
-                    Nvl(pa.postalcode,'') address,
+                    Nvl(pa.street,'-') || ', ' || Nvl(pa.city,'-') || ' ' || Nvl(scs.code,'') || ' ' || Nvl(pa.postalcode,'') address,
                     sch.abbreviation
                     FROM Students s
-                    ~[if#ss.~(gpv.ss;sqlText)=cur] INNER JOIN ~[temp.table.current.selection:students] temp ON (s.dcid =
-                    temp.dcid)
-                    [/if#ss]
+                    ~[if#ss.~(gpv.ss;sqlText)=cur] INNER JOIN ~[temp.table.current.selection:students] temp ON (s.dcid = temp.dcid)[/if#ss]
                     JOIN schools sch ON (s.schoolid = sch.school_number)
                     LEFT JOIN studentcontactassoc sca ON (s.dcid = sca.studentdcid)
                     LEFT JOIN studentcontactdetail scd ON (sca.studentcontactassocid = scd.studentcontactassocid)

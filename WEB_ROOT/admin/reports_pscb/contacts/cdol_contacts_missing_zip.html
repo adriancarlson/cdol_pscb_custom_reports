@@ -3,7 +3,7 @@
     <!-- non framed -->
 
     <head>
-        <title>Receive Mail & Lives With</title>
+        <title>Contacts Missing Zip Code</title>
         ~[wc:commonscripts]
         <link href="/images/css/screen.css" rel="stylesheet" media="screen">
         <link href="/images/css/print.css" rel="stylesheet" media="print">
@@ -17,10 +17,10 @@
         ~[wc:admin_header_frame_css]
         <!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a> &gt; <a
             href="/admin/reports_pscb/pscb_home.html" target="_top">PSCB Custom Reports</a> &gt; <a
-            href="/admin/reports_pscb/pscb_contacts.html" target="_top">Contacts</a> &gt; Receive Mail & Lives With
+            href="/admin/reports_pscb/pscb_contacts.html" target="_top">Contacts</a> &gt; Contacts Missing Zip Code
         <!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
         <!-- start of Options -->
-        <h1>Receive Mail & Lives With</h1>
+        <h1>Contacts Missing Zip Code</h1>
         <form name="searchform" action="#" method="POST">
             <div class="box-round" style="overflow: hidden;">
                 <h2>Report Filters</h2>
@@ -74,7 +74,7 @@
         <!-- Start of Results -->
         ~[if#showData.~(gpv.showData;sqlText)=1]
         <div class="box-round">
-            <h2>Receive Mail & Lives With</h2>
+            <h2>Contacts Missing Zip Code</h2>
             <table border="0" cellspacing="0" cellpadding="4" align="center" class="tablesorter grid" id="results">
                 <thead>
                     <tr>
@@ -84,8 +84,6 @@
                         <th class="left">Student Address</th>
                         <th class="left">Contacts</th>
                         <th class="left">Relationship</th>
-                        <th class="left filter-select">Receives Mail</th>
-                        <th class="left filter-select">Lives With</th>
                         <th class="left filter-select">Address Type</th>
                         <th class="left">Contact Address</th>
                         <th class="left filter-select">School</th>
@@ -94,25 +92,23 @@
                 <tbody>
                     ~[tlist_sql;
                     SELECT
-                    s.dcid,
-                    s.student_number,
-                    s.lastfirst,
-                    CASE
-                    WHEN TO_CHAR(s.grade_level) = -2 then 'PK3'
-                    WHEN TO_CHAR(s.grade_level) = -1 then 'PK4'
-                    WHEN TO_CHAR(s.grade_level) = 0 then 'K'
-                    WHEN TO_CHAR(s.grade_level) = 99 then 'Graduated'
-                    ELSE TO_CHAR(s.grade_level)
-                    END as PRETTY_GRADE,
-                    Nvl(s.mailing_street,'-') || ', ' || Nvl(s.mailing_city,'-') || ' ' || Nvl(s.mailing_state,'') || ' ' || Nvl(s.mailing_zip,'') as Student_ADDRESS,
-                    p.id,
-                    CASE WHEN p.firstname IS NULL AND p.lastname IS NULL THEN '-No Name-' ELSE p.firstname||' '||p.lastname END as Contact,
-                    cs.code Relationship,
-                    DECODE(scd.receivesmailflg, 1, 'Yes','No') receivesmailflg,
-                    DECODE(scd.liveswithflg, 1, 'Yes','No') liveswithflg,
-                    acs.code Address_type,
-                    Nvl(pa.street,'-') || ', ' || Nvl(pa.city,'-') || ' ' || Nvl(scs.code,'') || ' ' || Nvl(pa.postalcode,'') address,
-                    sch.abbreviation
+                        s.dcid,
+                        s.student_number,
+                        s.lastfirst,
+                        CASE
+                        WHEN TO_CHAR(s.grade_level) = -2 then 'PK3'
+                        WHEN TO_CHAR(s.grade_level) = -1 then 'PK4'
+                        WHEN TO_CHAR(s.grade_level) = 0 then 'K'
+                        WHEN TO_CHAR(s.grade_level) = 99 then 'Graduated'
+                        ELSE TO_CHAR(s.grade_level)
+                        END as PRETTY_GRADE,
+                        Nvl(s.mailing_street,'-') || ', ' || Nvl(s.mailing_city,'-') || ' ' || Nvl(s.mailing_state,'') || ' ' || Nvl(s.mailing_zip,'') as Student_ADDRESS,
+                        p.id,
+                        CASE WHEN p.firstname IS NULL AND p.lastname IS NULL THEN '-No Name-' ELSE p.firstname||' '||p.lastname END as Contact,
+                        cs.code Relationship,
+                        acs.code Address_type,
+                        Nvl(pa.street,'-') || ', ' || Nvl(pa.city,'-') || ' ' || Nvl(scs.code,'') || ' ' || Nvl(pa.postalcode,'') address,
+                        sch.abbreviation
                     FROM Students s
                     ~[if#ss.~(gpv.ss;sqlText)=cur] INNER JOIN ~[temp.table.current.selection:students] temp ON (s.dcid = temp.dcid)[/if#ss]
                     JOIN schools sch ON (s.schoolid = sch.school_number)
@@ -126,12 +122,12 @@
                     LEFT JOIN codeset scs ON (pa.statescodesetid = scs.codesetid)
                     LEFT JOIN guardianpersonassoc gp ON (p.id = gp.personid)
                     LEFT JOIN guardianstudent gs ON (s.dcid = gs.studentsdcid AND gp.guardianid = gs.guardianid)
-                    WHERE s.enroll_status = 0
-                    AND scd.receivesmailflg = 1
-                    AND scd.liveswithflg = 1
+                    WHERE s.enroll_status in (-1,0)
+                    AND pa.street IS NOT NULL
+                    AND (pa.postalcode is NULL OR  pa.postalcode = '')
                     ~[if.is.a.school] AND s.schoolid = ~(curschoolid) [/if.is.a.school]
                     ~[if#gr.~(gpv.gr;sqlText)#] AND s.grade_level = ~(gpv.gr) [/if#gr]
-                    ORDER BY sch.name, s.lastfirst, sca.contactpriorityorder;]
+                        ORDER BY sch.name, s.lastfirst, sca.contactpriorityorder;]
                     <tr data-StudentID="~(dcid)">
                         <td class="nowrap"><a href="/admin/students/contacts.html?frn=001~(dcid)"
                                 target="_blank">~(stunum)</a>
@@ -142,8 +138,6 @@
                         <td class="nowrap"><a href="/admin/contacts/edit.html#?contactid=~(cid)"
                                 target="_blank">~(contact;t)</a></td>
                         <td>~(relationship;t)</td>
-                        <td>~(mail;t)</td>
-                        <td>~(liveswith;t)</td>
                         <td>~(addresstype;t)</td>
                         <td class="nowrap">~(contactaddress;t)</td>
                         <td class="nowrap">~(school;t)</td>
