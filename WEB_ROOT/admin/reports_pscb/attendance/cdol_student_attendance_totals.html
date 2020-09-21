@@ -219,8 +219,8 @@ ABSDETAILPERIOD AS (
                                                 DETAILPERIOD.abbreviation
                                             from  DETAILPERIOD
                                             WHERE
-                                            ac.presence_status_cd = 'Absent'
-                                            ~[decode;~[gpv:attc];ABSUN; and TRIM(ce.ce_code) = 'Unexcused';ABEX; and TRIM(ce.ce_code) = 'Excused';ABILL; and TRIM(ce.ce_code) = 'Illness';ABALL;AND 1=1; AND ac.Att_Code = '~[gpv:attc]']
+                                            DETAILPERIOD.STATUS = 'Absent'
+                                            ~[decode;~[gpv:attc];ABSUN; and TRIM(DETAILPERIOD.ce_code) = 'Unexcused';ABEX; and TRIM(DETAILPERIOD.ce_code) = 'Excused';ABILL; and TRIM(DETAILPERIOD.ce_code) = 'Illness';ABALL;AND 1=1; AND DETAILPERIOD.att_code = '~[gpv:attc]']
                                             order by  DETAILPERIOD.schoolname, DETAILPERIOD.LASTFIRST, DETAILPERIOD.attdate, DETAILPERIOD.abbreviation
                                         ),
 ABSPERIODCOUNT AS (
