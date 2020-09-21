@@ -6,7 +6,7 @@
 		</tr>
 	</thead>
 	<tr id="studentAttendanceTotals">
-		<td><a href="/admin/reports_pscb/attendance/CDOL_student_attendance_totals.html">Students Attendance -
+		<td><a href="/admin/reports_pscb/attendance/CDOL_student_attendance_totals.html">Student Attendance -
 				Totals</a></td>
 		<td>Lists attendance totals</td>
 	</tr>

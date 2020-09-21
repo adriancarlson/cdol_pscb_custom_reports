@@ -3,7 +3,7 @@
     <!-- non framed -->
 
     <head>
-        <title>Contacts Missing Zip Code</title>
+        <title>Students Attendance - Totals</title>
         ~[wc:commonscripts]
         <link href="/images/css/screen.css" rel="stylesheet" media="screen">
         <link href="/images/css/print.css" rel="stylesheet" media="print">
@@ -16,11 +16,11 @@
     <body>
         ~[wc:admin_header_frame_css]
         <!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a> &gt; <a
-            href="/admin/reports_pscb/pscb_home.html" target="_top">PSCB Custom Reports</a> &gt; <a
-            href="/admin/reports_pscb/pscb_contacts.html" target="_top">Contacts</a> &gt; Contacts Missing Zip Code
+            href="/admin/reports_pscb/pscb_home.html" target="_top">PSCB Custom Reports</a> &gt; 
+            <a href="/admin/reports_pscb/pscb_attendance.html" target="_top">Attendance</a> &gt; Students Attendance - Totals
         <!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
         <!-- start of Options -->
-        <h1>Contacts Missing Zip Code</h1>
+        <h1>Students Attendance - Totals</h1>
         <form name="searchform" action="#" method="POST">
             <div class="box-round" style="overflow: hidden;">
                 <h2>Report Filters</h2>
@@ -28,36 +28,98 @@
                     <thead>
                         <tr>
                             <th style="white-space: nowrap;" width="180px">Student Selection</th>
-                            <th style="white-space: nowrap;">Grade Selection</th>
+                            <th style="white-space: nowrap;" width="90px">Term</th>
+                            <th style="white-space: nowrap;" width="180px">Absent Codes</th>
+                            <th style="white-space: nowrap;" >Tardy Codes</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
                             <td>
-                                <select name="ss" id="ss">
-                                    <option value='' ~[if.~[gpv:ss]=]selected[/if]>All Students</option>
+                                <select name="ss">
+                                    <option value='' ~[if.~[gpv:ss]=]selected[/if]>All Students
                                     <option value="cur" ~[if.~[gpv:ss]=cur]selected[/if]>Current Selection
-                                        (~[x:studsinset])</option>
+                                        (~[x:studsinset])
+                                </select>
+                            </td>
+                            <td valign="top" nowrap>
+                                <select id="term" name="term">
+                                    ~[tlist_sql;
+                                    SELECT 
+                                        terms.id termid, 
+                                        CASE 
+                                            WHEN terms.id = '~(gpv.term;sqlText)' THEN 'selected'
+                                            
+                                            ELSE '' 
+                                        END isselected, 
+                                        Upper(Abbreviation) term 
+                                    FROM terms 
+                                    WHERE 
+                                        terms.schoolid = ~(curschoolid) 
+                                        AND terms.yearid = ~(curyearid) 
+                                    ORDER BY Upper(Trim(termid))]
+                                    <option value="~(termid)" ~(isselected;t)>~(term)</option>
+                                    [/tlist_sql]
                                 </select>
                             </td>
                             <td>
-                                <select name="gr" name="gr">
-                                    <option value='' ~[if.~[gpv:gr]=]selected[/if]>All Grades</option>
+                                <select name="attc">
+                                    <option ~[if.~[gpv:attc]=ABALL]selected[/if] value="ABALL">All Absent Codes</option>
+                                    <option ~[if.~[gpv:attc]=ABSUN]selected[/if] value="ABSUN">Absent Unexcused Codes
+                                    </option>
+                                    <option ~[if.~[gpv:attc]=ABEX]selected[/if] value="ABEX">Absent Excused Codes
+                                    </option>
+                                    <option ~[if.~[gpv:attc]=ABILL]selected[/if] value="ABILL">Absent Illness Codes
+                                    </option>
                                     ~[tlist_sql;
-                                    SELECT DISTINCT GRADE_LEVEL,
+                                    SELECT
+                                    DISTINCT Att_Code,
+                                    DECODE('~[gpv:attc]', att_code, 'SELECTED', '')isselected,
+                                    to_char(Description) description
+                                    FROM Attendance_Code
+                                    WHERE
+                                    yearID = ~(curyearid)
+                                    AND schoolID LIKE
                                     CASE
-                                    WHEN TO_CHAR(grade_level) = -2 then 'PK3'
-                                    WHEN TO_CHAR(grade_level) = -1 then 'PK4'
-                                    WHEN TO_CHAR(grade_level) = 0 then 'K'
-                                    WHEN TO_CHAR(grade_level) = 99 then 'Graduated'
-                                    ELSE TO_CHAR(grade_level)
-                                    END as prettygrade
-                                    FROM STUDENTS
-                                    WHERE TO_CHAR(SCHOOLID) LIKE CASE WHEN TO_CHAR(~(curschoolid)) = '0'
-                                    THEN '%' ELSE TO_CHAR(~(curschoolid)) END
-                                    AND ENROLL_STATUS = 0
-                                    ORDER BY GRADE_LEVEL]
-                                    <option value="'~(gr)'">~(prettygrade)</option>
+                                    WHEN ~(curschoolid) = 0 THEN '%'
+                                    ELSE to_char(~(curschoolid))
+                                    END
+                                    AND presence_status_cd = 'Absent'
+                                    AND att_code is not null
+                                    ORDER BY Att_Code ]
+                                    <option value="~(Att_Code;t)" ~(isselected)>~(Att_Code;t) (~(description;t))
+                                    </option>
+                                    [/tlist_sql]
+                                </select>
+                            </td>
+                            <td>
+                                <select name="tardy">
+                                    <option ~[if.~[gpv:tardy]=]selected[/if]>All Tardy Codes
+                                    </option>
+                                    <option ~[if.~[gpv:tardy]=TARSUN]selected[/if] value="TARSUN">Tardy Unexcused Codes
+                                    </option>
+                                    <option ~[if.~[gpv:tardy]=TAREX]selected[/if] value="TAREX">Tardy Excused Codes
+                                    </option>
+                                    ~[tlist_sql;
+                                    SELECT
+                                    DISTINCT Att_Code,
+                                    DECODE('~[gpv:attc]', att_code, 'SELECTED', '')isselected,
+                                    to_char(Description) description
+                                    FROM Attendance_Code
+                                    WHERE
+                                    yearID = ~(curyearid)
+                                    AND schoolID LIKE
+                                    CASE
+                                    WHEN ~(curschoolid) = 0 THEN '%'
+                                    ELSE to_char(~(curschoolid))
+                                    END
+                                    AND att_code is not null
+                                    AND att_CODE LIKE 'T%'
+                                    AND att_CODE NOT LIKE 'TR%'
+                                    AND att_CODE NOT LIKE 'TM%'
+                                    ORDER BY Att_Code]
+                                    <option value="~(Att_Code;t)" ~(isselected)>~(Att_Code;t) (~(description;t))
+                                    </option>
                                     [/tlist_sql]
                                 </select>
                             </td>
@@ -74,73 +136,116 @@
         <!-- Start of Results -->
         ~[if#showData.~(gpv.showData;sqlText)=1]
         <div class="box-round">
-            <h2>Contacts Missing Zip Code</h2>
+            <h2>Students Attendance - Totals</h2>
             <table border="0" cellspacing="0" cellpadding="4" align="center" class="tablesorter grid" id="results">
                 <thead>
                     <tr>
                         <th class="left">Student Number</th>
                         <th class="left">Student Name</th>
-                        <th class="left filter-select">Grade Level</th>
-                        <th class="left">Student Address</th>
-                        <th class="left">Contacts</th>
-                        <th class="left">Relationship</th>
-                        <th class="left filter-select">Address Type</th>
-                        <th class="left">Contact Address</th>
-                        <th class="left filter-select">School</th>
+                        <th class="left">Exp.</th>
+                        <th class="left">Course</th>
+                        <th class="left">Absent Count</th>
+                        <th class="left">Absent Dates</th>
+                        <th class="left">Trady Count</th>
+                        <th class="left">Tardy Dates</th>
+                        <th class="left">School</th>
                     </tr>
                 </thead>
                 <tbody>
                     ~[tlist_sql;
+                    WITH ABSDETAILPERIOD AS (
+                                            select
+                                                students.DCID as sdcid,
+                                                students.STUDENT_NUMBER,
+                                                students.LASTFIRST,
+                                                schools.name as schoolname,
+                                                cc.expression,
+                                                ac.presence_status_cd AS STATUS,
+                                                att.att_date as attdate,
+                                                courses.course_name,
+                                                ac.att_code,
+                                                att.att_mode_code,
+                                                att.id AS ATT_ID
+                                            from  attendance att
+                                            inner join students 
+                                                on students.id = att.studentid
+                                            inner join schools 
+                                                on students.schoolid = schools.school_number
+                                            ~[if#ss.~[gpv:ss]=cur] INNER JOIN ~[temp.table.current.selection:students] temp ON (students.dcid = temp.dcid)  [/if#ss]
+                                            inner join cc 
+                                                on att.ccid = cc.id and att.studentid = cc.studentid
+                                            inner join sections s 
+                                                on abs(cc.sectionid) = s.id
+                                            inner join courses 
+                                                on courses.course_number = s.course_number
+                                            inner join calendar_day cd 
+                                                on att.calendar_dayid = cd.id
+                                            inner join attendance_code ac 
+                                                on att.attendance_codeid = ac.id
+                                            inner join cycle_day cy 
+                                                on cd.cycle_day_id = cy.id
+                                            inner join att_code_code_entity acce 
+                                                on acce.attendance_codeid = ac.id
+                                            inner join code_entity ce 
+                                                on ce.id = acce.code_entityid
+                                            inner join terms t 
+                                                on schools.school_number = t.schoolid 
+                                                and t.id = ~(gpv.term)
+                                            left join period per 
+                                                on att.periodid = per.id
+                                            where 
+                                                att.att_date >= t.firstday 
+                                                and att.att_date  < t.lastday
+                                                and att.att_mode_code = 'ATT_ModeMeeting'
+                                                and ac.presence_status_cd = 'Absent'
+                                                ~[decode;~[gpv:attc];ABSUN;and ac.presence_status_cd = 'Absent' and TRIM(ce.ce_code) = 'Unexcused';ABEX;and ac.presence_status_cd = 'Absent' and TRIM(ce.ce_code) = 'Excused';ABILL;and ac.presence_status_cd = 'Absent' and TRIM(ce.ce_code) = 'Illness';ABALL;AND 1=1; AND ac.Att_Code = '~[gpv:attc]']
+                                                ~[if.is.a.school] AND schools.school_number = ~(curschoolid) [/if.is.a.school]
+                                            order by  schools.name, students.LASTFIRST, att.att_date, per.abbreviation
+                                        ),
+ABSPERIODCOUNT AS (
+                SELECT
+                    LASTFIRST, 
+                    course_name,
+                    count(ATT_ID) as COUNTOFPERIOD
+                FROM 
+                    ABSDETAILPERIOD
+                GROUP BY 
+                    LASTFIRST, course_name
+                ORDER BY 
+                     LASTFIRST
+) 
                     SELECT
-                        s.dcid,
-                        s.student_number,
-                        s.lastfirst,
-                        CASE
-                        WHEN TO_CHAR(s.grade_level) = -2 then 'PK3'
-                        WHEN TO_CHAR(s.grade_level) = -1 then 'PK4'
-                        WHEN TO_CHAR(s.grade_level) = 0 then 'K'
-                        WHEN TO_CHAR(s.grade_level) = 99 then 'Graduated'
-                        ELSE TO_CHAR(s.grade_level)
-                        END as PRETTY_GRADE,
-                        Nvl(s.mailing_street,'-') || ', ' || Nvl(s.mailing_city,'-') || ' ' || Nvl(s.mailing_state,'') || ' ' || Nvl(s.mailing_zip,'') as Student_ADDRESS,
-                        p.id,
-                        CASE WHEN p.firstname IS NULL AND p.lastname IS NULL THEN '-No Name-' ELSE p.firstname||' '||p.lastname END as Contact,
-                        cs.code Relationship,
-                        acs.code Address_type,
-                        Nvl(pa.street,'-') || ', ' || Nvl(pa.city,'-') || ' ' || Nvl(scs.code,'') || ' ' || Nvl(pa.postalcode,'') address,
-                        sch.abbreviation
-                    FROM Students s
-                    ~[if#ss.~(gpv.ss;sqlText)=cur] INNER JOIN ~[temp.table.current.selection:students] temp ON (s.dcid = temp.dcid)[/if#ss]
-                    JOIN schools sch ON (s.schoolid = sch.school_number)
-                    LEFT JOIN studentcontactassoc sca ON (s.dcid = sca.studentdcid)
-                    LEFT JOIN studentcontactdetail scd ON (sca.studentcontactassocid = scd.studentcontactassocid)
-                    LEFT JOIN person p ON (sca.personid = p.ID)
-                    LEFT OUTER JOIN personaddressassoc paa ON (p.id = paa.personid)
-                    LEFT OUTER JOIN personaddress pa ON (paa.personAddressID = pa.personAddressID)
-                    LEFT OUTER JOIN codeset acs on (paa.AddressTypeCodeSetID = acs.codesetid)
-                    LEFT JOIN codeset cs ON (cs.codesetid = scd.relationshiptypecodesetid)
-                    LEFT JOIN codeset scs ON (pa.statescodesetid = scs.codesetid)
-                    LEFT JOIN guardianpersonassoc gp ON (p.id = gp.personid)
-                    LEFT JOIN guardianstudent gs ON (s.dcid = gs.studentsdcid AND gp.guardianid = gs.guardianid)
-                    WHERE s.enroll_status in (-1,0)
-                    AND pa.street IS NOT NULL
-                    AND (pa.postalcode is NULL OR  pa.postalcode = '')
-                    ~[if.is.a.school] AND s.schoolid = ~(curschoolid) [/if.is.a.school]
-                    ~[if#gr.~(gpv.gr;sqlText)#] AND s.grade_level = ~(gpv.gr) [/if#gr]
-                        ORDER BY sch.name, s.lastfirst, sca.contactpriorityorder;]
+                        ABSDETAILPERIOD.sdcid,
+                        ABSDETAILPERIOD.STUDENT_NUMBER,
+                        ABSDETAILPERIOD.LASTFIRST,
+                        ABSDETAILPERIOD.expression,
+                        ABSDETAILPERIOD.course_name,
+                        ABSPERIODCOUNT.COUNTOFPERIOD,
+                        LISTAGG(ABSDETAILPERIOD.att_code || '-' || to_char(ABSDETAILPERIOD.attDate,'MM/DD/YYYY'), ', ') WITHIN GROUP (ORDER BY ABSDETAILPERIOD.attDate ASC) as Dates,
+                        ABSDETAILPERIOD.schoolname
+                    FROM 
+                        ABSDETAILPERIOD
+                    JOIN ABSPERIODCOUNT 
+                         ON ABSDETAILPERIOD.LASTFIRST = ABSPERIODCOUNT.LASTFIRST
+                        AND ABSDETAILPERIOD.COURSE_NAME = ABSPERIODCOUNT.COURSE_NAME
+                     GROUP BY 
+                        ABSDETAILPERIOD.sdcid,
+                        ABSDETAILPERIOD.STUDENT_NUMBER,
+                        ABSDETAILPERIOD.LASTFIRST,
+                        ABSDETAILPERIOD.expression,
+                        ABSDETAILPERIOD.course_name,
+                        ABSPERIODCOUNT.COUNTOFPERIOD,
+                        ABSDETAILPERIOD.schoolname
+                    ORDER BY 
+                        ABSDETAILPERIOD.schoolname, ABSDETAILPERIOD.LASTFIRST, ABSDETAILPERIOD.EXPRESSION
+                    ;]
                     <tr data-StudentID="~(dcid)">
-                        <td class="nowrap"><a href="/admin/students/contacts.html?frn=001~(dcid)"
-                                target="_blank">~(stunum)</a>
-                        </td>
+                        <td><a href="/admin/students/att_daily.html?frn=001~(dcid)" target="_blank">~(stunum)</a></td>
                         <td class="nowrap">~(stuname;t)</td>
-                        <td class="center">~(grade_level)</td>
-                        <td class="nowrap">~(StuAddress;t)</td>
-                        <td class="nowrap"><a href="/admin/contacts/edit.html#?contactid=~(cid)"
-                                target="_blank">~(contact;t)</a></td>
-                        <td>~(relationship;t)</td>
-                        <td>~(addresstype;t)</td>
-                        <td class="nowrap">~(contactaddress;t)</td>
-                        <td class="nowrap">~(school;t)</td>
+                        <td class="center">~(expression;t;externalExpression)</td>
+                        <td>~(coursename)</td>
+                        <td class="center">~(abscnt)</td>
+                        <td>~(abslist)</td>
                     </tr>
                     [/tlist_sql]
                 </tbody>
