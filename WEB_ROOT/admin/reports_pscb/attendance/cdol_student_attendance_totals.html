@@ -153,7 +153,7 @@
                 </thead>
                 <tbody>
                     ~[tlist_sql;
-                    WITH ABSDETAILPERIOD AS (
+                    WITH DETAILPERIOD AS (
                                             select
                                                 students.DCID as sdcid,
                                                 students.STUDENT_NUMBER,
@@ -165,7 +165,9 @@
                                                 courses.course_name,
                                                 ac.att_code,
                                                 att.att_mode_code,
-                                                att.id AS ATT_ID
+                                                att.id AS ATT_ID,
+                                                ce.ce_code,
+                                                per.abbreviation
                                             from  attendance att
                                             inner join students 
                                                 on students.id = att.studentid
@@ -197,11 +199,27 @@
                                                 att.att_date >= t.firstday 
                                                 and att.att_date  < t.lastday
                                                 and att.att_mode_code = 'ATT_ModeMeeting'
-                                                and ac.presence_status_cd = 'Absent'
-                                                ~[decode;~[gpv:attc];ABSUN;and ac.presence_status_cd = 'Absent' and TRIM(ce.ce_code) = 'Unexcused';ABEX;and ac.presence_status_cd = 'Absent' and TRIM(ce.ce_code) = 'Excused';ABILL;and ac.presence_status_cd = 'Absent' and TRIM(ce.ce_code) = 'Illness';ABALL;AND 1=1; AND ac.Att_Code = '~[gpv:attc]']
-                                                
                                                 ~[if.is.a.school] AND schools.school_number = ~(curschoolid) [/if.is.a.school]
                                             order by  schools.name, students.LASTFIRST, att.att_date, per.abbreviation
+                                        ),
+ABSDETAILPERIOD AS (
+                                            select
+                                                DETAILPERIOD.sdcid,
+                                                DETAILPERIOD.STUDENT_NUMBER,
+                                                DETAILPERIOD.LASTFIRST,
+                                                DETAILPERIOD.schoolname,
+                                                DETAILPERIOD.expression,
+                                                DETAILPERIOD.STATUS,
+                                                DETAILPERIOD.attdate,
+                                                DETAILPERIOD.course_name,
+                                                DETAILPERIOD.att_code,
+                                                DETAILPERIOD.att_mode_code,
+                                                DETAILPERIOD.ATT_ID,
+                                                DETAILPERIOD.ce_code,
+                                                DETAILPERIOD.abbreviation
+                                            from  DETAILPERIOD
+                                            ~[decode;~[gpv:attc];ABSUN;and ac.presence_status_cd = 'Absent' and TRIM(ce.ce_code) = 'Unexcused';ABEX;and ac.presence_status_cd = 'Absent' and TRIM(ce.ce_code) = 'Excused';ABILL;and ac.presence_status_cd = 'Absent' and TRIM(ce.ce_code) = 'Illness';ABALL;AND 1=1; AND ac.Att_Code = '~[gpv:attc]']
+                                            order by  DETAILPERIOD.schoolname, DETAILPERIOD.LASTFIRST, DETAILPERIOD.attdate, DETAILPERIOD.abbreviation
                                         ),
 ABSPERIODCOUNT AS (
                 SELECT
@@ -214,31 +232,37 @@ ABSPERIODCOUNT AS (
                     LASTFIRST, course_name
                 ORDER BY 
                      LASTFIRST
-) 
+)
                     SELECT
-                        ABSDETAILPERIOD.sdcid,
-                        ABSDETAILPERIOD.STUDENT_NUMBER,
-                        ABSDETAILPERIOD.LASTFIRST,
-                        ABSDETAILPERIOD.expression,
-                        ABSDETAILPERIOD.course_name,
+                        DETAILPERIOD.sdcid,
+                        DETAILPERIOD.STUDENT_NUMBER,
+                        DETAILPERIOD.LASTFIRST,
+                        DETAILPERIOD.expression,
+                        DETAILPERIOD.course_name,
                         ABSPERIODCOUNT.COUNTOFPERIOD,
-                        LISTAGG(ABSDETAILPERIOD.att_code || '-' || to_char(ABSDETAILPERIOD.attDate,'MM/DD/YYYY'), ', ') WITHIN GROUP (ORDER BY ABSDETAILPERIOD.attDate ASC) as Dates,
-                        ABSDETAILPERIOD.schoolname
+                        LISTAGG(ABSDETAILPERIOD.att_code || '-' || to_char(ABSDETAILPERIOD.attDate,'MM/DD/YYYY'), ', ') WITHIN GROUP (ORDER BY ABSDETAILPERIOD.attDate ASC) as ABSDates,
+                        DETAILPERIOD.schoolname
                     FROM 
-                        ABSDETAILPERIOD
-                    JOIN ABSPERIODCOUNT 
-                         ON ABSDETAILPERIOD.LASTFIRST = ABSPERIODCOUNT.LASTFIRST
-                        AND ABSDETAILPERIOD.COURSE_NAME = ABSPERIODCOUNT.COURSE_NAME
+                        DETAILPERIOD
+                    INNER JOIN ABSPERIODCOUNT 
+                         ON DETAILPERIOD.LASTFIRST = ABSPERIODCOUNT.LASTFIRST
+                        AND DETAILPERIOD.COURSE_NAME = ABSPERIODCOUNT.COURSE_NAME
+                    JOIN ABSDETAILPERIOD 
+                         ON DETAILPERIOD.sdcid = ABSDETAILPERIOD.sdcid
+                        AND DETAILPERIOD.COURSE_NAME = ABSDETAILPERIOD.COURSE_NAME
+                        AND DETAILPERIOD.expression  = ABSDETAILPERIOD.expression 
+                        AND DETAILPERIOD.att_code  = ABSDETAILPERIOD.att_code 
+                        AND DETAILPERIOD.attDate  = ABSDETAILPERIOD.attDate
                      GROUP BY 
-                        ABSDETAILPERIOD.sdcid,
-                        ABSDETAILPERIOD.STUDENT_NUMBER,
-                        ABSDETAILPERIOD.LASTFIRST,
-                        ABSDETAILPERIOD.expression,
-                        ABSDETAILPERIOD.course_name,
+                        DETAILPERIOD.sdcid,
+                        DETAILPERIOD.STUDENT_NUMBER,
+                        DETAILPERIOD.LASTFIRST,
+                        DETAILPERIOD.expression,
+                        DETAILPERIOD.course_name,
                         ABSPERIODCOUNT.COUNTOFPERIOD,
-                        ABSDETAILPERIOD.schoolname
+                        DETAILPERIOD.schoolname
                     ORDER BY 
-                        ABSDETAILPERIOD.schoolname, ABSDETAILPERIOD.LASTFIRST, ABSDETAILPERIOD.EXPRESSION
+                        DETAILPERIOD.schoolname, DETAILPERIOD.LASTFIRST, DETAILPERIOD.EXPRESSION
                     ;]
                     <tr data-StudentID="~(dcid)">
                         <td><a href="/admin/students/att_daily.html?frn=001~(dcid)" target="_blank">~(stunum)</a></td>
