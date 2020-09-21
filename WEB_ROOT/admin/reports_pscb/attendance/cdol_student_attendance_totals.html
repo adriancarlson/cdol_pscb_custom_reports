@@ -71,6 +71,8 @@
                                     </option>
                                     <option ~[if.~[gpv:attc]=ABILL]selected[/if] value="ABILL">Absent Illness Codes
                                     </option>
+                                    <option ~[if.~[gpv:attc]=ABNULL]selected[/if] value="ABNULL">No Absent Codes
+                                    </option>
                                     ~[tlist_sql;
                                     SELECT
                                     DISTINCT Att_Code,
@@ -99,6 +101,8 @@
                                     <option ~[if.~[gpv:tardy]=TARUN]selected[/if] value="TARUN">Tardy Unexcused Codes
                                     </option>
                                     <option ~[if.~[gpv:tardy]=TAREX]selected[/if] value="TAREX">Tardy Excused Codes
+                                    </option>
+                                    <option ~[if.~[gpv:tardy]=TARNULL]selected[/if] value="TARNULL">No Tardy Codes
                                     </option>
                                     ~[tlist_sql;
                                     SELECT
@@ -220,7 +224,7 @@
                                         from  DETAILPERIOD
                                         WHERE
                                             DETAILPERIOD.STATUS = 'Absent'
-                                            ~[decode;~[gpv:attc];ABSUN; and TRIM(DETAILPERIOD.ce_code) = 'Unexcused';ABEX; and TRIM(DETAILPERIOD.ce_code) = 'Excused';ABILL; and TRIM(DETAILPERIOD.ce_code) = 'Illness';ABALL;AND 1=1; AND DETAILPERIOD.att_code = '~[gpv:attc]']
+                                            ~[decode;~[gpv:attc];ABSUN; and TRIM(DETAILPERIOD.ce_code) = 'Unexcused';ABEX; and TRIM(DETAILPERIOD.ce_code) = 'Excused';ABILL; and TRIM(DETAILPERIOD.ce_code) = 'Illness';ABALL;AND 1=1;ABNULL;AND 0=1; AND DETAILPERIOD.att_code = '~[gpv:attc]']
                                         order by  DETAILPERIOD.schoolname, DETAILPERIOD.LASTFIRST, DETAILPERIOD.attdate, DETAILPERIOD.abbreviation
                                         ),
                     ABSPERIODCOUNT AS (
@@ -265,7 +269,7 @@
                                         from  DETAILPERIOD
                                         WHERE
                                         DETAILPERIOD.att_code is not null
-                                        ~[decode;~[gpv:tardy];TARUN; and TRIM(DETAILPERIOD.ce_code) = 'Unexcused' AND DETAILPERIOD.att_CODE LIKE 'T%' AND DETAILPERIOD.att_CODE NOT LIKE 'TR%' AND DETAILPERIOD.att_CODE NOT LIKE 'TM%';TAREX; and TRIM(DETAILPERIOD.ce_code) = 'Excused'AND DETAILPERIOD.att_CODE LIKE 'T%' AND DETAILPERIOD.att_CODE NOT LIKE 'TR%' AND DETAILPERIOD.att_CODE NOT LIKE 'TM%';TARALL;and TRIM(DETAILPERIOD.ce_code) = 'Tardy';  AND TRIM(DETAILPERIOD.ce_code) = 'Tardy' AND DETAILPERIOD.att_code = '~[gpv:tardy]']
+                                        ~[decode;~[gpv:tardy];TARUN; and TRIM(DETAILPERIOD.ce_code) = 'Unexcused' AND DETAILPERIOD.att_CODE LIKE 'T%' AND DETAILPERIOD.att_CODE NOT LIKE 'TR%' AND DETAILPERIOD.att_CODE NOT LIKE 'TM%';TAREX; and TRIM(DETAILPERIOD.ce_code) = 'Excused'AND DETAILPERIOD.att_CODE LIKE 'T%' AND DETAILPERIOD.att_CODE NOT LIKE 'TR%' AND DETAILPERIOD.att_CODE NOT LIKE 'TM%';TARALL;and TRIM(DETAILPERIOD.ce_code) = 'Tardy'; TARNULL;and TRIM(DETAILPERIOD.ce_code) = ''; AND TRIM(DETAILPERIOD.ce_code) = 'Tardy' AND DETAILPERIOD.att_code = '~[gpv:tardy]']
                                         order by  DETAILPERIOD.schoolname, DETAILPERIOD.LASTFIRST, DETAILPERIOD.attdate, DETAILPERIOD.abbreviation
                                         ),
                     TARPERIODCOUNT AS (
