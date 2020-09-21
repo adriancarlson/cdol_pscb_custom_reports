@@ -153,7 +153,7 @@
                 </thead>
                 <tbody>
                     ~[tlist_sql;
-                    WITH DETAILPERIOD AS (
+                        WITH DETAILPERIOD AS (
                                             select
                                                 students.DCID as sdcid,
                                                 students.STUDENT_NUMBER,
@@ -220,6 +220,7 @@
                                         from  DETAILPERIOD
                                         WHERE
                                             DETAILPERIOD.STATUS = 'Absent'
+                                            and TRIM(DETAILPERIOD.ce_code) = 'Unexcused'
                                             ~[decode;~[gpv:attc];ABSUN; and TRIM(DETAILPERIOD.ce_code) = 'Unexcused';ABEX; and TRIM(DETAILPERIOD.ce_code) = 'Excused';ABILL; and TRIM(DETAILPERIOD.ce_code) = 'Illness';ABALL;AND 1=1; AND DETAILPERIOD.att_code = '~[gpv:attc]']
                                         order by  DETAILPERIOD.schoolname, DETAILPERIOD.LASTFIRST, DETAILPERIOD.attdate, DETAILPERIOD.abbreviation
                                         ),
@@ -246,6 +247,51 @@
                                         ABSDETAILPERIOD.schoolname
                                     FROM ABSDETAILPERIOD 
                                     group by ABSDETAILPERIOD.sdcid, ABSDETAILPERIOD.STUDENT_NUMBER, ABSDETAILPERIOD.LASTFIRST, ABSDETAILPERIOD.expression, ABSDETAILPERIOD.course_name, ABSDETAILPERIOD.schoolname
+                                    ),
+                    TARDETAILPERIOD AS (
+                                        select
+                                            DETAILPERIOD.sdcid,
+                                            DETAILPERIOD.STUDENT_NUMBER,
+                                            DETAILPERIOD.LASTFIRST,
+                                            DETAILPERIOD.schoolname,
+                                            DETAILPERIOD.expression,
+                                            DETAILPERIOD.STATUS,
+                                            DETAILPERIOD.attdate,
+                                            DETAILPERIOD.course_name,
+                                            DETAILPERIOD.att_code,
+                                            DETAILPERIOD.att_mode_code,
+                                            DETAILPERIOD.ATT_ID,
+                                            DETAILPERIOD.ce_code,
+                                            DETAILPERIOD.abbreviation
+                                        from  DETAILPERIOD
+                                        WHERE
+                                        TRIM(DETAILPERIOD.ce_code) = 'Tardy'
+--                                            ~[decode;~[gpv:attc];TARUN; and TRIM(DETAILPERIOD.ce_code) = 'Unexcused';ABEX; and TRIM(DETAILPERIOD.ce_code) = 'Excused';ABILL; and TRIM(DETAILPERIOD.ce_code) = 'Illness';ABALL;AND 1=1; AND DETAILPERIOD.att_code = '~[gpv:attc]']
+                                        order by  DETAILPERIOD.schoolname, DETAILPERIOD.LASTFIRST, DETAILPERIOD.attdate, DETAILPERIOD.abbreviation
+                                        ),
+                    TARPERIODCOUNT AS (
+                                    SELECT
+                                        LASTFIRST, 
+                                        course_name,
+                                        count(ATT_ID) as COUNTOFPERIOD
+                                    FROM 
+                                        TARDETAILPERIOD
+                                    GROUP BY 
+                                        LASTFIRST, course_name
+                                    ORDER BY 
+                                        LASTFIRST
+                                    ),
+                    TARLIST as (
+                                    SELECT
+                                        TARDETAILPERIOD.sdcid,
+                                        TARDETAILPERIOD.STUDENT_NUMBER,
+                                        TARDETAILPERIOD.LASTFIRST,
+                                        TARDETAILPERIOD.expression,
+                                        TARDETAILPERIOD.course_name,
+                                        LISTAGG(TARDETAILPERIOD.att_code || '-' || to_char(TARDETAILPERIOD.attDate,'MM/DD/YYYY'), ', ') WITHIN GROUP (ORDER BY TARDETAILPERIOD.attDate ASC) as TARDates,
+                                        TARDETAILPERIOD.schoolname
+                                    FROM TARDETAILPERIOD 
+                                    group by TARDETAILPERIOD.sdcid, TARDETAILPERIOD.STUDENT_NUMBER, TARDETAILPERIOD.LASTFIRST, TARDETAILPERIOD.expression, TARDETAILPERIOD.course_name, TARDETAILPERIOD.schoolname
                                     )
                     SELECT
                         DETAILPERIOD.sdcid,
@@ -253,8 +299,10 @@
                         DETAILPERIOD.LASTFIRST,
                         DETAILPERIOD.expression,
                         DETAILPERIOD.course_name,
-                        ABSPERIODCOUNT.COUNTOFPERIOD,
+                        ABSPERIODCOUNT.COUNTOFPERIOD ABSCOUNT,
                         ABSLIST.ABSDates,
+                        TARPERIODCOUNT.COUNTOFPERIOD TARCOUNT,
+                        TARLIST.TARDates,
                         DETAILPERIOD.schoolname
                     FROM 
                         DETAILPERIOD
@@ -265,10 +313,18 @@
                         ON DETAILPERIOD.sdcid = ABSLIST.sdcid
                         AND DETAILPERIOD.COURSE_NAME = ABSLIST.COURSE_NAME
                         AND DETAILPERIOD.expression  = ABSLIST.expression 
+                    LEFT OUTER JOIN TARPERIODCOUNT 
+                        ON DETAILPERIOD.LASTFIRST = TARPERIODCOUNT.LASTFIRST
+                        AND DETAILPERIOD.COURSE_NAME = TARPERIODCOUNT.COURSE_NAME
+                    LEFT OUTER JOIN TARLIST 
+                        ON DETAILPERIOD.sdcid = TARLIST.sdcid
+                        AND DETAILPERIOD.COURSE_NAME = TARLIST.COURSE_NAME
+                        AND DETAILPERIOD.expression  = TARLIST.expression 
                     WHERE 
                         ABSLIST.ABSDates IS NOT NULL
+                        OR TARLIST.TARDates IS NOT NULL
                     GROUP BY 
-                        DETAILPERIOD.sdcid, DETAILPERIOD.STUDENT_NUMBER, DETAILPERIOD.LASTFIRST, DETAILPERIOD.expression, DETAILPERIOD.course_name, ABSPERIODCOUNT.COUNTOFPERIOD, DETAILPERIOD.schoolname, ABSLIST.ABSDates
+                        DETAILPERIOD.sdcid, DETAILPERIOD.STUDENT_NUMBER, DETAILPERIOD.LASTFIRST, DETAILPERIOD.expression, DETAILPERIOD.course_name, ABSPERIODCOUNT.COUNTOFPERIOD, DETAILPERIOD.schoolname, ABSLIST.ABSDates, TARPERIODCOUNT.COUNTOFPERIOD, TARLIST.TARDates
                     ORDER BY 
                         DETAILPERIOD.schoolname, DETAILPERIOD.LASTFIRST, DETAILPERIOD.EXPRESSION
                     ;]
