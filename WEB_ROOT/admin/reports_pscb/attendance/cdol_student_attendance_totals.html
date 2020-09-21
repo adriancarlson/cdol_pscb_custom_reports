@@ -259,13 +259,15 @@
                         DETAILPERIOD.schoolname
                     FROM 
                         DETAILPERIOD
-                    INNER JOIN ABSPERIODCOUNT 
+                    LEFT OUTER JOIN ABSPERIODCOUNT 
                         ON DETAILPERIOD.LASTFIRST = ABSPERIODCOUNT.LASTFIRST
                         AND DETAILPERIOD.COURSE_NAME = ABSPERIODCOUNT.COURSE_NAME
                     LEFT OUTER JOIN ABSLIST 
                         ON DETAILPERIOD.sdcid = ABSLIST.sdcid
                         AND DETAILPERIOD.COURSE_NAME = ABSLIST.COURSE_NAME
                         AND DETAILPERIOD.expression  = ABSLIST.expression 
+                    WHERE 
+                        ABSLIST.ABSDates IS NOT NULL
                     GROUP BY 
                         DETAILPERIOD.sdcid, DETAILPERIOD.STUDENT_NUMBER, DETAILPERIOD.LASTFIRST, DETAILPERIOD.expression, DETAILPERIOD.course_name, ABSPERIODCOUNT.COUNTOFPERIOD, DETAILPERIOD.schoolname, ABSLIST.ABSDates
                     ORDER BY 
