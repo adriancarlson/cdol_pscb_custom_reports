@@ -220,7 +220,6 @@
                                         from  DETAILPERIOD
                                         WHERE
                                             DETAILPERIOD.STATUS = 'Absent'
-                                            and TRIM(DETAILPERIOD.ce_code) = 'Unexcused'
                                             ~[decode;~[gpv:attc];ABSUN; and TRIM(DETAILPERIOD.ce_code) = 'Unexcused';ABEX; and TRIM(DETAILPERIOD.ce_code) = 'Excused';ABILL; and TRIM(DETAILPERIOD.ce_code) = 'Illness';ABALL;AND 1=1; AND DETAILPERIOD.att_code = '~[gpv:attc]']
                                         order by  DETAILPERIOD.schoolname, DETAILPERIOD.LASTFIRST, DETAILPERIOD.attdate, DETAILPERIOD.abbreviation
                                         ),
