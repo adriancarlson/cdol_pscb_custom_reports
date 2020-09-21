@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><plugin xmlns="http://plugin.powerschool.pearson.com" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" description="Custom Student Contact Reports" name="CDOL PSCB Custom Reports" version="20.9.8.42" xsi:schemaLocation="http://plugin.powerschool.pearson.com plugin.xsd">
+<?xml version="1.0" encoding="UTF-8"?><plugin xmlns="http://plugin.powerschool.pearson.com" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" description="Custom Student Contact Reports" name="CDOL PSCB Custom Reports" version="20.9.8.43" xsi:schemaLocation="http://plugin.powerschool.pearson.com plugin.xsd">
 <publisher name="Adrian Carlson">
 <contact email="adrian-carlson@cdolinc.net"/>
 </publisher>

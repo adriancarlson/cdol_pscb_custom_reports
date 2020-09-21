@@ -94,16 +94,16 @@
                             </td>
                             <td>
                                 <select name="tardy">
-                                    <option ~[if.~[gpv:tardy]=]selected[/if]>All Tardy Codes
+                                    <option ~[if.~[gpv:tardy]=TARALL]selected[/if] value="TARALL">All Tardy Codes
                                     </option>
-                                    <option ~[if.~[gpv:tardy]=TARSUN]selected[/if] value="TARSUN">Tardy Unexcused Codes
+                                    <option ~[if.~[gpv:tardy]=TARUN]selected[/if] value="TARUN">Tardy Unexcused Codes
                                     </option>
                                     <option ~[if.~[gpv:tardy]=TAREX]selected[/if] value="TAREX">Tardy Excused Codes
                                     </option>
                                     ~[tlist_sql;
                                     SELECT
                                     DISTINCT Att_Code,
-                                    DECODE('~[gpv:attc]', att_code, 'SELECTED', '')isselected,
+                                    DECODE('~[gpv:tardy]', att_code, 'SELECTED', '')isselected,
                                     to_char(Description) description
                                     FROM Attendance_Code
                                     WHERE
@@ -158,7 +158,7 @@
                                                 students.DCID as sdcid,
                                                 students.STUDENT_NUMBER,
                                                 students.LASTFIRST,
-                                                schools.name as schoolname,
+                                                schools.abbreviation as schoolname,
                                                 cc.expression,
                                                 ac.presence_status_cd AS STATUS,
                                                 att.att_date as attdate,
@@ -220,7 +220,6 @@
                                         from  DETAILPERIOD
                                         WHERE
                                             DETAILPERIOD.STATUS = 'Absent'
-                                            and TRIM(DETAILPERIOD.ce_code) = 'Unexcused'
                                             ~[decode;~[gpv:attc];ABSUN; and TRIM(DETAILPERIOD.ce_code) = 'Unexcused';ABEX; and TRIM(DETAILPERIOD.ce_code) = 'Excused';ABILL; and TRIM(DETAILPERIOD.ce_code) = 'Illness';ABALL;AND 1=1; AND DETAILPERIOD.att_code = '~[gpv:attc]']
                                         order by  DETAILPERIOD.schoolname, DETAILPERIOD.LASTFIRST, DETAILPERIOD.attdate, DETAILPERIOD.abbreviation
                                         ),
@@ -265,8 +264,8 @@
                                             DETAILPERIOD.abbreviation
                                         from  DETAILPERIOD
                                         WHERE
-                                        TRIM(DETAILPERIOD.ce_code) = 'Tardy'
---                                            ~[decode;~[gpv:attc];TARUN; and TRIM(DETAILPERIOD.ce_code) = 'Unexcused';ABEX; and TRIM(DETAILPERIOD.ce_code) = 'Excused';ABILL; and TRIM(DETAILPERIOD.ce_code) = 'Illness';ABALL;AND 1=1; AND DETAILPERIOD.att_code = '~[gpv:attc]']
+                                        DETAILPERIOD.att_code is not null
+                                        ~[decode;~[gpv:tardy];TARUN; and TRIM(DETAILPERIOD.ce_code) = 'Unexcused' AND DETAILPERIOD.att_CODE LIKE 'T%' AND DETAILPERIOD.att_CODE NOT LIKE 'TR%' AND DETAILPERIOD.att_CODE NOT LIKE 'TM%';TAREX; and TRIM(DETAILPERIOD.ce_code) = 'Excused'AND DETAILPERIOD.att_CODE LIKE 'T%' AND DETAILPERIOD.att_CODE NOT LIKE 'TR%' AND DETAILPERIOD.att_CODE NOT LIKE 'TM%';TARALL;and TRIM(DETAILPERIOD.ce_code) = 'Tardy';  AND TRIM(DETAILPERIOD.ce_code) = 'Tardy' AND DETAILPERIOD.att_code = '~[gpv:tardy]']
                                         order by  DETAILPERIOD.schoolname, DETAILPERIOD.LASTFIRST, DETAILPERIOD.attdate, DETAILPERIOD.abbreviation
                                         ),
                     TARPERIODCOUNT AS (
@@ -332,9 +331,12 @@
                         <td><a href="/admin/students/att_daily.html?frn=001~(dcid)" target="_blank">~(stunum)</a></td>
                         <td class="nowrap">~(stuname;t)</td>
                         <td class="center">~(expression;t;externalExpression)</td>
-                        <td>~(coursename)</td>
+                        <td class="nowrap">~(coursename)</td>
                         <td class="center">~(abscnt)</td>
                         <td>~(abslist)</td>
+                        <td class="center">~(tarcnt)</td>
+                        <td>~(tarlist)</td>
+                        <td class="nowrap">~(school)</td>
                     </tr>
                     [/tlist_sql]
                 </tbody>
