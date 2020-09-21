@@ -218,6 +218,7 @@ ABSDETAILPERIOD AS (
                                                 DETAILPERIOD.ce_code,
                                                 DETAILPERIOD.abbreviation
                                             from  DETAILPERIOD
+                                            WHERE
                                             ~[decode;~[gpv:attc];ABSUN;and ac.presence_status_cd = 'Absent' and TRIM(ce.ce_code) = 'Unexcused';ABEX;and ac.presence_status_cd = 'Absent' and TRIM(ce.ce_code) = 'Excused';ABILL;and ac.presence_status_cd = 'Absent' and TRIM(ce.ce_code) = 'Illness';ABALL;AND 1=1; AND ac.Att_Code = '~[gpv:attc]']
                                             order by  DETAILPERIOD.schoolname, DETAILPERIOD.LASTFIRST, DETAILPERIOD.attdate, DETAILPERIOD.abbreviation
                                         ),
