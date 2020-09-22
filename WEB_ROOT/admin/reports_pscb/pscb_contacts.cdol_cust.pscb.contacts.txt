@@ -8,6 +8,11 @@
 		<td><a href="/admin/reports_pscb/contacts/CDOL_Mother_Father_Email.html">Students - Mother/Father Email</a></td>
 		<td>List Student with Mother and Father Email</td>
 	</tr>
+	<tr id="receiveMailEmail">
+		<td><a href="/admin/reports_pscb/contacts/cdol_receive_mail_email.html">Students - Contacts Receive
+        Mail with Email</a></td>
+		<td>List Student with Contacts that are marked as receive Mail with contact email addresses</td>
+	</tr>
 </table>
 <table id="bottomTable" border="0" cellspacing="0" cellpadding="4" class="table grid">
 	<thead>
@@ -55,9 +60,14 @@
 		/* insert custom CDOL fields onto the page. */
 		var motherFatherEmail = $j('#motherFatherEmail').closest('tr');
 		$j("td:contains('Students - Contacts List')").closest('tr').after(motherFatherEmail);
+
+		var receiveMailEmail = $j('#receiveMailEmail').closest('tr');
+		$j(motherFatherEmail).after(receiveMailEmail);
+
 		var bottomTable = $j('#bottomTable');
 		$j("td:contains('Students - Contacts List')").closest('tr').parent().parent().after(bottomTable);
 		/* remove the hidden tables  and divs */
+		
 		$j("#hiddenTable").remove();
 	});
 </script>
