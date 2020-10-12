@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html>
+    <!-- non framed -->
+
+    <head>
+        <title>All Demo Data</title>
+        ~[wc:commonscripts]
+        <link href="/images/css/screen.css" rel="stylesheet" media="screen">
+        <link href="/images/css/print.css" rel="stylesheet" media="print">
+        ~[wc:pscb_init]
+        <script>
+            pscbToolButtons = { "copyData": "Yes", "csvFile": "Yes", "pdfFile": "Yes", "curSel": "Yes" };
+        </script>
+    </head>
+
+    <body>
+        ~[wc:admin_header_frame_css]
+        <!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a> &gt; <a
+            href="/admin/reports_pscb/pscb_home.html" target="_top">PSCB Custom Reports</a> &gt; <a
+            href="/admin/reports_pscb/pscb_students.html" target="_top">Students</a> &gt; All Demo Data
+        <!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
+        <!-- start of Options -->
+        <h1>All Demo Data</h1>
+        <form name="searchform" action="#" method="POST">
+            <div class="box-round" style="overflow: hidden;">
+                <h2>Report Filters</h2>
+                <table border="0" cellspacing="0" cellpadding="0" class="linkDescList">
+                    <thead>
+                        <tr>
+                            <th style="white-space: nowrap;" width="180px">Student Selection</th>
+                            <th style="white-space: nowrap;">Grade Selection</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <select name="ss" id="ss">
+                                    <option value='' ~[if.~[gpv:ss]=]selected[/if]>All Students</option>
+                                    <option value="cur" ~[if.~[gpv:ss]=cur]selected[/if]>Current Selection
+                                        (~[x:studsinset])</option>
+                                </select>
+                            </td>
+                            <td>
+                                <select name="gr" name="gr">
+                                    <option value='' ~[if.~[gpv:gr]=]selected[/if]>All Grades</option>
+                                    ~[tlist_sql;
+                                    SELECT DISTINCT GRADE_LEVEL,
+                                    CASE
+                                    WHEN TO_CHAR(grade_level) = -2 then 'PK3'
+                                    WHEN TO_CHAR(grade_level) = -1 then 'PK4'
+                                    WHEN TO_CHAR(grade_level) = 0 then 'K'
+                                    WHEN TO_CHAR(grade_level) = 99 then 'Graduated'
+                                    ELSE TO_CHAR(grade_level)
+                                    END as prettygrade
+                                    FROM STUDENTS
+                                    WHERE TO_CHAR(SCHOOLID) LIKE CASE WHEN TO_CHAR(~(curschoolid)) = '0'
+                                    THEN '%' ELSE TO_CHAR(~(curschoolid)) END
+                                    AND ENROLL_STATUS = 0
+                                    ORDER BY GRADE_LEVEL]
+                                    <option value="'~(gr)'">~(prettygrade)</option>
+                                    [/tlist_sql]
+                                </select>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="button-row" style="float: left;">
+                    <input type="hidden" name="showData" value="1">
+                    <span class="red">&nbsp;&nbsp;Select parameters and click submit</span>
+                    <input type="hidden" name="ac" value="prim">~[submitbutton]
+                </div>
+            </div>
+        </form>
+        <!-- Start of Results -->
+        ~[if#showData.~(gpv.showData;sqlText)=1]
+        <div class="box-round">
+            <h2>LPS Student Report</h2>
+            <table border="0" cellspacing="0" cellpadding="4" align="center" class="tablesorter grid" id="results">
+                <thead>
+                    <tr>
+                        <th class="left">State Number</th>
+                        <th class="left">Old SMS Number</th>
+                        <th class="left">Student Number</th>
+                        <th class="left">First Name</th>
+                        <th class="left">Middle Name</th>
+                        <th class="left">Last Name</th>
+                        <th class="left">Last First</th>
+                        <th class="left">Preferend Name</th>
+                        <th class="left">Gender</th>
+                        <th class="left">Grade</th>
+                        <th class="left">Home Room</th>
+                        <th class="left">Class Of</th>
+                        <th class="left">Ethnicity</th>
+                        <th class="left">Race</th>
+                        <th class="left">District of Residence</th>
+                        <th class="left">Family Rep</th>
+                        <th class="left">Mailing Street</th>
+                        <th class="left">Mailing City</th>
+                        <th class="left">Mailing State</th>
+                        <th class="left">Mailing Zip</th>
+                        <th class="left">Street</th>
+                        <th class="left">City</th>
+                        <th class="left">State</th>
+                        <th class="left">Zip</th>
+                        <th class="left">Home Phone</th>
+                        <th class="left">Locker Location</th>
+                        <th class="left">Locker Number</th>
+                        <th class="left">Locker Combo</th>
+                        <th class="left">Title 1</th>
+                        <th class="left">Disability</th>
+                        <th class="left">Ungraded</th>
+                        <th class="left">Free Reduced</th>
+                        <th class="left">Sub Transportation</th>
+                        <th class="left">Religion</th>
+                        <th class="left">Parish</th>
+                        <th class="left">Parish City</th>
+                        <th class="left">Parish State</th>
+                        <th class="left">Baptism Date</th>
+                        <th class="left">Baptism Parish</th>
+                        <th class="left">Baptism City</th>
+                        <th class="left">Baptism State</th>
+                        <th class="left">Confession Date</th>
+                        <th class="left">Confession Parish</th>
+                        <th class="left">Confession City</th>
+                        <th class="left">Confession State</th>
+                        <th class="left">Communion Date</th>
+                        <th class="left">Communion Parish</th>
+                        <th class="left">Communion City</th>
+                        <th class="left">Communion State</th>
+                        <th class="left">Confirmation Date</th>
+                        <th class="left">Confirmation Parish</th>
+                        <th class="left">Confirmation City</th>
+                        <th class="left">Confirmation State</th>
+                        <th class="left">Doctor Name</th>
+                        <th class="left">Doctor Phone</th>
+                        <th class="left">Dentist Name</th>
+                        <th class="left">Dentist Phone</th>
+                        <th class="left">Medical Alert</th>
+                        <th class="left">Allergies</th>
+                        <th class="left">Discipline Alert</th>
+                        <th class="left">Other Alert</th>
+                        <th class="left">LDAP Enabled</th>
+                        <th class="left">Student Web Access</th>
+                        <th class="left">Student Username</th>
+                        <th class="left">Parent Web Access</th>
+                        <th class="left">Parent Access ID</th>
+                        <th class="left">Single Parent Household</th>
+                        <th class="left">Contact 1 is Active</th>
+                        <th class="left">Contact 1 Living or Deceased</th>
+                        <th class="left">Contact 1 Relationship</th>
+                        <th class="left">Contact 1 Prefix</th>
+                        <th class="left">Contact 1 First Name</th>
+                        <th class="left">Contact 1 Middle Name</th>
+                        <th class="left">Contact 1 Last Name</th>
+                        <th class="left">Contact 1 Maiden Name</th>
+                        <th class="left">Contact 1 Suffix</th>
+                        <th class="left">Contact 1 First Last</th>
+                        <th class="left">Contact 1 Gender</th>
+                        <th class="left">Contact 1 Phone numbers</th>
+                        <th class="left">Contact 1 Email Adresses</th>
+                        <th class="left">Contact 1 Home Street</th>
+                        <th class="left">Contact 1 Home City</th>
+                        <th class="left">Contact 1 Home State</th>
+                        <th class="left">Contact 1 Home Zip</th>
+                        <th class="left">Contact 1 Mailing Street</th>
+                        <th class="left">Contact 1 Mailing City</th>
+                        <th class="left">Contact 1 Mailing State</th>
+                        <th class="left">Contact 1 Mailing Zip</th>
+                        <th class="left">Contact 1 Has Custody</th>
+                        <th class="left">Contact 1 Lives With</th>
+                        <th class="left">Contact 1 Recieves Mail</th>
+                        <th class="left">Contact 1 Emergency Contact</th>
+                        <th class="left">Contact 1 School Pickup</th>
+                        <th class="left">Contact 1 Parent Portal Account</th>
+                        <th class="left">Contact 1 Employer</th>
+                        <th class="left">Contact 1 Religion</th>
+                        <th class="left">Contact 1 Parish</th>
+                        <th class="left">Contact 1 Parish City</th>
+                        <th class="left">Contact 1 Parish State</th>
+                        <th class="left">Contact 2 is Active</th>
+                        <th class="left">Contact 2 Living or Deceased</th>
+                        <th class="left">Contact 2 Relationship</th>
+                        <th class="left">Contact 2 Prefix</th>
+                        <th class="left">Contact 2 First Name</th>
+                        <th class="left">Contact 2 Middle Name</th>
+                        <th class="left">Contact 2 Last Name</th>
+                        <th class="left">Contact 2 Maiden Name</th>
+                        <th class="left">Contact 2 Suffix</th>
+                        <th class="left">Contact 2 First Last</th>
+                        <th class="left">Contact 2 Gender</th>
+                        <th class="left">Contact 2 Phone numbers</th>
+                        <th class="left">Contact 2 Email Adresses</th>
+                        <th class="left">Contact 2 Home Street</th>
+                        <th class="left">Contact 2 Home City</th>
+                        <th class="left">Contact 2 Home State</th>
+                        <th class="left">Contact 2 Home Zip</th>
+                        <th class="left">Contact 2 Mailing Street</th>
+                        <th class="left">Contact 2 Mailing City</th>
+                        <th class="left">Contact 2 Mailing State</th>
+                        <th class="left">Contact 2 Mailing Zip</th>
+                        <th class="left">Contact 2 Has Custody</th>
+                        <th class="left">Contact 2 Lives With</th>
+                        <th class="left">Contact 2 Recieves Mail</th>
+                        <th class="left">Contact 2 Emergency Contact</th>
+                        <th class="left">Contact 2 School Pickup</th>
+                        <th class="left">Contact 2 Parent Portal Account</th>
+                        <th class="left">Contact 2 Employer</th>
+                        <th class="left">Contact 2 Religion</th>
+                        <th class="left">Contact 2 Parish</th>
+                        <th class="left">Contact 2 Parish City</th>
+                        <th class="left">Contact 2 Parish State</th>
+                        <th class="left">Contact 3 is Active</th>
+                        <th class="left">Contact 3 Living or Deceased</th>
+                        <th class="left">Contact 3 Relationship</th>
+                        <th class="left">Contact 3 Prefix</th>
+                        <th class="left">Contact 3 First Name</th>
+                        <th class="left">Contact 3 Middle Name</th>
+                        <th class="left">Contact 3 Last Name</th>
+                        <th class="left">Contact 3 Maiden Name</th>
+                        <th class="left">Contact 3 Suffix</th>
+                        <th class="left">Contact 3 First Last</th>
+                        <th class="left">Contact 3 Gender</th>
+                        <th class="left">Contact 3 Phone numbers</th>
+                        <th class="left">Contact 3 Email Adresses</th>
+                        <th class="left">Contact 3 Home Street</th>
+                        <th class="left">Contact 3 Home City</th>
+                        <th class="left">Contact 3 Home State</th>
+                        <th class="left">Contact 3 Home Zip</th>
+                        <th class="left">Contact 3 Mailing Street</th>
+                        <th class="left">Contact 3 Mailing City</th>
+                        <th class="left">Contact 3 Mailing State</th>
+                        <th class="left">Contact 3 Mailing Zip</th>
+                        <th class="left">Contact 3 Has Custody</th>
+                        <th class="left">Contact 3 Lives With</th>
+                        <th class="left">Contact 3 Recieves Mail</th>
+                        <th class="left">Contact 3 Emergency Contact</th>
+                        <th class="left">Contact 3 School Pickup</th>
+                        <th class="left">Contact 3 Parent Portal Account</th>
+                        <th class="left">Contact 3 Employer</th>
+                        <th class="left">Contact 3 Religion</th>
+                        <th class="left">Contact 3 Parish</th>
+                        <th class="left">Contact 3 Parish City</th>
+                        <th class="left">Contact 3 Parish State</th>
+                        <th class="left">Contact 4 is Active</th>
+                        <th class="left">Contact 4 Living or Deceased</th>
+                        <th class="left">Contact 4 Relationship</th>
+                        <th class="left">Contact 4 Prefix</th>
+                        <th class="left">Contact 4 First Name</th>
+                        <th class="left">Contact 4 Middle Name</th>
+                        <th class="left">Contact 4 Last Name</th>
+                        <th class="left">Contact 4 Maiden Name</th>
+                        <th class="left">Contact 4 Suffix</th>
+                        <th class="left">Contact 4 First Last</th>
+                        <th class="left">Contact 4 Gender</th>
+                        <th class="left">Contact 4 Phone numbers</th>
+                        <th class="left">Contact 4 Email Adresses</th>
+                        <th class="left">Contact 4 Home Street</th>
+                        <th class="left">Contact 4 Home City</th>
+                        <th class="left">Contact 4 Home State</th>
+                        <th class="left">Contact 4 Home Zip</th>
+                        <th class="left">Contact 4 Mailing Street</th>
+                        <th class="left">Contact 4 Mailing City</th>
+                        <th class="left">Contact 4 Mailing State</th>
+                        <th class="left">Contact 4 Mailing Zip</th>
+                        <th class="left">Contact 4 Has Custody</th>
+                        <th class="left">Contact 4 Lives With</th>
+                        <th class="left">Contact 4 Recieves Mail</th>
+                        <th class="left">Contact 4 Emergency Contact</th>
+                        <th class="left">Contact 4 School Pickup</th>
+                        <th class="left">Contact 4 Parent Portal Account</th>
+                        <th class="left">Contact 4 Employer</th>
+                        <th class="left">Contact 4 Religion</th>
+                        <th class="left">Contact 4 Parish</th>
+                        <th class="left">Contact 4 Parish City</th>
+                        <th class="left">Contact 4 Parish State</th>
+                        <th class="left">Contact 5 is Active</th>
+                        <th class="left">Contact 5 Living or Deceased</th>
+                        <th class="left">Contact 5 Relationship</th>
+                        <th class="left">Contact 5 Prefix</th>
+                        <th class="left">Contact 5 First Name</th>
+                        <th class="left">Contact 5 Middle Name</th>
+                        <th class="left">Contact 5 Last Name</th>
+                        <th class="left">Contact 5 Maiden Name</th>
+                        <th class="left">Contact 5 Suffix</th>
+                        <th class="left">Contact 5 First Last</th>
+                        <th class="left">Contact 5 Gender</th>
+                        <th class="left">Contact 5 Phone numbers</th>
+                        <th class="left">Contact 5 Email Adresses</th>
+                        <th class="left">Contact 5 Home Street</th>
+                        <th class="left">Contact 5 Home City</th>
+                        <th class="left">Contact 5 Home State</th>
+                        <th class="left">Contact 5 Home Zip</th>
+                        <th class="left">Contact 5 Mailing Street</th>
+                        <th class="left">Contact 5 Mailing City</th>
+                        <th class="left">Contact 5 Mailing State</th>
+                        <th class="left">Contact 5 Mailing Zip</th>
+                        <th class="left">Contact 5 Has Custody</th>
+                        <th class="left">Contact 5 Lives With</th>
+                        <th class="left">Contact 5 Recieves Mail</th>
+                        <th class="left">Contact 5 Emergency Contact</th>
+                        <th class="left">Contact 5 School Pickup</th>
+                        <th class="left">Contact 5 Parent Portal Account</th>
+                        <th class="left">Contact 5 Employer</th>
+                        <th class="left">Contact 5 Religion</th>
+                        <th class="left">Contact 5 Parish</th>
+                        <th class="left">Contact 5 Parish City</th>
+                        <th class="left">Contact 5 Parish State</th>
+                        <th class="left">Contact 6 is Active</th>
+                        <th class="left">Contact 6 Living or Deceased</th>
+                        <th class="left">Contact 6 Relationship</th>
+                        <th class="left">Contact 6 Prefix</th>
+                        <th class="left">Contact 6 First Name</th>
+                        <th class="left">Contact 6 Middle Name</th>
+                        <th class="left">Contact 6 Last Name</th>
+                        <th class="left">Contact 6 Maiden Name</th>
+                        <th class="left">Contact 6 Suffix</th>
+                        <th class="left">Contact 6 First Last</th>
+                        <th class="left">Contact 6 Gender</th>
+                        <th class="left">Contact 6 Phone numbers</th>
+                        <th class="left">Contact 6 Email Adresses</th>
+                        <th class="left">Contact 6 Home Street</th>
+                        <th class="left">Contact 6 Home City</th>
+                        <th class="left">Contact 6 Home State</th>
+                        <th class="left">Contact 6 Home Zip</th>
+                        <th class="left">Contact 6 Mailing Street</th>
+                        <th class="left">Contact 6 Mailing City</th>
+                        <th class="left">Contact 6 Mailing State</th>
+                        <th class="left">Contact 6 Mailing Zip</th>
+                        <th class="left">Contact 6 Has Custody</th>
+                        <th class="left">Contact 6 Lives With</th>
+                        <th class="left">Contact 6 Recieves Mail</th>
+                        <th class="left">Contact 6 Emergency Contact</th>
+                        <th class="left">Contact 6 School Pickup</th>
+                        <th class="left">Contact 6 Parent Portal Account</th>
+                        <th class="left">Contact 6 Employer</th>
+                        <th class="left">Contact 6 Religion</th>
+                        <th class="left">Contact 6 Parish</th>
+                        <th class="left">Contact 6 Parish City</th>
+                        <th class="left">Contact 6 Parish State</th>
+                        <th class="left">Next School</th>
+                        <th class="left">School</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ~[tlist_sql;
+                    WITH HA AS (
+                        SELECT	
+                            p.id, 
+                            pa.street Home_Street,
+                            pa.city Home_City,
+                            scs.code Home_State,
+                            pa.postalcode Home_Zip			
+                        FROM 
+                            person p	
+                            LEFT OUTER JOIN personaddressassoc paa ON (p.id = paa.personid)
+                            LEFT OUTER JOIN personaddress pa ON (paa.personAddressID = pa.personAddressID)
+                            JOIN codeset cs ON (paa.AddressTypeCodeSetID = cs.CodeSetID)
+                            LEFT JOIN codeset scs	ON (pa.statescodesetid = scs.codesetid)
+                            WHERE  cs.code = 'Home'
+                            and paa.enddate is null
+                        ), MA AS (
+                        SELECT	
+                            p.id, 
+                            pa.street Mailing_Street,
+                            pa.city Mailing_City,
+                            scs.code Mailing_State,
+                            pa.postalcode Mailing_Zip			
+                        FROM 
+                            person p	
+                            LEFT OUTER JOIN personaddressassoc paa ON (p.id = paa.personid)
+                            LEFT OUTER JOIN personaddress pa ON (paa.personAddressID = pa.personAddressID)
+                            JOIN codeset cs ON (paa.AddressTypeCodeSetID = cs.CodeSetID)
+                            LEFT JOIN codeset scs	ON (pa.statescodesetid = scs.codesetid)
+                            WHERE  cs.code = 'Mailing'
+                            and paa.enddate is null
+                        ),
+                        pcontact as (
+                        SELECT DISTINCT
+                            s.dcid,
+                            sch.abbreviation school,
+                            s.student_number,
+                            s.lastfirst,
+                            s.grade_level,
+                            s.home_room, 
+                            p.id contactid,
+                            sca.contactpriorityorder as pcontactorder,
+                            precs.code Prefix,
+                            p.firstname, 
+                            p.middlename,
+                            p.lastname,
+                            CASE 
+                                WHEN p.firstname IS NULL AND p.lastname IS NULL 
+                                THEN '-No Name-' 
+                                ELSE p.firstname||' '||p.lastname 
+                            END ContactFirstLast,
+                            sufcs.code Suffix,
+                            sca.contactpriorityorder, 
+                            cs.code Relationship, 
+                            gcs.displayvalue Gender,
+                            p.employer, 
+                            Decode(p.isActive, 1, 'Active', 'Inactive') isactive,
+                            u.person_status,
+                            u.PERSON_MAIDEN_NAME,
+                            (
+                                SELECT LISTAGG(
+                                                Nvl(ppa.phonenumberasentered,'') || '  ' || Nvl(cs.code,''), '  '
+                                                ) 
+                                        WITHIN GROUP (ORDER BY po.phoneorder)
+                                FROM (
+                                        SELECT 
+                                            LEVEL AS phoneorder 
+                                        FROM 
+                                            DUAL CONNECT BY LEVEL <= 3
+                                        ) po 
+                                LEFT JOIN personphonenumberassoc ppa 
+                                ON (po.phoneorder = ppa.phonenumberpriorityorder  AND ppa.personid = p.id)  
+                                LEFT JOIN codeset cs 
+                                ON (ppa.PhoneTypeCodeSetID = cs.CodeSetID)
+                            ) AS Contact_Phone_Numbers,
+                            (
+                                SELECT 
+                                    LISTAGG(emailaddress, ' | ') WITHIN GROUP(ORDER BY emailaddresspriorityorder) Email_Addresses
+                                FROM PersonEmailAddressAssoc pea
+                                INNER JOIN EmailAddress	ea 
+                                ON (pea.EmailAddressID = ea.EmailAddressID)
+                                WHERE pea.personid = p.id
+                                GROUP BY personid
+                            )  AS Email_Addresses, 
+                            Decode(gs.studentsdcid, NULL, 'No', 'Yes') dataaccess,
+                            DECODE(scd.iscustodial, 1, 'Yes','No') iscustodial,
+                            DECODE(scd.liveswithflg, 1, 'Yes','No') liveswithflg,
+                            DECODE(scd.receivesmailflg, 1, 'Yes','No') receivesmailflg,
+                            DECODE(scd.isemergency, 1, 'Yes','No') isemergency,
+                            DECODE(scd.schoolpickupflg, 1, 'Yes','No') schoolpickupflg,
+                            u.person_religion,
+                            u.person_parish,
+                            u.person_parish_city, 
+                            u.person_parish_state
+                            FROM Students s            
+                            JOIN schools sch ON (s.schoolid = sch.school_number)
+                            LEFT JOIN studentcontactassoc sca ON (s.dcid = sca.studentdcid)
+                            LEFT JOIN studentcontactdetail scd  ON (sca.studentcontactassocid = scd.studentcontactassocid)
+                            LEFT JOIN person p	ON  (sca.personid = p.ID)
+                            LEFT JOIN codeset cs	ON (cs.codesetid = scd.relationshiptypecodesetid)
+                            LEFT JOIN codeset precs	ON (precs.codesetid = p.PREFIXCODESETID)
+                            LEFT JOIN codeset sufcs	ON (sufcs.codesetid = p.SUFFIXCODESETID)
+                            LEFT JOIN codeset gcs	ON (gcs.codesetid = p.GENDERCODESETID)
+                            LEFT JOIN guardianpersonassoc gp ON (p.id = gp.personid)
+                            LEFT JOIN guardianstudent gs ON (s.dcid = gs.studentsdcid AND gp.guardianid = gs.guardianid)
+                            LEFT JOIN U_PERSON_ADDITIONAL_INFO U	ON  (p.ID = u.personid)
+                            WHERE s.enroll_status = 0
+                            ORDER BY s.lastfirst, sca.contactpriorityorder 
+                        )
+                        SELECT 
+                            --A.ENROLL_STATUS,
+                            A.DCID,
+                            A.STATE_STUDENTNUMBER AS "State_Number(UUID)",
+                            SCF.PrevStudentID as Old_SMS_Number,
+                            A.STUDENT_NUMBER,
+                            A.FIRST_NAME,
+                            A.MIDDLE_NAME,
+                            A.LAST_NAME ,
+                            A.LASTFIRST AS LastFirst,
+                            AD.STUDENT_PREFERRED_NAME,
+                            CASE WHEN A.GENDER= 'M' THEN 'Male' WHEN A.GENDER = 'F' THEN 'Female' ELSE '' End AS Gender,
+                            to_char(a.dob,'MM/DD/YYYY') AS Birthday,
+                            --BIRTHPLACE
+                            A.GRADE_LEVEL,
+                            A.HOME_ROOM,
+                            A.CLASSOF,
+                            CASE WHEN A.FEDETHNICITY = 1 THEN 'Hispanic / Latino' WHEN A.FEDETHNICITY = 0 THEN 'Not Hispanic / Latino' ELSE ' ' END AS "Fed_Ethnicity",
+                        (SELECT LISTAGG (RACECD, ', ') WITHIN GROUP (ORDER BY RACECD)
+                                FROM STUDENTRACE A2
+                                WHERE A2.STUDENTID = A.ID) as "RACE",
+                            G.name as "District of Residence",
+                            CASE WHEN SCF.FAMILY_REP= 1 THEN 'YES' WHEN SCF.FAMILY_REP=0 THEN 'NO' END AS Family_rep,
+                            A.MAILING_STREET,
+                            A.MAILING_CITY,
+                            A.MAILING_STATE,
+                            A.MAILING_ZIP,
+                            A.STREET as Physical_Street,
+                            A.CITY as Physical_City,
+                            A.STATE as Physical_State,
+                            A.ZIP as Physical_Zip,
+                            A.HOME_PHONE,
+                            AD.LOCKER_LOCATION,
+                            A.LOCKER_NUMBER,
+                            A.LOCKER_COMBINATION,
+                            CASE WHEN NCEA.TITLEI_TF= 1 THEN 'YES' WHEN NCEA.TITLEI_TF= 0 THEN 'NO' ELSE '' END AS Title_1,
+                            CASE WHEN NCEA.DIAGNOSEDDISABILITY_TF= 1 THEN 'YES' WHEN NCEA.DIAGNOSEDDISABILITY_TF= 0 THEN 'NO' ELSE '' END AS Disability,
+                            CASE WHEN NCEA.UNGRADED_TF= 1 THEN 'YES' WHEN NCEA.UNGRADED_TF= 0 THEN 'NO' ELSE '' END AS Ungraded,
+                            NCEA.FEDERALNUTRITION AS "Free_Reduced",
+                            CASE WHEN NCEA.SUBSIDIZEDTRANS_TF= 1 THEN 'YES' WHEN NCEA.SUBSIDIZEDTRANS_TF= 0 THEN 'NO' ELSE '' END AS Sub_Transport,
+                            CASE WHEN NCEA.RELIGIOUSAFFILIATION= 'C' THEN 'Catholic' WHEN NCEA.RELIGIOUSAFFILIATION= 'N' THEN 'Non-Catholic'ELSE '' END AS Religion,
+                            SAC.STUDENT_PARISH,
+                            SAC.STUDENT_PARISH_CITY,
+                            SAC.STUDENT_PARISH_STATE,
+                            to_char(SAC.STUDENT_BAPTISM_DATE,'MM/DD/YYYY')as "Baptism_Date",
+                            SAC.STUDENT_BAPTISM_PARISH,
+                            SAC.STUDENT_BAPTISM_CITY,
+                            SAC.STUDENT_BAPTISM_STATE,
+                            to_char(SAC.STUDENT_CONFESSION_DATE,'MM/DD/YYYY')as "Confession_Date",
+                            SAC.STUDENT_CONFESSION_PARISH,
+                            SAC.STUDENT_CONFESSION_CITY,
+                            SAC.STUDENT_CONFESSION_STATE,
+                            to_char(SAC.STUDENT_COMMUNION_DATE,'MM/DD/YYYY')as "Communion_Date",
+                            SAC.STUDENT_COMMUNION_PARISH,
+                            SAC.STUDENT_COMMUNION_CITY,
+                            SAC.STUDENT_COMMUNION_STATE,
+                            to_char(SAC.STUDENT_CONFIRMATION_DATE,'MM/DD/YYYY')as "Confirmation_Date",
+                            SAC.STUDENT_CONFIRMATION_PARISH,
+                            SAC.STUDENT_CONFIRMATION_CITY,
+                            SAC.STUDENT_CONFIRMATION_STATE,
+                            A.DOCTOR_NAME,
+                            A.DOCTOR_PHONE,
+                            SCF.Dentist_Name,
+                            SCF.dentist_phone,
+                            A.ALERT_MEDICAL AS Medical_Alert,
+                            SCF.ALLERGIES AS Allergies,
+                            A.ALERT_DISCIPLINE AS Discipline_Alert,
+                            A.ALERT_OTHER as Other_Alert,
+                            CASE WHEN A.LDAPENABLED= 1 THEN 'YES' WHEN A.LDAPENABLED= 0 THEN 'NO' ELSE '' END AS LDAP_Enabled,
+                            CASE WHEN A.STUDENT_ALLOWWEBACCESS= 1 THEN 'YES' WHEN A.STUDENT_ALLOWWEBACCESS= 0 THEN 'NO' ELSE '' END AS Student_Web_Access,
+                            A.STUDENT_WEB_ID AS Student_Username,
+                            CASE WHEN A.ALLOWWEBACCESS= 1 THEN 'YES' WHEN A.ALLOWWEBACCESS= 0 THEN 'NO' ELSE '' END AS Parent_Web_Access,
+                            A.WEB_ID AS Parent_Access_ID,                            
+                            SCF.SINGLEPARENTHSHLDFLAG AS "Single Parent Household",
+                            C1.ISACTIVE as Contact_1_is_Active,
+                            C1.person_status as Contact_1_Living_or_Deceased,
+                            C1.RELATIONSHIP as Contact_1_Relationship,
+                            C1.prefix as Contact_1_Prefix,
+                            C1.firstname as Contact_1_First_Name,
+                            C1.middlename as Contact_1_Middle_Name,
+                            C1.lastname as Contact_1_Last_Name,
+                            C1.PERSON_MAIDEN_NAME as Contact_1_Maiden_Name,
+                            C1.suffix as Contact_1_Suffix,
+                            C1.ContactFirstLast as Contact_1_First_Last,
+                            C1.Gender as Contact_1_Gender,    
+                            C1.CONTACT_PHONE_NUMBERS as Contact_1_Phone_numbers,
+                            C1.EMAIL_ADDRESSES as Contact_1_Email_Adresses,
+                            C1HA.Home_Street as Contact_1_Home_Street,
+                            C1HA.Home_City as Contact_1_Home_City,
+                            C1HA.Home_State as Contact_1_Home_State, 
+                            C1HA.Home_zip as Contact_1_Home_Zip,
+                            nvl(C1MA.Mailing_Street,C1HA.Home_Street) as Contact_1_Mailing_Street ,
+                            nvl(C1MA.Mailing_City,C1HA.Home_City) as Contact_1_Mailing_City,
+                            nvl(C1MA.Mailing_State,C1HA.Home_State)as Contact_1_Mailing_State,
+                            nvl(C1MA.Mailing_Zip,C1HA.Home_zip) as Contact_1_Mailing_Zip,
+                            C1.ISCUSTODIAL as Contact_1_Has_Custody,
+                            C1.LIVESWITHFLG as Contact_1_Lives_With,
+                            C1.RECEIVESMAILFLG as Contact_1_Recieves_Mail,
+                            C1.ISEMERGENCY as Contact_1_Emergency_Contact,
+                            C1.SCHOOLPICKUPFLG as Contact_1_School_Pickup,
+                            C1.DATAACCESS as Contact_1_Parent_Portal_Account,
+                            C1.Employer as Contact_1_Employer, 
+                            C1.person_religion as Contact_1_Religion, 
+                            C1.person_parish as Contact_1_Parish, 
+                            C1.Person_parish_city as Contact_1_Parish_City, 
+                            C1.person_parish_state as Contact_1_Parish_State, 
+                            C2.ISACTIVE as Contact_2_is_Active,
+                            C2.person_status as Contact_2_Living_or_Deceased,
+                            C2.RELATIONSHIP as Contact_2_Relationship,
+                            C2.prefix as Contact_2_Prefix,
+                            C2.firstname as Contact_2_First_Name,
+                            C2.middlename as Contact_2_Middle_Name,
+                            C2.lastname as Contact_2_Last_Name,
+                            C2.PERSON_MAIDEN_NAME as Contact_2_Maiden_Name,
+                            C2.suffix as Contact_2_Suffix,
+                            C2.ContactFirstLast as Contact_2_First_Last,
+                            C2.Gender as Contact_2_Gender,
+                            C2.CONTACT_PHONE_NUMBERS as Contact_2_Phone_numbers,
+                            C2.EMAIL_ADDRESSES as Contact_2_Email_Adresses,
+                            C2HA.Home_Street as Contact_2_Home_Street,
+                            C2HA.Home_City as Contact_2_Home_City,
+                            C2HA.Home_State as Contact_2_Home_State, 
+                            C2HA.Home_zip as Contact_2_Home_Zip,
+                            nvl(C2MA.Mailing_Street,C2HA.Home_Street) as Contact_2_Mailing_Street ,
+                            nvl(C2MA.Mailing_City,C2HA.Home_City) as Contact_2_Mailing_City,
+                            nvl(C2MA.Mailing_State,C2HA.Home_State)as Contact_2_Mailing_State,
+                            nvl(C2MA.Mailing_Zip,C2HA.Home_zip) as Contact_2_Mailing_Zip,
+                            C2.ISCUSTODIAL as Contact_2_Has_Custody,
+                            C2.LIVESWITHFLG as Contact_2_Lives_With,
+                            C2.RECEIVESMAILFLG as Contact_2_Recieves_Mail,
+                            C2.ISEMERGENCY as Contact_2_Emergency_Contact,
+                            C2.SCHOOLPICKUPFLG as Contact_2_School_Pickup,
+                            C2.DATAACCESS as Contact_2_Parent_Portal_Account,
+                            C2.Employer as Contact_2_Employer,
+                            C2.person_religion as Contact_2_Religion, 
+                            C2.person_parish as Contact_2_Parish, 
+                            C2.Person_parish_city as Contact_2_Parish_City, 
+                            C2.person_parish_state as Contact_2_Parish_State,
+                            C3.ISACTIVE as Contact_3_is_Active,
+                            C3.person_status as Contact_3_Living_or_Deceased,
+                            C3.RELATIONSHIP as Contact_3_Relationship,
+                            C3.prefix as Contact_3_Prefix,
+                            C3.firstname as Contact_3_First_Name,
+                            C3.middlename as Contact_3_Middle_Name,
+                            C3.lastname as Contact_3_Last_Name,
+                            C3.PERSON_MAIDEN_NAME as Contact_3_Maiden_Name,
+                            C3.suffix as Contact_3_Suffix,
+                            C3.ContactFirstLast as Contact_3_First_Last,
+                            C3.Gender as Contact_3_Gender,
+                            C3.CONTACT_PHONE_NUMBERS as Contact_3_Phone_numbers,
+                            C3.EMAIL_ADDRESSES as Contact_3_Email_Adresses,
+                            C3HA.Home_Street as Contact_3_Home_Street,
+                            C3HA.Home_City as Contact_3_Home_City,
+                            C3HA.Home_State as Contact_3_Home_State, 
+                            C3HA.Home_zip as Contact_3_Home_Zip,
+                            nvl(C3MA.Mailing_Street,C3HA.Home_Street) as Contact_3_Mailing_Street ,
+                            nvl(C3MA.Mailing_City,C3HA.Home_City) as Contact_3_Mailing_City,
+                            nvl(C3MA.Mailing_State,C3HA.Home_State)as Contact_3_Mailing_State,
+                            nvl(C3MA.Mailing_Zip,C3HA.Home_zip) as Contact_3_Mailing_Zip,
+                            C3.ISCUSTODIAL as Contact_3_Has_Custody,
+                            C3.LIVESWITHFLG as Contact_3_Lives_With,
+                            C3.RECEIVESMAILFLG as Contact_3_Recieves_Mail,
+                            C3.ISEMERGENCY as Contact_3_Emergency_Contact,
+                            C3.SCHOOLPICKUPFLG as Contact_3_School_Pickup,
+                            C3.Employer as Contact_3_Employer, 
+                            C3.DATAACCESS as Contact_3_Parent_Portal_Account,
+                            C3.person_religion as Contact_3_Religion, 
+                            C3.person_parish as Contact_3_Parish, 
+                            C3.Person_parish_city as Contact_3_Parish_City, 
+                            C3.person_parish_state as Contact_3_Parish_State,
+                            C4.ISACTIVE as Contact_4_is_Active,
+                            C4.person_status as Contact_4_Living_or_Deceased,
+                            C4.RELATIONSHIP as Contact_4_Relationship,
+                            C4.prefix as Contact_4_Prefix,
+                            C4.firstname as Contact_4_First_Name,
+                            C4.middlename as Contact_4_Middle_Name,
+                            C4.lastname as Contact_4_Last_Name,
+                            C4.PERSON_MAIDEN_NAME as Contact_4_Maiden_Name,
+                            C4.suffix as Contact_4_Suffix,
+                            C4.ContactFirstLast as Contact_4_First_Last,
+                            C4.Gender as Contact_4_Gender,
+                            C4.CONTACT_PHONE_NUMBERS as Contact_4_Phone_numbers,
+                            C4.EMAIL_ADDRESSES as Contact_4_Email_Adresses,
+                            C4HA.Home_Street as Contact_4_Home_Street,
+                            C4HA.Home_City as Contact_4_Home_City,
+                            C4HA.Home_State as Contact_4_Home_State, 
+                            C4HA.Home_zip as Contact_4_Home_Zip,
+                            nvl(C4MA.Mailing_Street,C4HA.Home_Street) as Contact_4_Mailing_Street ,
+                            nvl(C4MA.Mailing_City,C4HA.Home_City) as Contact_4_Mailing_City,
+                            nvl(C4MA.Mailing_State,C4HA.Home_State)as Contact_4_Mailing_State,
+                            nvl(C4MA.Mailing_Zip,C4HA.Home_zip) as Contact_4_Mailing_Zip,
+                            C4.ISCUSTODIAL as Contact_4_Has_Custody,
+                            C4.LIVESWITHFLG as Contact_4_Lives_With,
+                            C4.RECEIVESMAILFLG as Contact_4_Recieves_Mail,
+                            C4.ISEMERGENCY as Contact_4_Emergency_Contact,
+                            C4.SCHOOLPICKUPFLG as Contact_4_School_Pickup,
+                            C4.DATAACCESS as Contact_4_Parent_Portal_Account,
+                            C4.Employer as Contact_4_Employer, 
+                            C4.person_religion as Contact_4_Religion, 
+                            C4.person_parish as Contact_4_Parish, 
+                            C4.Person_parish_city as Contact_4_Parish_City, 
+                            C4.person_parish_state as Contact_4_Parish_State,
+                            C5.ISACTIVE as Contact_5_is_Active,
+                            C5.person_status as Contact_5_Living_or_Deceased,
+                            C5.RELATIONSHIP as Contact_5_Relationship,
+                            C5.prefix as Contact_5_Prefix,
+                            C5.firstname as Contact_5_First_Name,
+                            C5.middlename as Contact_5_Middle_Name,
+                            C5.lastname as Contact_5_Last_Name,
+                            C5.PERSON_MAIDEN_NAME as Contact_5_Maiden_Name,
+                            C5.suffix as Contact_5_Suffix,
+                            C5.ContactFirstLast as Contact_5_First_Last,
+                            C5.Gender as Contact_5_Gender,
+                            C5.CONTACT_PHONE_NUMBERS as Contact_5_Phone_numbers,
+                            C5.EMAIL_ADDRESSES as Contact_5_Email_Adresses,
+                            C5HA.Home_Street as Contact_5_Home_Street,
+                            C5HA.Home_City as Contact_5_Home_City,
+                            C5HA.Home_State as Contact_5_Home_State, 
+                            C5HA.Home_zip as Contact_5_Home_Zip,
+                            nvl(C5MA.Mailing_Street,C5HA.Home_Street) as Contact_5_Mailing_Street ,
+                            nvl(C5MA.Mailing_City,C5HA.Home_City) as Contact_5_Mailing_City,
+                            nvl(C5MA.Mailing_State,C5HA.Home_State)as Contact_5_Mailing_State,
+                            nvl(C5MA.Mailing_Zip,C5HA.Home_zip) as Contact_5_Mailing_Zip,
+                            C5.ISCUSTODIAL as Contact_5_Has_Custody,
+                            C5.LIVESWITHFLG as Contact_5_Lives_With,
+                            C5.RECEIVESMAILFLG as Contact_5_Recieves_Mail,
+                            C5.ISEMERGENCY as Contact_5_Emergency_Contact,
+                            C5.SCHOOLPICKUPFLG as Contact_5_School_Pickup,
+                            C5.DATAACCESS as Contact_5_Parent_Portal_Account,
+                            C5.Employer as Contact_5_Employer, 
+                            C5.person_religion as Contact_5_Religion, 
+                            C5.person_parish as Contact_5_Parish, 
+                            C5.Person_parish_city as Contact_5_Parish_City, 
+                            C5.person_parish_state as Contact_5_Parish_State,
+                            C6.ISACTIVE as Contact_6_is_Active,
+                            C6.person_status as Contact_6_Living_or_Deceased,
+                            C6.RELATIONSHIP as Contact_6_Relationship,
+                            C6.prefix as Contact_6_Prefix,
+                            C6.firstname as Contact_6_First_Name,
+                            C6.middlename as Contact_6_Middle_Name,
+                            C6.lastname as Contact_6_Last_Name,
+                            C6.PERSON_MAIDEN_NAME as Contact_6_Maiden_Name,
+                            C6.suffix as Contact_6_Suffix,
+                            C6.ContactFirstLast as Contact_6_First_Last,
+                            C6.Gender as Contact_6_Gender,
+                            C6.CONTACT_PHONE_NUMBERS as Contact_6_Phone_numbers,
+                            C6.EMAIL_ADDRESSES as Contact_6_Email_Adresses,
+                            C6HA.Home_Street as Contact_6_Home_Street,
+                            C6HA.Home_City as Contact_6_Home_City,
+                            C6HA.Home_State as Contact_6_Home_State, 
+                            C6HA.Home_zip as Contact_6_Home_Zip,
+                            nvl(C6MA.Mailing_Street,C6HA.Home_Street) as Contact_6_Mailing_Street ,
+                            nvl(C6MA.Mailing_City,C6HA.Home_City) as Contact_6_Mailing_City,
+                            nvl(C6MA.Mailing_State,C6HA.Home_State)as Contact_6_Mailing_State,
+                            nvl(C6MA.Mailing_Zip,C6HA.Home_zip) as Contact_6_Mailing_Zip,
+                            C6.ISCUSTODIAL as Contact_6_Has_Custody,
+                            C6.LIVESWITHFLG as Contact_6_Lives_With,
+                            C6.RECEIVESMAILFLG as Contact_6_Recieves_Mail,
+                            C6.ISEMERGENCY as Contact_6_Emergency_Contact,
+                            C6.SCHOOLPICKUPFLG as Contact_6_School_Pickup,
+                            C6.DATAACCESS as Contact_6_Parent_Portal_Account,
+                            C6.Employer as Contact_6_Employer,
+                            C6.person_religion as Contact_6_Religion, 
+                            C6.person_parish as Contact_6_Parish, 
+                            C6.Person_parish_city as Contact_6_Parish_City, 
+                            C6.person_parish_state as Contact_6_Parish_State,
+                            A.Next_School,
+                            B.NAME as "SCHOOL"
+                        FROM  STUDENTS A
+                        INNER JOIN SCHOOLS B
+                            ON B.SCHOOL_NUMBER = A.SCHOOLID
+                        INNER JOIN IR_SCHOOLS C
+                            ON C.SCHOOL_NUMBER = B.SCHOOL_NUMBER
+                        INNER JOIN FTE Z
+                            ON Z.ID = A.FTEID
+                        LEFT JOIN U_STUDENT_SACRAMENTAL SAC
+                            ON SAC.STUDENTSDCID = A.DCID
+                        LEFT JOIN U_STUDENT_ADDITIONAL_INFO AD
+                            ON AD.STUDENTSDCID = A.DCID
+                        INNER JOIN StudentCoreFields SCF
+                            ON SCF.STUDENTSDCID =A.DCID
+                        LEFT JOIN S_STU_NCEA_X NCEA
+                            ON NCEA.STUDENTSDCID =A.DCID
+                        LEFT JOIN Gen G
+                            ON G.value = A.DistrictOfResidence AND G.cat = 'districts'
+                        LEFT JOIN pcontact  C1
+                            ON (C1.DCID = A.DCID AND C1.pcontactorder =1)
+                        LEFT JOIN HA C1HA
+                            ON (C1.contactid = C1HA.id)
+                        LEFT JOIN MA C1MA
+                            ON (C1.contactid = C1MA.id)
+                        LEFT JOIN  pcontact C2
+                            ON (C2.DCID = A.DCID AND C2.pcontactorder =2)
+                        LEFT JOIN HA C2HA
+                            ON (C2.contactid = C2HA.id)
+                        LEFT JOIN MA C2MA
+                            ON (C2.contactid = C2MA.id)
+                        LEFT JOIN  pcontact C3
+                            ON (C3.DCID = A.DCID AND C3.pcontactorder =3)
+                        LEFT JOIN HA C3HA
+                            ON (C3.contactid = C3HA.id)
+                        LEFT JOIN MA C3MA
+                            ON (C3.contactid = C3MA.id)
+                        LEFT JOIN  pcontact C4
+                            ON (C4.DCID = A.DCID AND C4.pcontactorder =4)
+                        LEFT JOIN HA C4HA
+                            ON (C4.contactid = C4HA.id)
+                        LEFT JOIN MA C4MA
+                            ON (C4.contactid = C4MA.id)
+                        LEFT JOIN  pcontact C5
+                            ON (C5.DCID = A.DCID AND C5.pcontactorder =5)
+                        LEFT JOIN HA C5HA
+                            ON (C5.contactid = C5HA.id)
+                        LEFT JOIN MA C5MA
+                            ON (C5.contactid = C5MA.id)
+                        LEFT JOIN  pcontact C6
+                            ON (C6.DCID = A.DCID AND C6.pcontactorder =6)
+                        LEFT JOIN HA C6HA
+                            ON (C6.contactid = C6HA.id)
+                        LEFT JOIN MA C6MA
+                            ON (C6.contactid = C6MA.id)
+                        WHERE enroll_status in (-1,0)
+                            ~[if.is.a.school] AND schoolid = ~(curschoolid) [/if.is.a.school]
+                            ~[if#gr.~(gpv.gr;sqlText)#] AND grade_level = ~(gpv.gr) [/if#gr]
+                        ORDER BY 
+                            lastfirst
+                    ;]
+                    <tr data-StudentID="~(dcid)">
+                        <td>~(State Number)</td>
+                        <td>~(Old SMS Number)</td>
+                        <td>~(Student Number)</td>
+                        <td>~(First Name;t)</td>
+                        <td>~(Middle Name;t)</td>
+                        <td>~(Last Name;t)</td>
+                        <td class="nowrap"><a href="/admin/students/contacts.html?frn=001~(dcid)" target="_blank">~(lastfirst;t)</a>
+                        </td>
+                        <td>~(Preferend Name;t)</td>
+                        <td>~(Gender;t)</td>
+                        <td>~(Grade)</td>
+                        <td>~(Home Room;t)</td>
+                        <td>~(Class Of)</td>
+                        <td>~(Ethnicity;t)</td>
+                        <td>~(Race;t)</td>
+                        <td>~(District of Residence;t)</td>
+                        <td>~(Family Rep;t)</td>
+                        <td>~(Mailing Street;t)</td>
+                        <td>~(Mailing City;t)</td>
+                        <td>~(Mailing State;t)</td>
+                        <td>~(Mailing Zip)</td>
+                        <td>~(Street;t)</td>
+                        <td>~(City;t)</td>
+                        <td>~(State;t)</td>
+                        <td>~(Zip)</td>
+                        <td>~(Home Phone)</td>
+                        <td>~(Locker Location;t)</td>
+                        <td>~(Locker Number)</td>
+                        <td>~(Locker Combo)</td>
+                        <td>~(Title 1;t)</td>
+                        <td>~(Disability;t)</td>
+                        <td>~(Ungraded;t)</td>
+                        <td>~(Free Reduced;t)</td>
+                        <td>~(Sub Transportation;t)</td>
+                        <td>~(Religion;t)</td>
+                        <td>~(Parish;t)</td>
+                        <td>~(Parish City;t)</td>
+                        <td>~(Parish State;t)</td>
+                        <td>~(Baptism Date;d)</td>
+                        <td>~(Baptism Parish;t)</td>
+                        <td>~(Baptism City;t)</td>
+                        <td>~(Baptism State;t)</td>
+                        <td>~(Confession Date;d)</td>
+                        <td>~(Confession Parish;t)</td>
+                        <td>~(Confession City;t)</td>
+                        <td>~(Confession State;t)</td>
+                        <td>~(Communion Date;d)</td>
+                        <td>~(Communion Parish;t)</td>
+                        <td>~(Communion City;t)</td>
+                        <td>~(Communion State;t)</td>
+                        <td>~(Confirmation Date;d)</td>
+                        <td>~(Confirmation Parish;t)</td>
+                        <td>~(Confirmation City;t)</td>
+                        <td>~(Confirmation State;t)</td>
+                        <td>~(Doctor Name;t)</td>
+                        <td>~(Doctor Phone)</td>
+                        <td>~(Dentist Name;t)</td>
+                        <td>~(Dentist Phone)</td>
+                        <td>~(Medical Alert;t)</td>
+                        <td>~(Allergies;t)</td>
+                        <td>~(Discipline Alert;t)</td>
+                        <td>~(Other Alert;t)</td>
+                        <td>~(LDAP Enabled;t)</td>
+                        <td>~(Student Web Access;t)</td>
+                        <td>~(Student Username;t)</td>
+                        <td>~(Parent Web Access;t)</td>
+                        <td>~(Parent Access ID;t)</td>
+                        <td>~(Single Parent Household;t)</td>
+                        <td>~(Contact 1 is Active;t)</td>
+                        <td>~(Contact 1 Living or Deceased;t)</td>
+                        <td>~(Contact 1 Relationship;t)</td>
+                        <td>~(Contact 1 Prefix;t)</td>
+                        <td>~(Contact 1 First Name;t)</td>
+                        <td>~(Contact 1 Middle Name;t)</td>
+                        <td>~(Contact 1 Last Name;t)</td>
+                        <td>~(Contact 1 Maiden Name;t)</td>
+                        <td>~(Contact 1 Suffix;t)</td>
+                        <td>~(Contact 1 First Last;t)</td>
+                        <td>~(Contact 1 Gender;t)</td>
+                        <td>~(Contact 1 Phone numbers)</td>
+                        <td>~(Contact 1 Email Adresses;t)</td>
+                        <td>~(Contact 1 Home Street;t)</td>
+                        <td>~(Contact 1 Home City;t)</td>
+                        <td>~(Contact 1 Home State;t)</td>
+                        <td>~(Contact 1 Home Zip)</td>
+                        <td>~(Contact 1 Mailing Street)</td>
+                        <td>~(Contact 1 Mailing City;t)</td>
+                        <td>~(Contact 1 Mailing State;t)</td>
+                        <td>~(Contact 1 Mailing Zip)</td>
+                        <td>~(Contact 1 Has Custody;t)</td>
+                        <td>~(Contact 1 Lives With;t)</td>
+                        <td>~(Contact 1 Recieves Mail;t)</td>
+                        <td>~(Contact 1 Emergency Contact;t)</td>
+                        <td>~(Contact 1 School Pickup;t)</td>
+                        <td>~(Contact 1 Parent Portal Account;t)</td>
+                        <td>~(Contact 1 Employer;t)</td>
+                        <td>~(Contact 1 Religion;t)</td>
+                        <td>~(Contact 1 Parish;t)</td>
+                        <td>~(Contact 1 Parish City;t)</td>
+                        <td>~(Contact 1 Parish State;t)</td>
+                        <td>~(Contact 2 is Active;t)</td>
+                        <td>~(Contact 2 Living or Deceased;t)</td>
+                        <td>~(Contact 2 Relationship;t)</td>
+                        <td>~(Contact 2 Prefix;t)</td>
+                        <td>~(Contact 2 First Name;t)</td>
+                        <td>~(Contact 2 Middle Name;t)</td>
+                        <td>~(Contact 2 Last Name;t)</td>
+                        <td>~(Contact 2 Maiden Name;t)</td>
+                        <td>~(Contact 2 Suffix;t)</td>
+                        <td>~(Contact 2 First Last;t)</td>
+                        <td>~(Contact 2 Gender;t)</td>
+                        <td>~(Contact 2 Phone numbers;t)</td>
+                        <td>~(Contact 2 Email Adresses;t)</td>
+                        <td>~(Contact 2 Home Street;t)</td>
+                        <td>~(Contact 2 Home City;t)</td>
+                        <td>~(Contact 2 Home State;t)</td>
+                        <td>~(Contact 2 Home Zip)</td>
+                        <td>~(Contact 2 Mailing Street;t)</td>
+                        <td>~(Contact 2 Mailing City;t)</td>
+                        <td>~(Contact 2 Mailing State;t)</td>
+                        <td>~(Contact 2 Mailing Zip)</td>
+                        <td>~(Contact 2 Has Custody;t)</td>
+                        <td>~(Contact 2 Lives With;t)</td>
+                        <td>~(Contact 2 Recieves Mail;t)</td>
+                        <td>~(Contact 2 Emergency Contact;t)</td>
+                        <td>~(Contact 2 School Pickup;t)</td>
+                        <td>~(Contact 2 Parent Portal Account;t)</td>
+                        <td>~(Contact 2 Employer;t)</td>
+                        <td>~(Contact 2 Religion;t)</td>
+                        <td>~(Contact 2 Parish;t)</td>
+                        <td>~(Contact 2 Parish City;t)</td>
+                        <td>~(Contact 2 Parish State;t)</td>
+                        <td>~(Contact 3 is Active;t)</td>
+                        <td>~(Contact 3 Living or Deceased;t)</td>
+                        <td>~(Contact 3 Relationship;t)</td>
+                        <td>~(Contact 3 Prefix;t)</td>
+                        <td>~(Contact 3 First Name;t)</td>
+                        <td>~(Contact 3 Middle Name;t)</td>
+                        <td>~(Contact 3 Last Name;t)</td>
+                        <td>~(Contact 3 Maiden Name;t)</td>
+                        <td>~(Contact 3 Suffix;t)</td>
+                        <td>~(Contact 3 First Last;t)</td>
+                        <td>~(Contact 3 Gender;t)</td>
+                        <td>~(Contact 3 Phone numbers;t)</td>
+                        <td>~(Contact 3 Email Adresses;t)</td>
+                        <td>~(Contact 3 Home Street;t)</td>
+                        <td>~(Contact 3 Home City;t)</td>
+                        <td>~(Contact 3 Home State;t)</td>
+                        <td>~(Contact 3 Home Zip)</td>
+                        <td>~(Contact 3 Mailing Street;t)</td>
+                        <td>~(Contact 3 Mailing City;t)</td>
+                        <td>~(Contact 3 Mailing State;t)</td>
+                        <td>~(Contact 3 Mailing Zip)</td>
+                        <td>~(Contact 3 Has Custody;t)</td>
+                        <td>~(Contact 3 Lives With;t)</td>
+                        <td>~(Contact 3 Recieves Mail;t)</td>
+                        <td>~(Contact 3 Emergency Contact;t)</td>
+                        <td>~(Contact 3 School Pickup;t)</td>
+                        <td>~(Contact 3 Parent Portal Account;t)</td>
+                        <td>~(Contact 3 Employer;t)</td>
+                        <td>~(Contact 3 Religion;t)</td>
+                        <td>~(Contact 3 Parish;t)</td>
+                        <td>~(Contact 3 Parish City;t)</td>
+                        <td>~(Contact 3 Parish State;t)</td>
+                        <td>~(Contact 4 is Active;t)</td>
+                        <td>~(Contact 4 Living or Deceased;t)</td>
+                        <td>~(Contact 4 Relationship;t)</td>
+                        <td>~(Contact 4 Prefix;t)</td>
+                        <td>~(Contact 4 First Name;t)</td>
+                        <td>~(Contact 4 Middle Name;t)</td>
+                        <td>~(Contact 4 Last Name;t)</td>
+                        <td>~(Contact 4 Maiden Name;t)</td>
+                        <td>~(Contact 4 Suffix;t)</td>
+                        <td>~(Contact 4 First Last;t)</td>
+                        <td>~(Contact 4 Gender;t)</td>
+                        <td>~(Contact 4 Phone numbers;t)</td>
+                        <td>~(Contact 4 Email Adresses;t)</td>
+                        <td>~(Contact 4 Home Street;t)</td>
+                        <td>~(Contact 4 Home City;t)</td>
+                        <td>~(Contact 4 Home State;t)</td>
+                        <td>~(Contact 4 Home Zip)</td>
+                        <td>~(Contact 4 Mailing Street;t)</td>
+                        <td>~(Contact 4 Mailing City;t)</td>
+                        <td>~(Contact 4 Mailing State;t)</td>
+                        <td>~(Contact 4 Mailing Zip)</td>
+                        <td>~(Contact 4 Has Custody;t)</td>
+                        <td>~(Contact 4 Lives With;t)</td>
+                        <td>~(Contact 4 Recieves Mail;t)</td>
+                        <td>~(Contact 4 Emergency Contact;t)</td>
+                        <td>~(Contact 4 School Pickup;t)</td>
+                        <td>~(Contact 4 Parent Portal Account;t)</td>
+                        <td>~(Contact 4 Employer;t)</td>
+                        <td>~(Contact 4 Religion;t)</td>
+                        <td>~(Contact 4 Parish;t)</td>
+                        <td>~(Contact 4 Parish City;t)</td>
+                        <td>~(Contact 4 Parish State;t)</td>
+                        <td>~(Contact 5 is Active;t)</td>
+                        <td>~(Contact 5 Living or Deceased;t)</td>
+                        <td>~(Contact 5 Relationship;t)</td>
+                        <td>~(Contact 5 Prefix;t)</td>
+                        <td>~(Contact 5 First Name;t)</td>
+                        <td>~(Contact 5 Middle Name;t)</td>
+                        <td>~(Contact 5 Last Name;t)</td>
+                        <td>~(Contact 5 Maiden Name;t)</td>
+                        <td>~(Contact 5 Suffix;t)</td>
+                        <td>~(Contact 5 First Last;t)</td>
+                        <td>~(Contact 5 Gender;t)</td>
+                        <td>~(Contact 5 Phone numbers;t)</td>
+                        <td>~(Contact 5 Email Adresses;t)</td>
+                        <td>~(Contact 5 Home Street;t)</td>
+                        <td>~(Contact 5 Home City;t)</td>
+                        <td>~(Contact 5 Home State;t)</td>
+                        <td>~(Contact 5 Home Zip)</td>
+                        <td>~(Contact 5 Mailing Street;t)</td>
+                        <td>~(Contact 5 Mailing City;t)</td>
+                        <td>~(Contact 5 Mailing State;t)</td>
+                        <td>~(Contact 5 Mailing Zip)</td>
+                        <td>~(Contact 5 Has Custody;t)</td>
+                        <td>~(Contact 5 Lives With;t)</td>
+                        <td>~(Contact 5 Recieves Mail;t)</td>
+                        <td>~(Contact 5 Emergency Contact;t)</td>
+                        <td>~(Contact 5 School Pickup;t)</td>
+                        <td>~(Contact 5 Parent Portal Account;t)</td>
+                        <td>~(Contact 5 Employer;t)</td>
+                        <td>~(Contact 5 Religion;t)</td>
+                        <td>~(Contact 5 Parish;t)</td>
+                        <td>~(Contact 5 Parish City;t)</td>
+                        <td>~(Contact 5 Parish State;t)</td>
+                        <td>~(Contact 6 is Active;t)</td>
+                        <td>~(Contact 6 Living or Deceased;t)</td>
+                        <td>~(Contact 6 Relationship;t)</td>
+                        <td>~(Contact 6 Prefix;t)</td>
+                        <td>~(Contact 6 First Name;t)</td>
+                        <td>~(Contact 6 Middle Name;t)</td>
+                        <td>~(Contact 6 Last Name;t)</td>
+                        <td>~(Contact 6 Maiden Name;t)</td>
+                        <td>~(Contact 6 Suffix;t)</td>
+                        <td>~(Contact 6 First Last;t)</td>
+                        <td>~(Contact 6 Gender;t)</td>
+                        <td>~(Contact 6 Phone numbers;t)</td>
+                        <td>~(Contact 6 Email Adresses;t)</td>
+                        <td>~(Contact 6 Home Street;t)</td>
+                        <td>~(Contact 6 Home City;t)</td>
+                        <td>~(Contact 6 Home State;t)</td>
+                        <td>~(Contact 6 Home Zip)</td>
+                        <td>~(Contact 6 Mailing Street;t)</td>
+                        <td>~(Contact 6 Mailing City;t)</td>
+                        <td>~(Contact 6 Mailing State;t)</td>
+                        <td>~(Contact 6 Mailing Zip)</td>
+                        <td>~(Contact 6 Has Custody;t)</td>
+                        <td>~(Contact 6 Lives With;t)</td>
+                        <td>~(Contact 6 Recieves Mail;t)</td>
+                        <td>~(Contact 6 Emergency Contact;t)</td>
+                        <td>~(Contact 6 School Pickup;t)</td>
+                        <td>~(Contact 6 Parent Portal Account;t)</td>
+                        <td>~(Contact 6 Employer;t)</td>
+                        <td>~(Contact 6 Religion;t)</td>
+                        <td>~(Contact 6 Parish;t)</td>
+                        <td>~(Contact 6 Parish City;t)</td>
+                        <td>~(Contact 6 Parish State;t)</td>
+                        <td>~(Next School;t)</td>
+                        <td>~(School;t)</td>
+                    </tr>
+                    [/tlist_sql]
+                </tbody>
+            </table>
+        </div>
+        [/if#showData]
+        <!-- end of content of bounding box -->
+        ~[wc:admin_footer_frame_css]
+    </body>
+
+</html><!-- end right frame -->
