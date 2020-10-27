@@ -133,8 +133,9 @@
                     on s_usr_ncea_x.usersdcid = users.DCID
                     left join userscorefields
                     on userscorefields.usersdcid = users.dcid
-                    where status = '1'
-                    and schoolid <> '0'
+                    where
+                    --status = '1' and
+                    schoolid <> '0'
                         ~[if.is.a.school] AND schoolid = ~(curschoolid) [/if.is.a.school]
                         and (s_ssf_ncea_x.excludefromncea_tf = '0'
                         or s_ssf_ncea_x.excludefromncea_tf IS NULL)) a
