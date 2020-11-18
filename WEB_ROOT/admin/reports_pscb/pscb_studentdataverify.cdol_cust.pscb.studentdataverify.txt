@@ -14,6 +14,12 @@
 		<td>List Name, DOB, Grade Level, Gender, Address, Phone Number, Adults Students Live With for LPS
 		</td>
 	</tr>
+	<tr id="NPDEF">
+		<td><a href="/admin/reports_pscb/studentdataverify/cdol_npdef.html">Non-Public Digital Equity Report</a></td>
+		<td>List NDE Student Id#, Student First name, last name, address, city, state, zip, grade level, teacher last
+			name and first name for Non-Public Digital Equity File Upload Collection for the NDE
+		</td>
+	</tr>
 </table>
 
 <script>
