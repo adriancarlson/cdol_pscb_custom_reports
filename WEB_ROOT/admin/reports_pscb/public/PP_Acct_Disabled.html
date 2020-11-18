@@ -101,7 +101,7 @@
                     ,s.grade_level
                     ,CASE WHEN s.AllowWebAccess = 0 THEN 'Yes' WHEN s.AllowWebAccess = 1 THEN 'NO' END as
                     Parent_Access_Disabled
-                    ,CASE WHEN s.Student_AllowWebAccess = 0 THEN 'Yes' WHEN s.Student_AllowWebAccess = 1 THEN 'NO' END
+                    ,CASE WHEN s.Student_AllowWebAccess = 0 THEN 'Yes' WHEN s.Student_AllowWebAccess = 1 THEN 'No' END
                     as Student_Access_Disabled
                     FROM
                     Students s
