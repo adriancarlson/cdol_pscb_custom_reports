@@ -29,7 +29,6 @@
 		<td><a href="/admin/reports_pscb/misc/student_alerts_list.html">Student Alerts List</a></td>
 		<td>View student list for a selected Alert type.</td>
 	</tr>
-	[/if]
 	<tr id="raceReligion">
 		<td><a href="/admin/reports_pscb/studentdataverify/cdol_race_religion.html">Race / Religion</a></td>
 		<td>List students with their race and religion</td>
