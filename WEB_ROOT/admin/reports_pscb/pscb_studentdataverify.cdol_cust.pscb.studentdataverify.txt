@@ -48,6 +48,10 @@
 		<td><a href="/admin/reports_pscb/studentdataverify/cdol_student_languages.html">Student Languages</a></td>
 		<td>List students Home, First, and Primary Languages</td>
 	</tr>
+	<tr id="sAgreements">
+		<td><a href="/admin/reports_pscb/studentdataverify/cdol_agreements.html">Student Agreements</a></td>
+		<td>List Student Agreements</td>
+	</tr>
 	<tr id="sEmail">
 		<td><a href="/admin/reports_pscb/studentdataverify/cdol_student_email.html">Student Email</a></td>
 		<td>List of students and their emails</td>
