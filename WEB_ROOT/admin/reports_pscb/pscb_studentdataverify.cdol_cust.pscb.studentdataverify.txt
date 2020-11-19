@@ -54,7 +54,12 @@
 	</tr>
 	<tr id="sSacraments">
 		<td><a href="/admin/reports_pscb/studentdataverify/cdol_sacraments.html">Student Sacraments</a></td>
-		<td>List Student Agreements</td>
+		<td>List student's religion, parish information, sacraments and dates of sacraments</td>
+	</tr>
+	<tr id="sDistricts">
+		<td><a href="/admin/reports_pscb/studentdataverify/cdol_public_school_districts.html">Public School
+				Districts</a></td>
+		<td>List Students according to their Public School Districts</td>
 	</tr>
 	<tr id="sEmail">
 		<td><a href="/admin/reports_pscb/studentdataverify/cdol_student_email.html">Student Email</a></td>
