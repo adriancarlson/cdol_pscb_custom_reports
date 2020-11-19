@@ -17,7 +17,8 @@
         ~[wc:admin_header_frame_css]
         <!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a> &gt; <a
             href="/admin/reports_pscb/pscb_home.html" target="_top">PSCB Custom Reports</a> &gt; <a
-            href="/admin/reports_pscb/pscb_students.html" target="_top">Students</a> &gt; Student Languages
+            href="/admin/reports_pscb/pscb_studentdataverify.html" target="_top">Student Data Verification</a> &gt;
+        Student Languages
         <!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
         <!-- start of Options -->
         <h1>Student Languages</h1>
@@ -101,7 +102,11 @@
                     WHEN TO_CHAR(s.grade_level) = 99 then 'Graduated'
                     ELSE TO_CHAR(s.grade_level)
                     END as PRETTY_GRADE,
-                    s.gender,
+                    CASE
+                    WHEN UPPER(s.gender) = 'M' THEN 'Male'
+                    WHEN UPPER(s.gender) = 'F' THEN 'Female'
+                    ELSE s.gender
+                    END as GENDER,
                     AD.HOME_LANGUAGE,
                     AD.FIRST_LANGUAGE,
                     AD.PRIMARY_LANGUAGE,
@@ -123,8 +128,8 @@
                                 target="_blank">~(studentnumb)</a>
                         </td>
                         <td>~(name;t)</td>
-                        <td>~(grade_level)</td>
-                        <td>~(gender;t)</td>
+                        <td class="center">~(grade_level)</td>
+                        <td class="center">~(gender;t)</td>
                         <td class="nowrap">~(homel;t)</td>
                         <td class="nowrap">~(firstl;t)</td>
                         <td class="nowrap">~(primaryl;t)</td>
