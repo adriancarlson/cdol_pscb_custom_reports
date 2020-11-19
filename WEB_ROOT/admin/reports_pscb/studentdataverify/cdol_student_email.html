@@ -89,6 +89,7 @@
                 <tbody>
                     ~[tlist_sql;
                     SELECT
+                    s.dcid,
                     s.student_number,
                     s.lastfirst,
                     CASE
@@ -113,11 +114,10 @@
                     ~[if#gr.~(gpv.gr;sqlText)#] AND s.grade_level = ~(gpv.gr) [/if#gr]
                     ORDER BY sch.abbreviation, s.lastfirst
                     ;]
-                    <tr>
+                    <tr data-StudentID="~(dcid)">
                         <td class="nowrap">~(studentnumb)</td>
                         <td>~(name;t)</td>
                         <td class="center">~(grade_level)</td>
-                        <td>~(gender;t)</td>
                         <td class="nowrap">~(email;t)</td>
                         <td>~(school;t)</td>
                     </tr>
