@@ -52,6 +52,10 @@
 		<td><a href="/admin/reports_pscb/studentdataverify/cdol_agreements.html">Student Agreements</a></td>
 		<td>List Student Agreements</td>
 	</tr>
+	<tr id="sSacraments">
+		<td><a href="/admin/reports_pscb/studentdataverify/cdol_sacraments.html">Student Sacraments</a></td>
+		<td>List Student Agreements</td>
+	</tr>
 	<tr id="sEmail">
 		<td><a href="/admin/reports_pscb/studentdataverify/cdol_student_email.html">Student Email</a></td>
 		<td>List of students and their emails</td>
