@@ -48,11 +48,17 @@
 		<td><a href="/admin/reports_pscb/studentdataverify/cdol_student_languages.html">Student Languages</a></td>
 		<td>List students Home, First, and Primary Languages</td>
 	</tr>
+	<tr id="sEmail">
+		<td><a href="/admin/reports_pscb/studentdataverify/cdol_student_email.html">Student Email</a></td>
+		<td>List of students and their emails</td>
+	</tr>
 </table>
 
 <script>
 	/*checks to make sure page is loaded */
 	$j(document).ready(function () {
 		$j('.box-round').append($j('#bottomTable'));
+		var sEmail = $j('#sEmail').closest('tr');
+		$j("td:contains('Email / Physical / Mailing Address')").closest('tr').before(sEmail);
 	});
 </script>

@@ -3,7 +3,7 @@
     <!-- non framed -->
 
     <head>
-        <title>Student Languages</title>
+        <title>Student Email</title>
         ~[wc:commonscripts]
         <link href="/images/css/screen.css" rel="stylesheet" media="screen">
         <link href="/images/css/print.css" rel="stylesheet" media="print">
@@ -18,10 +18,10 @@
         <!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a> &gt; <a
             href="/admin/reports_pscb/pscb_home.html" target="_top">PSCB Custom Reports</a> &gt; <a
             href="/admin/reports_pscb/pscb_studentdataverify.html" target="_top">Student Data Verification</a> &gt;
-        Student Languages
+        Student Email
         <!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
         <!-- start of Options -->
-        <h1>Student Languages</h1>
+        <h1>Student Email</h1>
         <form name="searchform" action="#" method="POST">
             <div class="box-round" style="overflow: hidden;">
                 <h2>Report Filters</h2>
@@ -75,24 +75,20 @@
         <!-- Start of Results -->
         ~[if#showData.~(gpv.showData;sqlText)=1]
         <div class="box-round">
-            <h2>Student Languages</h2>
+            <h2>Student Email</h2>
             <table border="0" cellspacing="0" cellpadding="4" align="center" class="tablesorter grid" id="results">
                 <thead>
                     <tr>
                         <th class="left">Student Number</th>
                         <th class="left">Name</th>
                         <th class="left filter-select">Grade Level</th>
-                        <th class="left filter-select">Gender</th>
-                        <th class="left filter-select">Home Language</th>
-                        <th class="left filter-select">First Language</th>
-                        <th class="left filter-select">Primary Language</th>
+                        <th class="left">Email</th>
                         <th class="left ">School</th>
                     </tr>
                 </thead>
                 <tbody>
                     ~[tlist_sql;
                     SELECT
-                    s.dcid,
                     s.student_number,
                     s.lastfirst,
                     CASE
@@ -102,37 +98,27 @@
                     WHEN TO_CHAR(s.grade_level) = 99 then 'Graduated'
                     ELSE TO_CHAR(s.grade_level)
                     END as PRETTY_GRADE,
-                    CASE
-                    WHEN UPPER(s.gender) = 'M' THEN 'Male'
-                    WHEN UPPER(s.gender) = 'F' THEN 'Female'
-                    ELSE s.gender
-                    END as GENDER,
-                    AD.HOME_LANGUAGE,
-                    AD.FIRST_LANGUAGE,
-                    AD.PRIMARY_LANGUAGE,
+                    psc.email,
                     sch.abbreviation
-                    FROM Students s
+                    FROM PSM_STudentcontact psc
+                    inner join psm_studentcontacttype psct on psc.studentcontacttypeid= psct.id and psct.name='Self'
+                    inner join sync_studentmap ssm on psc.studentid = ssm.studentid
+                    inner join students s on ssm.studentsdcid = s.dcid
                     ~[if#ss.~(gpv.ss;sqlText)=cur] INNER JOIN ~[temp.table.current.selection:students] temp ON (s.dcid =
                     temp.dcid)
                     [/if#ss]
                     JOIN schools sch ON (s.schoolid = sch.school_number)
-                    LEFT JOIN U_STUDENT_ADDITIONAL_INFO AD
-                    ON AD.STUDENTSDCID = s.DCID
                     WHERE s.enroll_status in (-1,0)
                     ~[if.is.a.school] AND s.schoolid = ~(curschoolid) [/if.is.a.school]
                     ~[if#gr.~(gpv.gr;sqlText)#] AND s.grade_level = ~(gpv.gr) [/if#gr]
                     ORDER BY sch.abbreviation, s.lastfirst
                     ;]
-                    <tr data-StudentID="~(dcid)">
-                        <td class="nowrap"><a href="/admin/students/studentpages/language.html?frn=001~(dcid)"
-                                target="_blank">~(studentnumb)</a>
-                        </td>
+                    <tr>
+                        <td class="nowrap">~(studentnumb)</td>
                         <td>~(name;t)</td>
                         <td class="center">~(grade_level)</td>
                         <td>~(gender;t)</td>
-                        <td class="nowrap">~(homel;t)</td>
-                        <td class="nowrap">~(firstl;t)</td>
-                        <td class="nowrap">~(primaryl;t)</td>
+                        <td class="nowrap">~(email;t)</td>
                         <td>~(school;t)</td>
                     </tr>
                     [/tlist_sql]
