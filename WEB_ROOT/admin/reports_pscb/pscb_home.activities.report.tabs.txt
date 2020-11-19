@@ -1,0 +1,9 @@
+
+<tr class="~[evenoddrow]">
+    <td>
+        <a href="/admin/reports_pscb/pscb_activities.html">Activities</a>
+    </td>
+    <td>
+        Custom CDOL Activities reports.
+    </td>
+</tr>
