@@ -90,8 +90,7 @@
                 </thead>
                 <tbody>
                     ~[tlist_sql;
-                    SELECT
-                    DISTINCT
+                    SELECT DISTINCT
                     s.dcid,
                     s.student_number,
                     s.lastfirst,
@@ -113,7 +112,7 @@
                     FROM Students s
                     ~[if#ss.~(gpv.ss;sqlText)=cur] INNER JOIN ~[temp.table.current.selection:students] temp ON (s.dcid =
                     temp.dcid)[/if#ss]
-                    JJOIN schools sch ON (s.schoolid = sch.school_number)
+                    JOIN schools sch ON (s.schoolid = sch.school_number)
                     LEFT JOIN studentcontactassoc sca ON (s.dcid = sca.studentdcid)
                     LEFT JOIN studentcontactdetail scd ON (sca.studentcontactassocid = scd.studentcontactassocid)
                     LEFT JOIN u_studentcontactdetail_cdol uscd ON scd.studentcontactdetailid =
@@ -132,7 +131,8 @@
                     AND u.PERSON_MAIDEN_NAME IS NOT NULL
                     ~[if.is.a.school] AND s.schoolid = ~(curschoolid) [/if.is.a.school]
                     ~[if#gr.~(gpv.gr;sqlText)#] AND s.grade_level = ~(gpv.gr) [/if#gr]
-                    ORDER BY sch.name, s.lastfirst, sca.contactpriorityorder;]
+                    ORDER BY sch.name, s.lastfirst, sca.contactpriorityorder
+                    ;]
                     <tr data-StudentID="~(dcid)">
                         <td class="nowrap"><a href="/admin/students/contacts.html?frn=001~(dcid)"
                                 target="_blank">~(stunum)</a>
