@@ -90,7 +90,7 @@
                 </thead>
                 <tbody>
                     ~[tlist_sql;
-                    SELECT DISTINCT
+                    SELECT
                     s.dcid,
                     s.student_number,
                     s.lastfirst,
@@ -104,7 +104,7 @@
                     sca.contactpriorityorder as pcontactorder,
                     cs.code Relationship,
                     p.id,
-                    NVL(precs.code, '') || p.firstname || ' ' || NVL(p.middlename, '') || p.lastname || ' ' ||
+                    NVL(precs.code, '') || p.firstname || ' ' || NVL(p.middlename, '') || ' ' || p.lastname || ' ' ||
                     NVL(sufcs.code, '') as
                     person_name,
                     u.PERSON_MAIDEN_NAME,
@@ -127,6 +127,7 @@
                     LEFT JOIN guardianstudent gs ON (s.dcid = gs.studentsdcid AND gp.guardianid = gs.guardianid)
                     LEFT JOIN U_PERSON_ADDITIONAL_INFO U ON (p.ID = u.personid)
                     WHERE cs.codesetid != 32
+                    AND s.enroll_status in (-1,0)
                     AND gcs.displayvalue ='Female'
                     AND u.PERSON_MAIDEN_NAME IS NOT NULL
                     ~[if.is.a.school] AND s.schoolid = ~(curschoolid) [/if.is.a.school]
@@ -143,7 +144,7 @@
                         <td>~(relationship;t)</td>
                         <td class="nowrap"><a href="/admin/contacts/edit.html#?contactid=~(cid)"
                                 target="_blank">~(contact;t)</a></td>
-                        <td class="nowrap">~(madienname;t)</td>
+                        <td class="nowrap">~(maidenname;t)</td>
                         <td class="nowrap">~(school;t)</td>
                     </tr>
                     [/tlist_sql]
