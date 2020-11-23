@@ -116,7 +116,7 @@
                     LEFT JOIN S_NE_SCH_X ON SCHOOLS.DCID = S_NE_SCH_X.SCHOOLSDCID
                     LEFT JOIN U_SCHOOLS ON SCHOOLS.DCID = U_SCHOOLS.SCHOOLSDCID
                     LEFT JOIN codeset on schools.schoolcategorycodesetid = codeset.codesetid
-                    where schools.schoolid = ~(curschoolid)
+                    where schools.school_number = ~(curschoolid)
                     order by schools.sortorder
                     ;alternatecolor;nonemessage=
                     <tr>
