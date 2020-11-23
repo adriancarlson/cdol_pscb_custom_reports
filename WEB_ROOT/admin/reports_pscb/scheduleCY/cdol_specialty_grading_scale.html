@@ -30,7 +30,6 @@
 							<th class="left">Teacher</th>
 							<th class="left">Department</th>
 							<th class="left">Course Name</th>
-							<th class="left">Room</th>
 							<th width="100%">Term</th>
 						</tr>
 					</thead>
@@ -77,17 +76,6 @@
 								</select>
 							</td>
 							<td valign="top" nowrap>
-								<select id="room" name="room">
-									<option value="" ~[if.~(gpv.room)=]selected[/if]>All Rooms
-										~[tlist_sql;SELECT DISTINCT Upper(room) AS room_value, CASE WHEN Upper(room) =
-										'~(gpv.room;sqlText)' THEN 'selected' ELSE '' END AS isselected, Upper(room) AS
-										room FROM ps.sections WHERE schoolid = ~(curschoolid) AND termid >=
-										~(curyearid)00 AND termid < (~(curyearid)00 + 100) ORDER BY room] <option
-											value="~(room_value;t)" ~(isselected;t)>~(room)
-											[/tlist_sql]
-								</select>
-							</td>
-							<td valign="top" nowrap>
 								<select id="term" name="term">
 									<option value="" ~[if.~(gpv.term)=]selected[/if]>All Terms
 										~[tlist_sql;SELECT id, CASE WHEN id = '~(gpv.term;sqlText)' THEN 'selected' ELSE
@@ -118,41 +106,29 @@
 				<thead>
 					<tr>
 						<th class="left filter-select">Term</th>
-						<th class="left">Course Number</th>
-						<th class="left">Section Number</th>
-						<th class="left filter-select">Course Name</th>
 						<th class="left">Expression</th>
+						<th class="left">Course.Section</th>
+						<th class="left filter-select">Course Name</th>
 						<th class="left filter-select">Teacher</th>
 						<th class="left filter-select">Grade Scale</th>
-						<th class="left filter-select">Department</th>
-						<th class="left filter-select">Room</th>
 					</tr>
 				</thead>
 				<tbody>
 					~[tlist_sql;
 					SELECT
 					trm.abbreviation AS term,
-					sect.course_number,
-					sect.section_number,
-					c.course_name,
 					sect.expression,
+					sect.course_number || '.' ||sect.section_number,
+					c.course_name,
 					t.lastfirst teacher_name,
-					c.sched_department dept,
 					sect.teacher,
-					sect.room,
-					sect.gradescaleid,
-					CASE WHEN sect.GradescaleID = 124 and sect.SCHOOLID = 101 THEN 'AP Grading Scale' WHEN
-					sect.GradescaleID = 124 and
-					sect.SCHOOLID = 130 THEN '10 Point Scale' WHEN sect.GradescaleID = 139 THEN 'H, DW, S, NI, E' WHEN
-					sect.GradescaleID =
-					423 THEN 'Pass/Fail'WHEN sect.GradescaleID = 425 THEN 'Pass/Fail' ELSE 'Unknown' END AS Grade_Scale
+					gs.name
 					FROM sections sect
 					LEFT OUTER JOIN courses c ON c.course_number = sect.course_number
 					LEFT OUTER JOIN teachers t ON t.id = sect.teacher
 					LEFT OUTER JOIN terms Trm ON sect.termid = trm.id AND sect.schoolid = trm.schoolid
-					LEFT OUTER JOIN PSM_GradeScale ON sect.gradescaleid = PSM_GradeScale.id
-					WHERE sect.GradescaleID NOT IN (0,1,523,624)
-					AND sect.schoolid = ~(curschoolid)
+					LEFT OUTER JOIN GradeScaleItem gs ON sect.gradescaleid = gs.dcid
+					WHERE sect.schoolid = ~(curschoolid)
 					AND sect.termid BETWEEN ~(v.ayearid)00 AND ~(v.ayearid)99
 					~[if.~(gpv.teacher)#] AND sect.teacher = ~(gpv.teacher;sqlText)[/if]
 					~[if.~(gpv.dept)#] AND Upper(c.sched_department) = Upper('~(gpv.dept;sqlText)')[/if]
@@ -164,14 +140,11 @@
 					</tr>]
 					<tr class="Record">
 						<td>~(term;t)</td>
-						<td>~(Course#)</td>
-						<td>~(Section#)</td>
-						<td>~(course_name;t)</td>
 						<td>~(expression;t;externalExpression)</td>
+						<td>~(Course.section)</td>
+						<td>~(course_name;t)</td>
 						<td>~(teacher_name;t)</td>
 						<td>~(gradeScale;t)</td>
-						<td>~(dept;t)</td>
-						<td>~(room;t)</td>
 					</tr>
 					[/tlist_sql]
 				</tbody>
