@@ -7,6 +7,10 @@
 		<td><a href="/admin/reports_pscb/scheduleCY/CDOL_StudentsDoubleBooked.html">Students - Double Booked</a></td>
 		<td>Lists students with two or more sections scheduled during the same period at the same term.</td>
 	</tr>
+	<tr id="sectionsSpecialty">
+		<td><a href="/admin/reports_pscb/scheduleCY/cdol_specialty_grading_scale.html">Sections - Specialty Grading Scales</a></td>
+		<td>List all of the sections at your school that have the Specialty Grading Scale. H, DW, S, NI, E</td>
+	</tr>
 </table>
 
 <script>
@@ -18,6 +22,8 @@
 		/* insert custom CDOL fields onto the page. */
 		var studentDoubleBooked = $j('#studentDoubleBooked').closest('tr');
 		$j("td:contains('Students - Non Scheduled Periods')").closest('tr').after(studentDoubleBooked);
+		var sectionsSpecialty = $j('#sectionsSpecialty').closest('tr');
+		$j("td:contains('Sections - No Room Assigned')").closest('tr').after(sectionsSpecialty);
 		/* remove the hidden tables  and divs */
 		$j("#hiddenTable").remove();
 	});

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+	<!-- non framed -->
+
+	<head>
+		<title>Sections - Specialty Grading Scale</title>
+		~[wc:commonscripts]
+		<link href="/images/css/screen.css" rel="stylesheet" media="screen">
+		<link href="/images/css/print.css" rel="stylesheet" media="print">
+		~[wc:pscb_init]
+	</head>
+
+	<body>
+		~[wc:admin_header_frame_css]
+		<!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a> &gt; <a
+			href="/admin/reports_pscb/pscb_home.html">PSCB Custom Reports</a> &gt; <a
+			href="/admin/reports_pscb/pscb_scheduleCY.html">Scheduling (Current Year)</a> &gt; Sections - Specialty
+		Grading Scale
+		<!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
+
+
+		<!-- start of Report Filters -->
+		<h1>Sections - Specialty Grading Scale</h1>
+		<form id="rptFilters" action="#" method="POST">
+			<div class="box-round" style="overflow: hidden;">
+				<h2>Report Filters</h2>
+				<table border="0" cellspacing="0" cellpadding="0" class="linkDescList">
+					<thead>
+						<tr>
+							<th class="left">Teacher</th>
+							<th class="left">Department</th>
+							<th class="left">Course Name</th>
+							<th class="left">Room</th>
+							<th width="100%">Term</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							~[f.variable_create;name=ayearid;type=TEXT;when=NEVER]
+							~(f.variable_set;name=ayearid;value=~(curyearid))
+							<td valign="top" nowrap>
+								<select id="teacher" name="teacher">
+									<option value="" ~[if.~(gpv.teacher)=]selected[/if]>All Teachers
+										~[tlist_sql;SELECT DISTINCT t.id, CASE WHEN t.id = '~(gpv.teacher;sqlText)' THEN
+										'selected' ELSE '' END AS isselected, t.lastfirst FROM ps.sections sect INNER
+										JOIN ps.teachers t ON t.id = sect.teacher AND t.schoolid = sect.schoolid WHERE
+										sect.schoolid = ~(curschoolid) AND sect.termid >= ~(curyearid)00 AND sect.termid
+										< (~(curyearid)00 + 100) ORDER BY t.lastfirst] <option value="~(t.id)"
+											~(isselected;t)>~(t.lastfirst; t)
+											[/tlist_sql]
+								</select>
+							</td>
+							<td valign="top" nowrap>
+								<select id="dept" name="dept">
+									<option value="" ~[if.~(gpv.dept)=]selected[/if]>All Departments
+										~[tlist_sql;SELECT DISTINCT Upper(c.sched_department) AS dept_value, CASE WHEN
+										Upper(sched_department) = '~(gpv.dept;sqlText)' THEN 'selected' ELSE '' END AS
+										isselected, Upper(c.sched_department) AS dept FROM ps.sections sect INNER JOIN
+										ps.courses c ON sect.course_number = c.course_number WHERE sect.schoolid =
+										~(curschoolid) AND sect.termid >= ~(curyearid)00 AND sect.termid <
+											(~(curyearid)00 + 100) ORDER BY dept] <option value="~(dept_value;t)"
+											~(isselected;t)>~(dept;t)
+											[/tlist_sql]
+								</select>
+							</td>
+							<td valign="top" nowrap>
+								<select id="cn" name="cn">
+									<option value="" ~[if.~(gpv.cn)=]selected[/if]>All Courses
+										~[tlist_sql;SELECT DISTINCT Upper(c.course_name) AS course_name_value, CASE WHEN
+										Upper(c.course_name) = '~(gpv.cn;sqlText)' THEN 'selected' ELSE '' END AS
+										isselected, Upper(c.course_name) AS course_name FROM ps.sections sect INNER JOIN
+										ps.courses c ON sect.course_number = c.course_number WHERE sect.schoolid =
+										~(curschoolid) AND sect.termid >= ~(curyearid)00 AND sect.termid <
+											(~(curyearid)00 + 100) ORDER BY Course_Name] <option
+											value="~(course_name_value;t)" ~(isselected;t)>~(course_name;t)
+											[/tlist_sql]
+								</select>
+							</td>
+							<td valign="top" nowrap>
+								<select id="room" name="room">
+									<option value="" ~[if.~(gpv.room)=]selected[/if]>All Rooms
+										~[tlist_sql;SELECT DISTINCT Upper(room) AS room_value, CASE WHEN Upper(room) =
+										'~(gpv.room;sqlText)' THEN 'selected' ELSE '' END AS isselected, Upper(room) AS
+										room FROM ps.sections WHERE schoolid = ~(curschoolid) AND termid >=
+										~(curyearid)00 AND termid < (~(curyearid)00 + 100) ORDER BY room] <option
+											value="~(room_value;t)" ~(isselected;t)>~(room)
+											[/tlist_sql]
+								</select>
+							</td>
+							<td valign="top" nowrap>
+								<select id="term" name="term">
+									<option value="" ~[if.~(gpv.term)=]selected[/if]>All Terms
+										~[tlist_sql;SELECT id, CASE WHEN id = '~(gpv.term;sqlText)' THEN 'selected' ELSE
+										'' END AS isselected, Upper(Abbreviation) AS term FROM ps.terms WHERE schoolid =
+										~(curschoolid) AND YearID = ~(v.ayearid) ORDER BY term]
+									<option value="~(id)" ~(isselected;t)>~(term)
+										[/tlist_sql]
+								</select>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+				<div class="button-row" style="float: left;">
+					<input type="hidden" name="showData" value="1">
+					<button type="submit" id="btnSubmit" name="btnSubmit" onClick="actionChange()"
+						style="float: left;">Submit</button>
+					<font color="red">&nbsp;&nbsp;Select parameters and click submit</font>
+				</div>
+			</div>
+		</form>
+		<!-- End  of Report Filters -->
+
+		<!-- Start of Results -->
+		~[if#showData.~(gpv.showData)=1]
+		<div class="box-round">
+			<h2>Sections List</h2>
+			<table border="0" cellspacing="0" cellpadding="0" class="tablesorter grid" id="results">
+				<thead>
+					<tr>
+						<th class="left filter-select">Term</th>
+						<th class="left">Course Number</th>
+						<th class="left">Section Number</th>
+						<th class="left filter-select">Course Name</th>
+						<th class="left">Expression</th>
+						<th class="left filter-select">Teacher</th>
+						<th class="left filter-select">Grade Scale</th>
+						<th class="left filter-select">Department</th>
+						<th class="left filter-select">Room</th>
+					</tr>
+				</thead>
+				<tbody>
+					~[tlist_sql;
+					SELECT
+					trm.abbreviation AS term,
+					sect.course_number,
+					sect.section_number,
+					c.course_name,
+					sect.expression,
+					t.lastfirst teacher_name,
+					c.sched_department dept,
+					sect.teacher,
+					sect.room,
+					sect.gradescaleid,
+					CASE WHEN sect.GradescaleID = 124 and sect.SCHOOLID = 101 THEN 'AP Grading Scale' WHEN
+					sect.GradescaleID = 124 and
+					sect.SCHOOLID = 130 THEN '10 Point Scale' WHEN sect.GradescaleID = 139 THEN 'H, DW, S, NI, E' WHEN
+					sect.GradescaleID =
+					423 THEN 'Pass/Fail'WHEN sect.GradescaleID = 425 THEN 'Pass/Fail' ELSE 'Unknown' END AS Grade_Scale
+					FROM sections sect
+					LEFT OUTER JOIN courses c ON c.course_number = sect.course_number
+					LEFT OUTER JOIN teachers t ON t.id = sect.teacher
+					LEFT OUTER JOIN terms Trm ON sect.termid = trm.id AND sect.schoolid = trm.schoolid
+					LEFT OUTER JOIN PSM_GradeScale ON sect.gradescaleid = PSM_GradeScale.id
+					WHERE sect.GradescaleID NOT IN (0,1,523,624)
+					AND sect.schoolid = ~(curschoolid)
+					AND sect.termid BETWEEN ~(v.ayearid)00 AND ~(v.ayearid)99
+					~[if.~(gpv.teacher)#] AND sect.teacher = ~(gpv.teacher;sqlText)[/if]
+					~[if.~(gpv.dept)#] AND Upper(c.sched_department) = Upper('~(gpv.dept;sqlText)')[/if]
+					~[if.~(gpv.cn)#] AND Upper(c.course_name) = Upper('~(gpv.cn;sqlText)')[/if]
+					~[if.~(gpv.room)#] AND Upper(sect.room) = Upper('~(gpv.room;sqlText)')[/if]
+					~[if.~(gpv.term)#] AND sect.termid = ~(gpv.term;sqlText)[/if]
+					;alternatecolor;nonemessage=<tr>
+						<td colspan="100%">No records returned.</td>
+					</tr>]
+					<tr class="Record">
+						<td>~(term;t)</td>
+						<td>~(Course#)</td>
+						<td>~(Section#)</td>
+						<td>~(course_name;t)</td>
+						<td>~(expression;t;externalExpression)</td>
+						<td>~(teacher_name;t)</td>
+						<td>~(gradeScale;t)</td>
+						<td>~(dept;t)</td>
+						<td>~(room;t)</td>
+					</tr>
+					[/tlist_sql]
+				</tbody>
+			</table>
+		</div>
+		<!-- End of Results -->
+		<div style="clear: both;">
+			<p>
+				<center>Report generated at ~[time] on ~[date]</center>
+			</p>
+		</div>
+		[/if#showData]
+		~[wc:admin_footer_frame_css]
+	</body>
+
+</html><!-- end right frame -->
