@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+    <!-- non framed -->
+
+    <head>
+        <title>Schools - School Info</title>
+        ~[wc:commonscripts]
+        <link href="/images/css/screen.css" rel="stylesheet" media="screen">
+        <link href="/images/css/print.css" rel="stylesheet" media="print">
+        ~[wc:pscb_init]
+    </head>
+
+    <body>
+        ~[wc:admin_header_frame_css]
+        <!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a> &gt; <a
+            href="/admin/reports_pscb/pscb_home.html">PSCB Custom Reports</a> &gt; <a
+            href="/admin/reports_pscb/pscb_schools.html">Schools</a> &gt; Schools - School Info
+        <!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
+
+        <!-- Start of Results -->
+        <h1>Schools - School Info</h1>
+        <div class="box-round">
+            <h2>Schools - School Info</h2>
+            <table border="0" cellspacing="0" cellpadding="4" align="center" class="tablesorter grid" id="results">
+                <thead>
+                    <tr>
+                        <th class="left">Name</th>
+                        <th class="left">Abbreviation</th>
+                        <th class="left">Number</th>
+                        <th class="left">Low Grade</th>
+                        <th class="left">High Grade</th>
+                        <th class="left">Kind</th>
+                        <th class="left">Phone #</th>
+                        <th class="left">Fax #</th>
+                        <th class="left">Principal</th>
+                        <th class="left">Principal Phone</th>
+                        <th class="left">Principal Email</th>
+                        <th class="left">Ast. Principal</th>
+                        <th class="left">Ast. Principal Phone</th>
+                        <th class="left">Ast. Principal Email</th>
+                        <th class="left">Attn. Secretary Email</th>
+                        <th class="left">Bulletin Email</th>
+                        <th class="left">Log Email</th>
+                        <th class="left">Registrar </th>
+                        <th class="left">Registrar Phone</th>
+                        <th class="left">Registrar Email</th>
+                        <th class="left">PS Admin </th>
+                        <th class="left">PS Admin Phone</th>
+                        <th class="left">PS Admin Email</th>
+                        <th class="left">Address</th>
+                        <th class="left">City</th>
+                        <th class="left">State</th>
+                        <th class="left">Zip</th>
+                        <th class="left">County</th>
+                        <th class="left">County Number</th>
+                        <th class="left">Type</th>
+                        <th class="left">Scheduling Pref</th>
+                        <th class="left">Grading Pref</th>
+                        <th class="left">Exclude from State Reporting</th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    ~[tlist_sql;
+                    SELECT
+                    SCHOOLS.DCID,
+                    SCHOOLS.NAME,
+                    SCHOOLS.ABBREVIATION,
+                    SCHOOLS.SCHOOL_NUMBER,
+                    SCHOOLS.LOW_GRADE,
+                    SCHOOLS.HIGH_GRADE,
+                    CASE
+                    WHEN S_NE_SCH_X.SCHOOL_TYPE = 01 THEN '9-12 Senior High'
+                    WHEN S_NE_SCH_X.SCHOOL_TYPE = 02 THEN '10-12 Senior High'
+                    WHEN S_NE_SCH_X.SCHOOL_TYPE = 03 THEN '7-12 Secondary'
+                    WHEN S_NE_SCH_X.SCHOOL_TYPE = 04 THEN '7-9 Junior High'
+                    WHEN S_NE_SCH_X.SCHOOL_TYPE = 05 THEN '7-8 Junior High'
+                    WHEN S_NE_SCH_X.SCHOOL_TYPE = 07 THEN 'Middle School'
+                    WHEN S_NE_SCH_X.SCHOOL_TYPE = 08 THEN 'K-6 or Less Elementary'
+                    WHEN S_NE_SCH_X.SCHOOL_TYPE = 09 THEN 'K-8 Elementary'
+                    WHEN S_NE_SCH_X.SCHOOL_TYPE = 13 THEN '8-12 Elementary'
+                    WHEN S_NE_SCH_X.SCHOOL_TYPE = 14 THEN 'K-7 Elementary'
+                    WHEN S_NE_SCH_X.SCHOOL_TYPE = 16 THEN 'Special Education (any grades)'
+                    WHEN S_NE_SCH_X.SCHOOL_TYPE = 20 THEN 'PreK'
+                    ELSE 'Not Set' END AS Kind,
+                    SCHOOLS.SCHOOLPHONE,
+                    SCHOOLS.SCHOOLFAX,
+                    SCHOOLS.PRINCIPAL,
+                    SCHOOLS.PRINCIPALPHONE,
+                    SCHOOLS.PRINCIPALEMAIL,
+                    SCHOOLS.ASSTPRINCIPAL,
+                    SCHOOLS.ASSTPRINCIPALPHONE,
+                    SCHOOLS.ASSTPRINCIPALEMAIL,
+                    SCHOOLSCOREFIELDS.ATT_SEC_EMAIL,
+                    SCHOOLS.BULLETINEMAIL,
+                    SCHOOLS.TCHRLOGENTRTO,
+                    C_SCHOOLS_REGISTRAR.REGISTRAR_NAME,
+                    C_SCHOOLS_REGISTRAR.REGISTRAR_PHONE,
+                    C_SCHOOLS_REGISTRAR.REGISTRAR_EMAIL,
+                    U_SCHOOLS.ADMIN_NAME,
+                    U_SCHOOLS.ADMIN_PHONE,
+                    U_SCHOOLS.ADMIN_EMAIL,
+                    schools.schooladdress,
+                    schools.schoolcity,
+                    schools.schoolstate,
+                    schools.schoolzip,
+                    schools.countyname,
+                    schools.countynbr,
+                    codeset.displayvalue,
+                    u_schools.sched_pref,
+                    u_schools.grading_pref,
+                    SCHOOLS.STATE_EXCLUDEFROMREPORTING
+                    FROM SCHOOLS
+                    LEFT JOIN C_SCHOOLS_REGISTRAR ON SCHOOLS.DCID = C_SCHOOLS_REGISTRAR.SCHOOLSDCID
+                    LEFT JOIN SCHOOLSCOREFIELDS ON SCHOOLS.DCID = SCHOOLSCOREFIELDS.SCHOOLSDCID
+                    LEFT JOIN S_NE_SCH_X ON SCHOOLS.DCID = S_NE_SCH_X.SCHOOLSDCID
+                    LEFT JOIN U_SCHOOLS ON SCHOOLS.DCID = U_SCHOOLS.SCHOOLSDCID
+                    LEFT JOIN codeset on schools.schoolcategorycodesetid = codeset.codesetid
+                    where schools.schoolid = ~(curschoolid)
+                    order by schools.sortorder
+                    ;alternatecolor;nonemessage=
+                    <tr>
+                        <td colspan="100%">No records returned.</td>
+                    </tr>]
+                    <tr class="Record">
+                        <td class="nowrap"><a
+                                href="/admin/schools/edit.html?frn=039~(sch.dcid)&schoolfrn=039~(sch.dcid)"
+                                target="_blank">~(sch.name;t)</a></td>
+                        <td>~(abbr;t)</td>
+                        <td>~(number)</td>
+                        <td>~(low)</td>
+                        <td>~(high)</td>
+                        <td>~(type;t)</td>
+                        <td>~(phone)</td>
+                        <td>~(fax)</td>
+                        <td>~(principal;t)</td>
+                        <td>~(principalphone)</td>
+                        <td>~(principalemail;t)</td>
+                        <td>~(astprincipal;t)</td>
+                        <td>~(astprincipalphone)</td>
+                        <td>~(astprincipalemail;t)</td>
+                        <td>~(attsecemail;t)</td>
+                        <td>~(bulletinemail;t)</td>
+                        <td>~(logemail;t)</td>
+                        <td>~(registrat;t)</td>
+                        <td>~(registratphone)</td>
+                        <td>~(registratemail;t)</td>
+                        <td>~(amdmin;t)</td>
+                        <td>~(amdminphone)</td>
+                        <td>~(amdminemail;t)</td>
+                        <td>~(address;t)</td>
+                        <td>~(city;t)</td>
+                        <td>~(state;t)</td>
+                        <td>~(zip)</td>
+                        <td>~(county;t)</td>
+                        <td>~(countynumber)</td>
+                        <td>~(type;t)</td>
+                        <td>~(schedpref;t)</td>
+                        <td>~(gradepref;t)</td>
+                        <td>~(exclude;t)</td>
+
+                        <!-- ~(s.schoolid;t) -->
+                        </td>
+                    </tr>
+                    [/tlist_sql]
+                </tbody>
+            </table>
+            <!-- End of shaded content table -->
+        </div>
+        <!-- End of results -->
+        <div style="clear: both;">
+            <p>
+                <center>Report generated at ~[time] on ~[date]</center>
+            </p>
+        </div>
+        ~[wc:admin_footer_frame_css]
+    </body>
+
+</html>
