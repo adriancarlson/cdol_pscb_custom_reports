@@ -46,9 +46,8 @@
                         AND CALENDAR_DAY.date_value between terms.firstday and terms.lastday
                         AND CALENDAR_DAY.insession = 0
                         AND TO_CHAR(CALENDAR_DAY.date_value, 'DY') NOT IN ('SUN', 'SAT')
-                        order by schools.name, CALENDAR_DAY.date_value;
-                        ~[if.is.a.school] where schools.school_number = ~(curschoolid) [/if.is.a.school]
-                        order by schools.sortorder
+                        ~[if.is.a.school] AND schools.school_number = ~(curschoolid) [/if.is.a.school]
+                        order by schools.name, CALENDAR_DAY.date_value
                         ;alternatecolor;nonemessage=
                         <tr>
                             <td colspan="100%">No records returned.</td>
