@@ -121,15 +121,15 @@
 					sect.course_number || '.' ||sect.section_number,
 					c.course_name,
 					t.lastfirst teacher_name,
-					sect.teacher,
 					gs.name
 					FROM sections sect
 					LEFT OUTER JOIN courses c ON c.course_number = sect.course_number
 					LEFT OUTER JOIN teachers t ON t.id = sect.teacher
 					LEFT OUTER JOIN terms Trm ON sect.termid = trm.id AND sect.schoolid = trm.schoolid
-					LEFT OUTER JOIN GradeScaleItem gs ON sect.gradescaleid = gs.dcid
+					LEFT OUTER JOIN GradeScaleItem gs ON sect.gradescaleid = gs.id
 					WHERE sect.schoolid = ~(curschoolid)
 					AND sect.termid BETWEEN ~(v.ayearid)00 AND ~(v.ayearid)99
+					AND sect.GradescaleID NOT IN (0,1,523,624)
 					~[if.~(gpv.teacher)#] AND sect.teacher = ~(gpv.teacher;sqlText)[/if]
 					~[if.~(gpv.dept)#] AND Upper(c.sched_department) = Upper('~(gpv.dept;sqlText)')[/if]
 					~[if.~(gpv.cn)#] AND Upper(c.course_name) = Upper('~(gpv.cn;sqlText)')[/if]
@@ -144,7 +144,7 @@
 						<td>~(Course.section)</td>
 						<td>~(course_name;t)</td>
 						<td>~(teacher_name;t)</td>
-						<td>~(gradeScale;t)</td>
+						<td>~(gradeScale;sqlText)</td>
 					</tr>
 					[/tlist_sql]
 				</tbody>
