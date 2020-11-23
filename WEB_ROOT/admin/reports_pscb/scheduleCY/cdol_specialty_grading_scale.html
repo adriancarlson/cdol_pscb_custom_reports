@@ -103,17 +103,21 @@
 				<tbody>
 					~[tlist_sql;
 					SELECT
-					trm.abbreviation AS term,
-					sect.expression,
-					sect.course_number || '.' ||sect.section_number,
-					c.course_name,
-					t.lastfirst teacher_name,
-					gs.name
-					FROM sections sect
-					LEFT OUTER JOIN courses c ON c.course_number = sect.course_number
-					LEFT OUTER JOIN teachers t ON t.id = sect.teacher
-					LEFT OUTER JOIN terms Trm ON sect.termid = trm.id AND sect.schoolid = trm.schoolid
-					LEFT OUTER JOIN GradeScaleItem gs ON sect.gradescaleid = gs.id
+					CALENDAR_DAY.date_value,
+					CALENDAR_DAY.note,
+					schools.name
+					FROM terms
+					LEFT JOIN SCHOOLS
+					ON TERMS.SCHOOLID = SCHOOLS.SCHOOL_NUMBER
+					JOIN CALENDAR_DAY
+					on TERMS.schoolid = CALENDAR_DAY.schoolid
+					WHERE terms.isyearrec = 1
+					AND terms.schoolid <> 0
+						AND terms.yearid = 30
+						AND CALENDAR_DAY.date_value between terms.firstday and terms.lastday
+						AND CALENDAR_DAY.insession = 0
+						AND TO_CHAR(CALENDAR_DAY.date_value, 'DY') NOT IN ('SUN', 'SAT')
+						order by schools.name, CALENDAR_DAY.date_value;
 					WHERE sect.schoolid = ~(curschoolid)
 					AND sect.termid BETWEEN ~(v.ayearid)00 AND ~(v.ayearid)99
 					AND sect.GradescaleID NOT IN (0,1,523,624)
