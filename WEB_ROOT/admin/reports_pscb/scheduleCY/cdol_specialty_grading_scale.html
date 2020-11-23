@@ -50,19 +50,6 @@
 								</select>
 							</td>
 							<td valign="top" nowrap>
-								<select id="dept" name="dept">
-									<option value="" ~[if.~(gpv.dept)=]selected[/if]>All Departments
-										~[tlist_sql;SELECT DISTINCT Upper(c.sched_department) AS dept_value, CASE WHEN
-										Upper(sched_department) = '~(gpv.dept;sqlText)' THEN 'selected' ELSE '' END AS
-										isselected, Upper(c.sched_department) AS dept FROM ps.sections sect INNER JOIN
-										ps.courses c ON sect.course_number = c.course_number WHERE sect.schoolid =
-										~(curschoolid) AND sect.termid >= ~(curyearid)00 AND sect.termid <
-											(~(curyearid)00 + 100) ORDER BY dept] <option value="~(dept_value;t)"
-											~(isselected;t)>~(dept;t)
-											[/tlist_sql]
-								</select>
-							</td>
-							<td valign="top" nowrap>
 								<select id="cn" name="cn">
 									<option value="" ~[if.~(gpv.cn)=]selected[/if]>All Courses
 										~[tlist_sql;SELECT DISTINCT Upper(c.course_name) AS course_name_value, CASE WHEN
@@ -131,9 +118,7 @@
 					AND sect.termid BETWEEN ~(v.ayearid)00 AND ~(v.ayearid)99
 					AND sect.GradescaleID NOT IN (0,1,523,624)
 					~[if.~(gpv.teacher)#] AND sect.teacher = ~(gpv.teacher;sqlText)[/if]
-					~[if.~(gpv.dept)#] AND Upper(c.sched_department) = Upper('~(gpv.dept;sqlText)')[/if]
 					~[if.~(gpv.cn)#] AND Upper(c.course_name) = Upper('~(gpv.cn;sqlText)')[/if]
-					~[if.~(gpv.room)#] AND Upper(sect.room) = Upper('~(gpv.room;sqlText)')[/if]
 					~[if.~(gpv.term)#] AND sect.termid = ~(gpv.term;sqlText)[/if]
 					;alternatecolor;nonemessage=<tr>
 						<td colspan="100%">No records returned.</td>
