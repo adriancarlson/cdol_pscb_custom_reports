@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <title>Teacher - Percent Averages</title>
+        ~[wc:commonscripts]
+        <link href="/images/css/screen.css" rel="stylesheet" media="screen">
+        <link href="/images/css/print.css" rel="stylesheet" media="print">
+        ~[wc:pscb_init]
+        <script>
+            pscbToolButtons = { "copyData": "Yes", "csvFile": "Yes", "pdfFile": "No", "curSel": "Yes" };
+
+        </script>
+    </head>
+
+    <body>
+        ~[wc:admin_header_frame_css]
+        <!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a> &gt; <a
+            href="/admin/reports_pscb/pscb_home.html" target="_top">PSCB Custom Reports</a> &gt; <a
+            href="/admin/reports_pscb/pscb_grading.html" target="_top">Grading</a> &gt; Teacher - Percent Averages
+        <!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
+
+
+        <!-- Begin report filters-->
+        <h1>Teacher - Percent Averages</h1>
+        <form name="rptFilters" action="#" method="POST">
+            <div class="box-round" style="overflow: hidden;">
+                <h2>Report Filters</h2>
+                <table border="0" cellspacing="0" cellpadding="0" class="linkDescList">
+                    <thead>
+                        <tr>
+                            <th width="100px">Section To View</th>
+                            <th width="10px">&nbsp;Teacher</th>
+                            <th width="100%">Grade Reporting Term</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <select name="sid" id="sid">
+                                    <option value="" ~[if.~(gpv.sid)=]selected="selected" [/if]>Select Section</option>
+                                    ~[tlist_sql;SELECT DISTINCT
+                                    sec.ID,
+                                    CASE WHEN sec.ID = '~(gpv.sid;sqlText)' THEN 'selected' ELSE '' END isSelected,
+                                    c.course_name,
+                                    c.course_number,
+                                    sec.section_number,
+                                    t.lastfirst
+                                    FROM Sections sec
+                                    INNER JOIN courses c ON upper(sec.course_number) = upper(c.course_number)
+                                    INNER JOIN teachers t ON sec.teacher=t.id
+                                    WHERE sec.SchoolID = ~(curschoolid) AND sec.termid BETWEEN ~(curyearid)00 AND
+                                    ~(curyearid)99
+                                    AND sec.gradebooktype = 2
+                                    ORDER BY c.course_name, c.course_number, sec.section_number, t.lastfirst]
+                                    <option value="~(sec.ID;l)" ~(isSelected)>~(c.course_name;t)&nbsp;&nbsp;&nbsp;
+                                        ~(c.course_number;t)-~(sec.section_number)&nbsp;&nbsp;&nbsp; (~(t.lastfirst;t))
+                                    </option>
+                                    [/tlist_sql]
+                                </select>
+                            </td>
+                            <td>
+                                <select name="t">
+                                    <option value='0' ~[if.~(gpv.t)=0]selected[/if]>All Teachers
+                                    <option value='cur' ~[if.~(gpv.t)=cur]selected[/if]>Currently Selected Students
+                                        ~[tlist_sql;
+                                        SELECT DISTINCT t.ID, CASE WHEN to_char(t.ID) = to_char('~(gpv.t;sqlText)') THEN
+                                        'selected' END AS
+                                        isselected, LastFirst
+                                        FROM Teachers t
+                                        INNER JOIN Sections sec ON t.ID = sec.Teacher AND t.SchoolID = sec.SchoolID AND
+                                        sec.ExcludeFromStoredGrades
+                                        = 0
+                                        INNER JOIN Terms ter ON sec.TermID = ter.ID AND sec.SchoolID = ter.SchoolID
+                                        WHERE t.SchoolID = ~(curschoolid) AND t.status = 1 AND t.StaffStatus = 1
+                                        AND ter.FirstDay
+                                        <= (SELECT LastDay FROM Terms WHERE SchoolID=~(curschoolid) AND ID=~(curtermid))
+                                            AND ter.LastDay>= (SELECT
+                                            FirstDay FROM Terms WHERE SchoolID = ~(curschoolid) AND ID = ~(curtermid))
+                                            ORDER BY LastFirst]
+                                    <option value="~(ID;l)" ~(isselected;t)>~(Teacher;t)
+                                        [/tlist_sql]
+                                </select>
+                            </td>
+                            <td>
+                                <select name="sc">
+                                    <option value="" ~[if.~(gpv.sc)=]selected[/if]>Select Grade Reporting Term</option>
+                                    ~[tlist_sql;SELECT DISTINCT
+                                    storecode,
+                                    CASE WHEN storecode='~(gpv.sc;sqlText)' THEN 'selected' ELSE '' END as selected
+                                    FROM termbins
+                                    WHERE schoolid = ~(curschoolid)
+                                    ORDER BY upper(storecode)]
+                                    <option value="~(storecode;t)" ~(sel;t)>~(storecode)</option>
+                                    [/tlist_sql]
+                                </select>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="button-row" style="float: left;">
+                    <input type="hidden" name="showData" value="1">
+                    <span class="red">&nbsp;&nbsp;Select parameters and click submit</span>
+                    <input type="hidden" name="ac" style="float: left;" value="prim">~[submitbutton]
+                </div>
+            </div>
+        </form>
+
+
+        <!-- End report parameters-->
+        ~[if#showData.~(gpv.showData)=1]
+        <div class="box-round">
+            <h2>Teacher - Percent Averages</h2>
+            <table border="0" cellspacing="0" cellpadding="4" class="tablesorter grid" id="results">
+                <thead></thead>
+                <tbody>
+                    ~[tlist_sql;
+                    SELECT
+                    sec.course_number,
+                    crs.course_name,
+                    sec.section_number,
+                    t.name,
+                    tch.lastfirst AS Teacher,
+                    pgf.finalgradename AS FinalGrade,
+                    COUNT(pgf.percent) AS NumStudents,
+                    ROUND(AVG(pgf.percent),1) AS PercentAvg,
+                    schools.name AS School
+                    FROM
+                    PGFinalGrades pgf
+                    INNER JOIN Sections sec
+                    ON pgf.sectionid = sec.id
+                    INNER JOIN cc
+                    ON pgf.sectionid = cc.sectionid
+                    AND pgf.studentid = cc.studentid
+                    INNER JOIN Teachers tch
+                    ON sec.teacher = tch.id
+                    INNER JOIN Courses crs
+                    ON sec.course_number = crs.course_number
+                    INNER JOIN terms t
+                    ON sec.termid = t.id
+                    AND sec.schoolid = t.schoolid
+                    INNER JOIN terms t2
+                    ON t2.schoolid = t.schoolid
+                    AND t2.firstday < t.lastday AND t2.lastday> t.firstday
+                        AND trunc(sysdate) between t2.firstday
+                        AND t2.lastday AND t2.isyearrec=1
+                        INNER JOIN Schools
+                        ON sec.schoolid = Schools.school_number
+                        GROUP BY
+                        schools.name, sec.course_number, crs.course_name,sec.section_number, t.name, tch.lastfirst,
+                        pgf.finalgradename
+                        ORDER BY schools.name, crs.course_name, tch.lastfirst
+                        ;alternatecolor;nonemessage=
+                        <tr nodata>
+                            <td colspan="100%">No Records Found.</td>
+                        </tr>]
+                        <tr class="~[evenoddrow]">
+                            <td class="left">~(cnumb;t)</td>
+                            <td class="nowrap">~(course;t)</td>
+                            <td class="center">~(section;t)</td>
+                            <td class="center">~(term;t)</td>
+                            <td class="nowrap">~(teacher;t)</td>
+                            <td class="center">~(rptterm;t)</td>
+                            <td class="center">~(count)</td>
+                            <td class="center">~(avg;t)</td>
+                            <td class="nowrap">~(school;t)</td>
+                        </tr>
+                        [/tlist_sql]
+                </tbody>
+            </table>
+        </div>
+        <!-- End of results -->
+        <div>
+            <p>
+                <center>Report generated at ~[time] on ~[date]</center>
+            </p>
+        </div>
+        [/if#showData]
+        ~[wc:admin_footer_frame_css]
+    </body>
+
+</html>

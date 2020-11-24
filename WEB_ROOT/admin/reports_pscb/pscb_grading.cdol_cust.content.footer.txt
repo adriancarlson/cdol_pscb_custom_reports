@@ -1,0 +1,17 @@
+<table id="hiddenTable" style="display: none;">
+	<tr id="tchrPercentAvg">
+		<td><a href="/admin/reports_pscb/grading/cdol_teacher_percent_average.html">Teacher - Percent Averages</a></td>
+		<td>Gives the average grade a teacher gave per reporting term.</td>
+	</tr>
+</table>
+
+<script>
+	/*checks to make sure page is loaded */
+	$j(document).ready(function () {
+		/* insert custom CDOL fields onto the page. */
+		var tchrPercentAvg = $j('#tchrPercentAvg').closest('tr');
+		$j("td:contains('Gradebook - Update Status')").closest('tr').after(tchrPercentAvg);
+		/* remove the hidden tables  and divs */
+		$j("#hiddenTable").remove();
+	});
+</script>
