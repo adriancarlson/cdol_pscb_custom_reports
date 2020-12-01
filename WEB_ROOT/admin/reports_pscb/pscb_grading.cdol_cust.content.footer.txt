@@ -3,6 +3,10 @@
 		<td><a href="/admin/reports_pscb/grading/cdol_teacher_percent_average.html">Teacher - Percent Averages</a></td>
 		<td>Gives the average grade a teacher gave per reporting term.</td>
 	</tr>
+	<tr id="lastUpdate">
+		<td><a href="/admin/reports_pscb/grading/cdol_gradebook_last_updated.html">Gradebook - Last Updated</a></td>
+		<td>Report shows the last date that teachers updated Their PowerTeacher Gradebooks</td>
+	</tr>
 </table>
 
 <script>
@@ -11,6 +15,8 @@
 		/* insert custom CDOL fields onto the page. */
 		var tchrPercentAvg = $j('#tchrPercentAvg').closest('tr');
 		$j("td:contains('Gradebook - Update Status')").closest('tr').after(tchrPercentAvg);
+		var lastUpdate = $j('#lastUpdate').closest('tr');
+		$j("td:contains('Gradebook - Update Status')").closest('tr').before(lastUpdate);
 		/* remove the hidden tables  and divs */
 		$j("#hiddenTable").remove();
 	});
