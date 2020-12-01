@@ -124,7 +124,7 @@
                     sec.section_number,
                     t.name,
                     tch.lastfirst AS Teacher,
-                    to_char(MAX(pgf.LastGradeUpdate),'MM/DD/YYYY') AS Last_Updated
+                    to_char(MAX(pgf.LastGradeUpdate),'MM/DD/YYYY') AS Last_Updated,
                     schools.name AS School
                     FROM
                     PGFinalGrades pgf
