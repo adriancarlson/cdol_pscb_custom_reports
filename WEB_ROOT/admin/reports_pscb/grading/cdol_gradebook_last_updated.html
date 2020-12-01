@@ -110,7 +110,7 @@
                         <th class="left filter-select">Section Number</th>
                         <th class="left filter-select">Term</th>
                         <th class="left filter-select">Teacher</th>
-                        <th class="left filter-select">Last Updated</th>
+                        <th class="left">Last Updated</th>
                         <th class="left">School</th>
                     </tr>
                 </thead>
@@ -153,8 +153,8 @@
                     (t.yearid +1990) || '-' || (t.yearid +1991), schools.name, sec.course_number,
                     crs.course_name,sec.section_number, t.name, tch.lastfirst,
                     pgf.finalgradename
-                    ORDER BY schools.name, crs.course_name, sec.section_number, pgf.finalgradename, t.name,
-                    tch.lastfirst
+                    ORDER BY schools.name, tch.lastfirst, MAX(pgf.LastGradeUpdate), crs.course_name, sec.section_number,
+                    pgf.finalgradename, t.name
                     ;alternatecolor;nonemessage=
                     <tr nodata>
                         <td colspan="100%">No Records Found.</td>
