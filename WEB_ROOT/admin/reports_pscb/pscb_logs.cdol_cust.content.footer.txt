@@ -1,7 +1,7 @@
 <table id="hiddenTable" style="display: none;">
 	<tr id="customLogs">
-		<td><a href="/admin/reports_pscb/logs/CDOL_logs.html">CDOL Logs Report</a></td>
-		<td>Custom Log Report for the Diocese of Lincoln</td>
+		<td><a href="/admin/reports_pscb/logs/CDOL_logs.html">CDOL Discipline Log Entries</a></td>
+		<td>Custom Discipline Log Report for the Diocese of Lincoln</td>
 	</tr>
 </table>
 
@@ -11,7 +11,7 @@
 		/* insert custom CDOL fields onto the page. */
 		var customLogs = $j('#customLogs').closest('tr');
 		$j("td:contains('Discipline Log Entries Summary')").closest('tr').before(customLogs);
-
+    $j("td:contains('Discipline Log Entries Summary')").closest('tr').hide();
 		$j("#hiddenTable").remove();
 	});
 </script>
