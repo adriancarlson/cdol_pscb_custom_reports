@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+    <!-- start right frame -->
+
+    <head>
+        <title>CDOL Log Entries Summary</title>
+        ~[wc:commonscripts]
+        <link href="/images/css/screen.css" rel="stylesheet" media="screen">
+        <link href="/images/css/print.css" rel="stylesheet" media="print">
+        ~[wc:pscb_init]
+    </head>
+
+    <body>
+        <!-- breadcrumb start -->
+        ~[wc:admin_header_frame_css]<a href="/admin/home.html" target="_top">Start Page</a> &gt; <a
+            href="/admin/reports/home.html">Reports</a> &gt; <a href="/admin/reports_pscb/pscb_home.html">PSCB Custom
+            Reports</a> &gt; <a href="/admin/reports_pscb/PSCB_logs.html">Log Entries</a> &gt; Log Entries
+        Summary~[wc:admin_navigation_frame_css]
+        <!-- breadcrumb end -->
+        <h1>CDOL Log Entries Summary</h1>
+        <form id="rptFilters" action="#" method="POST">
+            <div class="box-round" style="overflow: hidden;">
+                <h2>Report Filters</h2>
+                <table border="0" cellspacing="0" cellpadding="4" style="line-height: 25px">
+                    <tr class="headerrow">
+                        <th style="white-space: nowrap;" width="10px">&nbsp;Log Type</th>
+                        <th style="white-space: nowrap;" width="10px">&nbsp;Students To View</th>
+                        <th style="white-space: nowrap;" width="10px">Start Date</th>
+                        <th style="white-space: nowrap;" width="10px">End Date</th>
+                        <th width="100%">&nbsp;</th>
+                    </tr>
+                    <tr class="headerrow">
+                        <td>
+                            <select name="lgt">
+                                <option value="" selected="selected">All Log Types</option>
+                                ~[tlist_sql;
+                                SELECT distinct id, CASE WHEN id = '~[gpv:lgt]' THEN 'selected' ELSE '' END selectedlgt,
+                                name
+                                FROM gen
+                                WHERE cat = 'logtype'
+                                ORDER BY name]
+                                <option value="~(id)" ~(selectedlt)>~(name)
+                                    [/tlist_sql]
+                            </select>
+                        </td>
+                        <td style="height:30px">
+                            <select name="se">
+                                <option value="all">All Students</option>
+                                <option ~[if.~[gpv:se]=cur]selected[/if] value="cur">Current Selection (~[x:studsinset])
+                                </option>
+                            </select>
+                        </td>
+                        <td style="white-space: nowrap;">
+                            <input name="sd" id="sd" type="text"
+                                value="~[if.~[gpv:sd] > 1/1/1900]~[gpv:sd][else]~[tlist_sql;SELECT MIN(FirstDay) FROM Terms WHERE to_char(SchoolID) LIKE CASE WHEN ~(curschoolid) = 0 THEN '%' ELSE to_char(~(curschoolid)) END AND to_char(ID) LIKE CASE WHEN ~(curschoolid) = 0 THEN '%' ELSE to_char(~(curtermid)) END AND YearID = ~(curyearid)]~(firstday;d)[/tlist_sql][/if]"
+                                size="15" maxlength="10" class="psDateWidget">
+                        </td>
+                        <td style="white-space: nowrap;">
+                            <input name="ed" id="ed" type="text"
+                                value="~[if.~[gpv:ed] > 1/1/1900]~[gpv:ed][else]~[eaodate][/if]" size="15"
+                                maxlength="10" class="psDateWidget">
+                        </td>
+                        <td>&nbsp;</td>
+                    </tr>
+                </table>
+                <div class="button-row" style="float: left;">
+                    <input type="hidden" name="showData" value="1">
+                    <span class="red">&nbsp;&nbsp;Select parameters and click submit</span>
+                    <input type="hidden" name="ac" value="prim">~[submitbutton]
+                </div>
+            </div>
+        </form>
+
+        <!-- start of content and bounding box -->
+        ~[if#showData.~[gpv:showData]=1]
+        <div class="box-round">
+            <h2>Log Entries List<span><label id="lblRecordCount"></label></span></h2>
+            <table class="tablesorter grid" id="results">
+                <thead>
+                    <tr bgcolor="#f6f6f6">
+                        <!--
+						<th class="bold">ID</th>
+						<th class="bold">DCID</th>
+					-->
+                        <th class="bold">Entry Details</th>
+                        <th class="bold">Student Number</th>
+                        <th class="bold">Student Name</th>
+                        <th class="bold">Grade Level</th>
+                        <th class="bold">Gender</th>
+                        <th class="bold">Log Type</th>
+                        <th class="bold">Entry Date</th>
+                        <th class="bold">Author</th>
+                        <th class="bold">Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ~[x:GetDoThisForStudents]
+                    ~[tlist_sql;
+                    SELECT
+                    lg.dcid log_dcid
+                    ,s.student_number
+                    ,s.dcid
+                    ,s.lastfirst
+                    ,s.grade_level
+                    ,s.gender
+                    ,g.name
+                    ,lg.entry_date
+                    ,lg.entry_author
+                    ,lg.entry
+                    FROM
+                    log lg
+                    JOIN students s ON lg.studentid = s.id
+                    JOIN gen g ON lg.logtypeid = g.id
+                    ~[if#se.~[gpv:se]=cur] INNER JOIN ~[temp.table.current.selection:students] temp ON (s.dcid =
+                    temp.dcid) [/if#se]
+                    WHERE s.schoolid = ~(curschoolid)
+                    ~[if#lgt.~[gpv:lgt]#] AND lg.logtypeid = ~[gpv:lgt] [/if#lgt]
+                    AND cat = 'logtype' AND name != 'Discipline'
+                    AND lg.entry_date >= to_date('~[gpv:sd]','MM/DD/YYYY')
+                    AND lg.entry_date <= to_date('~[gpv:ed]','MM/DD/YYYY') ORDER BY lg.entry_date desc
+                        ;alternatecolor;nonemessage=<tr nodata>
+                        <td colspan="100%">No Records Found.</td>
+                        </tr>]
+                        <tr class="Record">
+                            <td><a href="/admin/reports_pscb/logs/customlogentrydetails.html?frn=008~(log_dcid)"
+                                    target="_blank">View</a>
+                            </td>
+                            <td>~(student_number)</td>
+                            <td class="nowrap"><a href="/admin/students/log.html?frn=001~(dcid)"
+                                    target="_blank">~(lastfirst)</a></td>
+                            <td>~(s.grade_level)</td>
+                            <td>~(s.gender)</td>
+                            <td>~(g.name)</td>
+                            <td>~(entry_date;d)</td>
+                            <td class="nowrap">~(entry_author)</td>
+                            <td>~(entry)</td>
+                        </tr>
+                        [/tlist_sql]
+                </tbody>
+            </table>
+        </div>
+        <p align="center">Report generated at ~[time] on ~[date]</p>
+        [/if#showData]
+        ~[wc:admin_footer_frame_css]
+    </body>
+
+</html>
