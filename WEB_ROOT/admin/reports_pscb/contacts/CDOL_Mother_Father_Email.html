@@ -113,11 +113,12 @@
                         (s.dcid=gs.studentsdcid AND gp.guardianid=gs.guardianid) WHERE s.enroll_status=0 ORDER BY
                         s.lastfirst, sca.contactpriorityorder ) SELECT A.dcid, A.student_number, A.LASTFIRST AS
                         LastFirst, A.GRADE_LEVEL, M.CONTACTNAME as Mother, M.EMAIL_ADDRESSES as Mother_Email_Adresses,
-                        F.CONTACTNAME as Father, F.EMAIL_ADDRESSES as Father__Email_Adresses FROM STUDENTS A INNER JOIN
-                        SCHOOLS B ON B.SCHOOL_NUMBER=A.SCHOOLID LEFT JOIN pcontact M ON (M.DCID=A.DCID AND
-                        M.Relationship='Mother' ) LEFT JOIN pcontact F ON (F.DCID=A.DCID AND F.Relationship='Father' )
-                        WHERE A.enroll_status=0 ~[if.is.a.school] AND A.schoolid=~(curschoolid) [/if.is.a.school] ORDER
-                        BY A.LastFirst;] <tr data-StudentID="~(dcid)">
+                        F.CONTACTNAME as Father, F.EMAIL_ADDRESSES as Father__Email_Adresses FROM STUDENTS A
+                        ~[if#ss.~(gpv.ss;sqlText)=cur] INNER JOIN ~[temp.table.current.selection:students] temp ON
+                        (A.dcid=temp.dcid) [/if#ss] INNER JOIN SCHOOLS B ON B.SCHOOL_NUMBER=A.SCHOOLID LEFT JOIN
+                        pcontact M ON (M.DCID=A.DCID AND M.Relationship='Mother' ) LEFT JOIN pcontact F ON
+                        (F.DCID=A.DCID AND F.Relationship='Father' ) WHERE A.enroll_status=0 ~[if.is.a.school] AND
+                        A.schoolid=~(curschoolid) [/if.is.a.school] ORDER BY A.LastFirst;] <tr data-StudentID="~(dcid)">
                         <td>~(student_number;t)</td>
                         <td class="nowrap">~(lastfirst;t)</td>
                         <td>~(grade_level;t)</td>

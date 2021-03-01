@@ -125,9 +125,7 @@
                     Nvl(pa.postalcode,'') address,
                     sch.abbreviation
                     FROM Students s
-                    ~[if#ss.~(gpv.ss;sqlText)=cur] INNER JOIN ~[temp.table.current.selection:students] temp ON
-                    (s.dcid =
-                    temp.dcid)[/if#ss]
+                    ~[if#ss.~(gpv.ss;sqlText)=cur] INNER JOIN ~[temp.table.current.selection:students] temp ON (s.dcid = temp.dcid) [/if#ss]
                     JOIN schools sch ON (s.schoolid = sch.school_number)
                     LEFT JOIN studentcontactassoc sca ON (s.dcid = sca.studentdcid)
                     LEFT JOIN studentcontactdetail scd ON (sca.studentcontactassocid = scd.studentcontactassocid)
