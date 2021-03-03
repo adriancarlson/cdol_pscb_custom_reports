@@ -31,8 +31,8 @@
 						<tr>
 							<th width="200px">First Reporting Term</th>
 							<th width="200px">Second Reporting Term</th>
-							<th width="120px">Percent Change</th>
-							<th width="150px"></th>
+							<th width="150px">Percent Change</th>
+							<th width="150px">Type of Change</th>
 							<th></th>
 						</tr>
 					</thead>
@@ -66,9 +66,15 @@
                                         [/tlist_sql]
                                     </select>
                                 </td>
-                                <td class="center"><input type="text" id="prctcng" name="prctcng" value="~(gpv.prctcng)" size="1">% or more
+                                <td class=""><input type="text" id="prctcng" name="prctcng" value="~(gpv.prctcng)" size="1">% or more
                                 </td>
-                                <td></td>
+                                <td>
+								<select id="chngtyp" name="chngtyp">
+									<option value=""  ~[if.~(gpv.chngtyp)=]selected[/if]>Positive & Negative</option>
+									<option value="p"  ~[if.~(gpv.chngtyp)=p]selected[/if]>Positive</option>
+									<option value="n"  ~[if.~(gpv.chngtyp)=n]selected[/if]>Negative</option>
+								</select>
+							</td>
                                 <td></td>
                             </tr>
                         </tbody>
@@ -188,6 +194,8 @@
                             FROM PivotData 
                             WHERE 
                                 ABS(TO_NUMBER(ROUND((((RPT2 - RPT1) / RPT1)*100),2))) > TO_NUMBER(~(gpv.prctcng))
+                                ~[if#chngtyp.~(gpv.chngtyp;sqlText)=p] AND (RPT2 - RPT1) > 0 [/if#chngtyp]
+                                ~[if#chngtyp.~(gpv.chngtyp;sqlText)=n] AND (RPT2 - RPT1) < 0  [/if#chngtyp]
                             ORDER BY 
                                 GRADE_LEVEL DESC, LASTFIRST, EXPRESSION, COURSE_SECTION, TEACHER 
                             ;alternatecolor;nonemessage=
