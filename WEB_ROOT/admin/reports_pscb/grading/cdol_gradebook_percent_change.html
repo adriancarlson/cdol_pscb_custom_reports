@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+    <!-- non framed -->
+
+    <head>
+        <title>Gradebook - Percent Change</title>
+        ~[wc:commonscripts]
+        <link href="/images/css/screen.css" rel="stylesheet" media="screen">
+        <link href="/images/css/print.css" rel="stylesheet" media="print">
+        ~[wc:pscb_init]
+        <script>
+            pscbToolButtons = { "copyData": "Yes", "csvFile": "Yes", "pdfFile": "No", "curSel": "Yes" };
+        </script>
+    </head>
+
+    <body>
+        ~[wc:admin_header_frame_css]
+        <!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a> &gt; <a
+            href="/admin/reports_pscb/pscb_home.html" target="_top">PSCB Custom Reports</a> &gt; <a
+            href="/admin/reports_pscb/pscb_grading.html" target="_top">Grading</a> &gt; Gradebook - Percent Change
+        <!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
+
+        <!-- Start of Results -->
+        <form name="searchform" action="#" method="POST">
+            <form name="searchform" action="#" method="POST">
+                <h1>Gradebook - Percent Change</h1>
+                <div class="box-round" style="overflow: hidden;">
+                    <h2>Report Filters</h2>
+                    <table border="0" cellspacing="0" cellpadding="4" class="linkDescList">
+                        <thead>
+                            <tr class="headerrow">
+                                <th>Grade Reporting Term</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="headerrow" valign="top">
+                                <td>
+                                    <select name="tm1">
+                                        <option value="">Select First Term</option>
+                                        ~[tlist_sql;
+                                        SELECT distinct storecode, CASE WHEN storecode = '~(gpv.tm1;sqlText)' THEN
+                                        'selected' ELSE '' END selectedterm
+                                        FROM termbins
+                                        WHERE yearid = ~(curyearid)
+                                        AND schoolid = ~(curschoolid)
+                                        ORDER BY storecode]
+                                        <option value="~(rpt1;t)" ~(selectedterm,t)>~(rpt1;t)</option>
+                                        [/tlist_sql]
+                                    </select>
+                                </td>
+                                <td>
+                                    <select name="tm2">
+                                        <option value="">Select Second Term</option>
+                                        ~[tlist_sql;
+                                        SELECT distinct storecode, CASE WHEN storecode = '~(gpv.tm2;sqlText)' THEN
+                                        'selected' ELSE '' END selectedterm
+                                        FROM termbins
+                                        WHERE yearid = ~(curyearid)
+                                        AND schoolid = ~(curschoolid)
+                                        ORDER BY storecode]
+                                        <option value="~(rpt2;t)" ~(selectedterm,t)>~(rpt2;t)</option>
+                                        [/tlist_sql]
+                                    </select>
+                                </td>
+                                <td><input type="text" id="prctcng" name="prctcng" value="~(gpv.prctcng)" size="1">%
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="button-row" style="float: left;">
+                        <input type="hidden" name="showData" value="1">
+                        <span>
+                            <font color="red">&nbsp;&nbsp;Select parameters and click submit</font>
+                        </span>
+                        <button type="submit" id="btnSubmit" name="btnSubmit" onClick="actionChange()">Submit</button>
+                    </div>
+                </div>
+            </form>
+            <!-- end of Options -->
+            ~[if#showData.~(gpv.showData)=1]
+            <div class="box-round">
+                <h2>~(gpv.prctcng;sqlText) % Grade Change between ~(gpv.rpt1;sqlText) & ~(gpv.rpt1;sqlText)</h2>
+                <table border="0" cellspacing="0" cellpadding="4" class="tablesorter grid" id="results">
+                    <thead>
+                        <tr class="headerRow">
+                            <th class="left">Student Number</th>
+                            <th class="left">Student</th>
+                            <th class="left filter-select">Gender</th>
+                            <th class="left filter-select">Grade Level</th>
+                            <th class="left">Expression</th>
+                            <th class="left">Course.Section</th>
+                            <th class="left filter-select">Course Name</th>
+                            <th class="left filter-select">Teacher</th>
+                            <th class="center">~(gpv.rpt1;sqlText)</th>
+                            <th class="center">~(gpv.rpt2;sqlText)</th>
+                            <th class="center">% Change</th>
+                            <th class="center">Term</th>
+                            <th class="center">Year</th>
+                            <th class="left">School</th>>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ~[tlist_sql;
+                            WITH PivotData as (
+                                SELECT*
+                                FROM (
+                                        SELECT
+                                            STU.STUDENT_NUMBER as STUDENT_NUMBER,
+                                            STU.LASTFIRST as LASTFIRST,
+                                            CASE
+                                            WHEN UPPER(STU.gender) = 'M' THEN 'Male'
+                                            WHEN UPPER(STU.gender) = 'F' THEN 'Female'
+                                            ELSE STU.gender
+                                            END as GENDER,
+                                            CASE
+                                                WHEN TO_CHAR(STU.grade_level) = -2 then 'PK3'
+                                                WHEN TO_CHAR(STU.grade_level) = -1 then 'PK4'
+                                                WHEN TO_CHAR(STU.grade_level) = 0 then 'K'
+                                                WHEN TO_CHAR(STU.grade_level) = 99 then 'Graduated'
+                                                ELSE TO_CHAR(STU.grade_level)
+                                            END as GRADE_LEVEL,
+                                            SEC.EXTERNAL_EXPRESSION as EXPRESSION,
+                                            C.COURSE_NUMBER ||'.'|| SEC.SECTION_NUMBER as COURSE_section,
+                                            C.COURSE_NAME as COURSE_NAME,
+                                            TCH.LASTFIRST as TEACHER,
+                                            FG.FINALGRADENAME as REPORTING_TERM,
+                                            --FG.GRADE as GRADE,
+                                            FG.PERCENT as PERCENT,
+                                            (SELECT T.ABBREVIATION from TERMS T WHERE SEC.TERMID = T.ID AND T.SCHOOLID = SEC.SCHOOLID AND T.isyearrec=1) as
+                                            SCHOOL_YEAR,
+                                            (SELECT T.ABBREVIATION from TERMS T WHERE SEC.TERMID = T.ID AND T.SCHOOLID = SEC.SCHOOLID) as CLASS_TERM,
+                                            SCH.NAME as SCHOOL_NAME                        
+                                        FROM SCHOOLS SCH
+                                        INNER JOIN SECTIONS SEC 
+                                            ON SEC.SchoolID = SCH.School_Number AND SEC.TermID >= (~(curyearid)00) AND SEC.TermID <
+                            (~(curyearid)99) 
+                                        INNER JOIN PGFINALGRADES FG 
+                                            ON FG.SectionId=SEC.ID 
+                                        INNER JOIN CC 
+                                            ON CC.StudentID=FG.StudentID AND ABS(CC.TermID)=SEC.TermID AND ABS(CC.SectionID)=FG.SectionID 
+                                        INNER JOIN STUDENTS STU 
+                                            ON FG.StudentID=STU.ID INNER
+                                        JOIN COURSES C 
+                                            ON lower(C.Course_Number)=Lower(SEC.Course_Number) 
+                                        INNER JOIN TEACHERS TCH 
+                                            ON SEC.TEACHER=TCH.ID
+                                        WHERE SCH.SCHOOL_NUMBER=~(curschoolid) 
+                                            AND FG.FINALGRADENAME in ('Q1','Q2') 
+                            ) 
+                                PIVOT ( 
+                                        MAX(PERCENT) 
+                                        FOR REPORTING_TERM 
+                                        in ('Q1' as RPT1,'Q2'as RPT2) 
+                                ) 
+                                ORDER BY 
+                                    GRADE_LEVEL, LASTFIRST, EXPRESSION, STUDENT_NUMBER, GENDER, COURSE_SECTION, COURSE_NAME, TEACHER 
+                            ) 
+                            SELECT 
+                                STUDENT_NUMBER, 
+                                LASTFIRST, 
+                                GENDER, 
+                                GRADE_LEVEL, 
+                                EXPRESSION,
+                                COURSE_SECTION, 
+                                COURSE_NAME, 
+                                TEACHER, 
+                                RPT1, 
+                                RPT2, 
+                                --(RPT2 - RPT1) as increase, 
+                                CASE 
+                                    WHEN (RPT2 - RPT1)> 0 THEN 'green'
+                                    WHEN (RPT2 - RPT1) < 0 THEN 'red' 
+                                    ELSE '' 
+                                END color, 
+                                ROUND((((RPT2 - RPT1) / RPT1)*100),2) || '%' as PERCENT_CHANGE,
+                                --ROUND((RPT2 / (RPT1 * 100)),2) || '%' as PERCENT_CHANGE,
+                                -- % increase=Increase ÷ Original Number × 100.
+                                CLASS_TERM, 
+                                SCHOOL_YEAR, 
+                                SCHOOL_NAME 
+                            FROM PivotData 
+                            WHERE 
+                                ABS(TO_NUMBER(ROUND((((RPT2 - RPT1) / RPT1)*100),2))) > TO_NUMBER(5)
+                            ORDER BY 
+                                GRADE_LEVEL, LASTFIRST, EXPRESSION, STUDENT_NUMBER, GENDER, COURSE_SECTION, COURSE_NAME, TEACHER
+                            ;alternatecolor;nonemessage=
+                            <tr nodata>
+                                <td colspan="100%">No Records Found.</td>
+                            </tr>]
+                            <tr class="Record">
+                                <td>~(stdNum;t)</td>
+                                <td class="nowrap">~(student;t)</td>
+                                <td>~(gender)</td>
+                                <td>~(grlvl;t)</td>
+                                <td>~(expression;t)</td>
+                                <td>~(coursesction;t)</td>
+                                <td class="nowrap">~(coursename;t)</td>
+                                <td class="nowrap">~(tchr;t)</td>
+                                <td align="center">~(rpt1;t)</td>
+                                <td align="center">~(rpt2;t)</td>
+                                <td align="center" style="background-color:~(color;t);">~(prctchng;t)</td>
+                                <td align="center">~(term;t)</td>
+                                <td align="center">~(year;t)</td>
+                                <td>~(school)</td>
+                            </tr>
+                            [/tlist_sql]
+                    </tbody>
+                </table>
+            </div>
+            <!-- End of results -->
+            <div style="clear: both;">
+                <p>
+                    <center>Report generated at ~[time] on ~[date]</center>
+                </p>
+            </div>
+            [/if#showData]
+            ~[wc:admin_footer_frame_css]
+    </body>
+
+</html>
