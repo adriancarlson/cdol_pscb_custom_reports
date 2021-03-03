@@ -27,11 +27,15 @@
                 <div class="box-round" style="overflow: hidden;">
                     <h2>Report Filters</h2>
                     <table border="0" cellspacing="0" cellpadding="4" class="linkDescList">
-                        <thead>
-                            <tr class="headerrow">
-                                <th>Grade Reporting Term</th>
-                            </tr>
-                        </thead>
+                    <thead>
+						<tr>
+							<th width="200px">First Reporting Term</th>
+							<th width="200px">Second Reporting Term</th>
+							<th width="120px">Percent Change</th>
+							<th width="150px"></th>
+							<th></th>
+						</tr>
+					</thead>
                         <tbody>
                             <tr class="headerrow" valign="top">
                                 <td>
@@ -44,7 +48,7 @@
                                         WHERE yearid = ~(curyearid)
                                         AND schoolid = ~(curschoolid)
                                         ORDER BY storecode]
-                                        <option value="~(rpt1;t)" ~(selectedterm,t)>~(rpt1;t)</option>
+                                        <option value="~(rpt1)" ~(selectedterm,t)>~(rpt1)</option>
                                         [/tlist_sql]
                                     </select>
                                 </td>
@@ -58,12 +62,14 @@
                                         WHERE yearid = ~(curyearid)
                                         AND schoolid = ~(curschoolid)
                                         ORDER BY storecode]
-                                        <option value="~(rpt2;t)" ~(selectedterm,t)>~(rpt2;t)</option>
+                                        <option value="~(rpt2)" ~(selectedterm,t)>~(rpt2)</option>
                                         [/tlist_sql]
                                     </select>
                                 </td>
-                                <td><input type="text" id="prctcng" name="prctcng" value="~(gpv.prctcng)" size="1">%
+                                <td class="center"><input type="text" id="prctcng" name="prctcng" value="~(gpv.prctcng)" size="1">%
                                 </td>
+                                <td></td>
+                                <td></td>
                             </tr>
                         </tbody>
                     </table>
@@ -79,24 +85,23 @@
             <!-- end of Options -->
             ~[if#showData.~(gpv.showData)=1]
             <div class="box-round">
-                <h2>~(gpv.prctcng;sqlText) % Grade Change between ~(gpv.rpt1;sqlText) & ~(gpv.rpt1;sqlText)</h2>
+                <h2>~(gpv.prctcng) % Grade Change between ~(gpv.tm1) & ~(gpv.tm2)</h2>
                 <table border="0" cellspacing="0" cellpadding="4" class="tablesorter grid" id="results">
                     <thead>
                         <tr class="headerRow">
-                            <th class="left">Student Number</th>
+                            <th class="left">Stu. Number</th>
                             <th class="left">Student</th>
                             <th class="left filter-select">Gender</th>
-                            <th class="left filter-select">Grade Level</th>
+                            <th class="left filter-select">Grade</th>
                             <th class="left">Expression</th>
                             <th class="left">Course.Section</th>
                             <th class="left filter-select">Course Name</th>
                             <th class="left filter-select">Teacher</th>
-                            <th class="center">~(gpv.rpt1;sqlText)</th>
-                            <th class="center">~(gpv.rpt2;sqlText)</th>
+                            <th class="center">~(gpv.tm1;sqlText)</th>
+                            <th class="center">~(gpv.tm2;sqlText)</th>
                             <th class="center">% Change</th>
                             <th class="center">Term</th>
-                            <th class="center">Year</th>
-                            <th class="left">School</th>>
+                            <th class="left">School</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -118,7 +123,8 @@
                                                 WHEN TO_CHAR(STU.grade_level) = 0 then 'K'
                                                 WHEN TO_CHAR(STU.grade_level) = 99 then 'Graduated'
                                                 ELSE TO_CHAR(STU.grade_level)
-                                            END as GRADE_LEVEL,
+                                            END as PRETTY_GRADE,
+                                            STU.grade_level,
                                             SEC.EXTERNAL_EXPRESSION as EXPRESSION,
                                             C.COURSE_NUMBER ||'.'|| SEC.SECTION_NUMBER as COURSE_section,
                                             C.COURSE_NAME as COURSE_NAME,
@@ -145,12 +151,14 @@
                                         INNER JOIN TEACHERS TCH 
                                             ON SEC.TEACHER=TCH.ID
                                         WHERE SCH.SCHOOL_NUMBER=~(curschoolid) 
-                                            AND FG.FINALGRADENAME in ('Q1','Q2') 
+                                            AND STU.ENROLL_STATUS = 0
+                                            AND FG.FINALGRADENAME in ('~(gpv.tm1;sqlText)','~(gpv.tm2;sqlText)') 
+                                            AND FG.PERCENT <> 0 
                             ) 
                                 PIVOT ( 
                                         MAX(PERCENT) 
                                         FOR REPORTING_TERM 
-                                        in ('Q1' as RPT1,'Q2'as RPT2) 
+                                        in ('~(gpv.tm1;sqlText)' as RPT1,'~(gpv.tm2;sqlText)'as RPT2) 
                                 ) 
                                 ORDER BY 
                                     GRADE_LEVEL, LASTFIRST, EXPRESSION, STUDENT_NUMBER, GENDER, COURSE_SECTION, COURSE_NAME, TEACHER 
@@ -159,7 +167,7 @@
                                 STUDENT_NUMBER, 
                                 LASTFIRST, 
                                 GENDER, 
-                                GRADE_LEVEL, 
+                                PRETTY_GRADE, 
                                 EXPRESSION,
                                 COURSE_SECTION, 
                                 COURSE_NAME, 
@@ -168,21 +176,20 @@
                                 RPT2, 
                                 --(RPT2 - RPT1) as increase, 
                                 CASE 
-                                    WHEN (RPT2 - RPT1)> 0 THEN 'green'
-                                    WHEN (RPT2 - RPT1) < 0 THEN 'red' 
+                                    WHEN (RPT2 - RPT1)> 0 THEN '#baffc9'
+                                    WHEN (RPT2 - RPT1) < 0 THEN '#ffb3ba' 
                                     ELSE '' 
                                 END color, 
                                 ROUND((((RPT2 - RPT1) / RPT1)*100),2) || '%' as PERCENT_CHANGE,
                                 --ROUND((RPT2 / (RPT1 * 100)),2) || '%' as PERCENT_CHANGE,
                                 -- % increase=Increase ÷ Original Number × 100.
                                 CLASS_TERM, 
-                                SCHOOL_YEAR, 
                                 SCHOOL_NAME 
                             FROM PivotData 
                             WHERE 
-                                ABS(TO_NUMBER(ROUND((((RPT2 - RPT1) / RPT1)*100),2))) > TO_NUMBER(5)
+                                ABS(TO_NUMBER(ROUND((((RPT2 - RPT1) / RPT1)*100),2))) > TO_NUMBER(~(gpv.prctcng))
                             ORDER BY 
-                                GRADE_LEVEL, LASTFIRST, EXPRESSION, STUDENT_NUMBER, GENDER, COURSE_SECTION, COURSE_NAME, TEACHER
+                                GRADE_LEVEL DESC, LASTFIRST, EXPRESSION, COURSE_SECTION, TEACHER 
                             ;alternatecolor;nonemessage=
                             <tr nodata>
                                 <td colspan="100%">No Records Found.</td>
@@ -200,8 +207,7 @@
                                 <td align="center">~(rpt2;t)</td>
                                 <td align="center" style="background-color:~(color;t);">~(prctchng;t)</td>
                                 <td align="center">~(term;t)</td>
-                                <td align="center">~(year;t)</td>
-                                <td>~(school)</td>
+                                <td class="nowrap">~(school)</td>
                             </tr>
                             [/tlist_sql]
                     </tbody>
