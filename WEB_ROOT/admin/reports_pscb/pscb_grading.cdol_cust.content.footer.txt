@@ -1,4 +1,8 @@
 <table id="hiddenTable" style="display: none;">
+	<tr id="prcntCng">
+		<td><a href="/admin/reports_pscb/grading/cdol_gradebook_percent_change.html">Gradebook - Percent Change</a></td>
+		<td>Give students who have a specified percent change between two terms.</td>
+	</tr>
 	<tr id="tchrPercentAvg">
 		<td><a href="/admin/reports_pscb/grading/cdol_teacher_percent_average.html">Teacher - Percent Averages</a></td>
 		<td>Gives the average grade a teacher gave per reporting term.</td>
@@ -12,9 +16,10 @@
 <script>
 	/*checks to make sure page is loaded */
 	$j(document).ready(function () {
-		/* insert custom CDOL fields onto the page. */
+		var prcntCng = $j('#prcntCng').closest('tr');
+		$j("td:contains('Gradebook - Update Status')").closest('tr').after(prcntCng);
 		var tchrPercentAvg = $j('#tchrPercentAvg').closest('tr');
-		$j("td:contains('Gradebook - Update Status')").closest('tr').after(tchrPercentAvg);
+		$j(prcntCng).after(tchrPercentAvg);
 		var lastUpdate = $j('#lastUpdate').closest('tr');
 		$j("td:contains('Gradebook - Update Status')").closest('tr').before(lastUpdate);
 		/* remove the hidden tables  and divs */
