@@ -49,6 +49,7 @@
                     Students.Enroll_Status = 0
                     AND
                     PS_CustomFields.GetStudentsCF(Students.ID,Gen.Value) IS NOT NULL
+                    ~[if.is.a.school] AND Students.schoolid = ~(curschoolid) [/if.is.a.school]
                     ORDER BY
                     schools.name,
                     Students.LastFirst,
