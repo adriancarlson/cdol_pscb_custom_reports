@@ -23,6 +23,7 @@
 				<table border="0" cellspacing="0" cellpadding="4" style="line-height: 25px">
 					<tr>
 						<th>Student Selection</th>
+						<th>Grade Level</th>
 						<th>Term</th>
 						<th>Period</th>
 						<th>Course Name</th>
@@ -37,6 +38,27 @@
 								<option value='' ~[if.~(gpv.ss)=]selected[/if]>All Students</option>
 							</select>
 						</td>
+						<td>
+							<select name="gr">
+								<option value='' ~[if.~[gpv:gr]=]selected[/if]>All Grades</option>
+								~[tlist_sql;
+								SELECT DISTINCT GRADE_LEVEL,
+								CASE
+								WHEN TO_CHAR(grade_level) = -2 then 'PK3'
+								WHEN TO_CHAR(grade_level) = -1 then 'PK4'
+								WHEN TO_CHAR(grade_level) = 0 then 'K'
+								WHEN TO_CHAR(grade_level) = 99 then 'Graduated'
+								ELSE TO_CHAR(grade_level)
+								END as prettygrade
+								FROM STUDENTS
+								WHERE TO_CHAR(SCHOOLID) LIKE CASE WHEN TO_CHAR(~(curschoolid)) = '0'
+								THEN '%' ELSE TO_CHAR(~(curschoolid)) END
+								AND ENROLL_STATUS = 0
+								ORDER BY GRADE_LEVEL]
+								<option value="'~(gr)'">~(prettygrade)</option>
+								[/tlist_sql]
+							</select>
+						</td>
 						<td valign="top" nowrap>
 							<select id="term" name="term">
 								<option value="" ~[if.~(gpv.term)=]selected[/if]>All Terms</option>
@@ -49,23 +71,20 @@
 								[/tlist_sql]
 							</select>
 						</td>
-						<td valign="top" nowrap>
-							<select id="exp" name="exp">
-								<option value="" ~[if.~(gpv.cn)=]selected[/if]>All Courses</option>
-								~[tlist_sql;SELECT DISTINCT
-								cc.expression expression,
-								CASE
-								WHEN upper(crs.course_name) = '~(gpv.cn;sqlText)' THEN 'selected'
-								ELSE ''
-								END isselected
-								from cc
-								where cc.schoolid = ~(curschoolid) and cc.termid like '~(curyearid)__'
-								order by cc.expression]
-								<option value="~(expression;t)" ~(isselected;t)>~(expression;t;externalExpression)
+						<td>
+							<select name="exp" id="exp">
+								~[tlist_sql;
+								SELECT DISTINCT cc.expression, CASE WHEN cc.expression = '~(gpv.exp)' THEN 'selected'
+								END isSelected
+								FROM cc
+								WHERE cc.SchoolID = ~(curschoolid) AND cc.termid like '~(curyearid)__'
+								ORDER BY cc.expression]
+								<option value="~(expression;t)" ~(isSelected)>~(expression;t;externalExpression)
 								</option>
 								[/tlist_sql]
 							</select>
 						</td>
+
 						<td valign="top" nowrap>
 							<select id="cn" name="cn">
 								<option value="" ~[if.~(gpv.cn)=]selected[/if]>All Courses</option>
@@ -125,19 +144,19 @@
 				<thead>
 					<tr>
 						<th class="left">Student #</th>
-						<th class="left">Student</th>
-						<th class="left">Grade</th>
-						<th class="left">Gender</th>
+						<th class="left filter-selec">Student</th>
+						<th class="left filter-selec">Grade</th>
+						<th class="left filter-selec">Gender</th>
 						<th class="left filter-select">Term</th>
-						<th class="left">Period</th>
+						<th class="left filter-selec">Period</th>
 						<th class="left">Course Number</th>
 						<th class="left">Section</th>
-						<th class="left">Course</th>
+						<th class="left filter-selec">Course</th>
 						<th class="left filter-select">Teacher</th>
 						<th class="left">Teacher Number</th>
 						<th class="left filter-select">Course Dept</th>
 						<th class="left filter-select">Room</th>
-						<th class="left">School</th>
+						<th class="left filter-selec">School</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -166,32 +185,35 @@
 					LEFT OUTER JOIN schools sch ON (s.schoolid = sch.school_number)
 					~[if#e.~(gpv.ss)=cur] INNER JOIN ~[temp.table.current.selection:students] temp ON (s.dcid =
 					temp.dcid) [/if#e]
-					WHERE s.Enroll_Status <in (-1,0) AND cc.schoolid=~(curschoolid) ~[if.~(gpv.sec)#] AND
-						ss.id=~(gpv.sec;sqlText) [/if] ~[if.~(gpv.exp)#] AND cc.Expression=~(gpv.exp;sqlText)
-						[/if]~[if.~(gpv.dept)#] AND Upper(c.sched_department)='~(gpv.dept;sqlText)' [/if]
-						~[if.~(gpv.cn)#] AND Upper(c.course_name)='~(gpv.cn;sqlText)' [/if] ~[if.~(gpv.TchName)#] AND
-						ss.Teacher=~(gpv.TchName;sqlText) [/if] ~[if.~(gpv.term)#] AND ss.termid=~(gpv.term;sqlText)
-						[/if] ORDER BY Upper(Trim(s.LastFirst)), Upper(Trim(CrsTitle)) ;alternatecolor;nonemessage=<tr>
+					WHERE s.Enroll_Status in (-1,0) AND cc.schoolid=~(curschoolid)
+					~[if.~(gpv.sec)#] AND ss.id=~(gpv.sec;sqlText) [/if]
+					~[if.~(gpv.dept)#] AND Upper(c.sched_department)='~(gpv.dept;sqlText)' [/if]
+					~[if.~(gpv.cn)#] AND Upper(c.course_name)='~(gpv.cn;sqlText)' [/if]
+					~[if.~(gpv.TchName)#] AND ss.Teacher=~(gpv.TchName;sqlText) [/if]
+					~[if.~(gpv.term)#] AND ss.termid=~(gpv.term;sqlText) [/if]
+					~[if.~(gpv.exp)#] AND cc.Expression IN ('~(gpv.exp)') [/if]
+					~[if#gr.~(gpv.gr;sqlText)#] AND s.grade_level = ~(gpv.gr) [/if#gr]
+					ORDER BY Upper(Trim(s.LastFirst)), Upper(Trim(CrsTitle)) ;alternatecolor;nonemessage=<tr>
 						<td colspan="100%">No records returned.</td>
-						</tr>]
-						<tr class="Record" data-StudentID="~(dcid;t)">
-							<td class="nowrap"><a href="/admin/students/schedulelist.html?frn=001~(dcid;t)"
-									target="_blank">~(studnum;t)</a></td>
-							<td>~(sutdent;t)</td>
-							<td>~(gradelvl;t)</td>
-							<td>~(gender;t)</td>
-							<td>~(term;t)</td>
-							<td class="nowrap">~(expression;t;externalExpression)</td>
-							<td>~(CrsNum;t)</td>
-							<td>~(CrsSec;t)</td>
-							<td class="nowrap">~(CrsTitle;t)</td>
-							<td class="nowrap">~(TchName;t)</td>
-							<td>~(TchNumber;t)</td>
-							<td>~(CrsDept;t)</td>
-							<td>~(room;t)</td>
-							<td>~(school;t)</td>
-						</tr>
-						[/tlist_sql]
+					</tr>]
+					<tr class="Record" data-StudentID="~(dcid;t)">
+						<td class="nowrap"><a href="/admin/students/schedulelist.html?frn=001~(dcid;t)"
+								target="_blank">~(studnum;t)</a></td>
+						<td>~(sutdent;t)</td>
+						<td>~(gradelvl;t)</td>
+						<td>~(gender;t)</td>
+						<td>~(term;t)</td>
+						<td class="nowrap">~(expression;t;externalExpression)</td>
+						<td>~(CrsNum;t)</td>
+						<td>~(CrsSec;t)</td>
+						<td class="nowrap">~(CrsTitle;t)</td>
+						<td class="nowrap">~(TchName;t)</td>
+						<td>~(TchNumber;t)</td>
+						<td>~(CrsDept;t)</td>
+						<td>~(room;t)</td>
+						<td>~(school;t)</td>
+					</tr>
+					[/tlist_sql]
 				</tbody>
 			</table>
 		</div>
