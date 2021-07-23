@@ -7,6 +7,23 @@
 		<link href="/images/css/screen.css" rel="stylesheet" media="screen">
 		<link href="/images/css/print.css" rel="stylesheet" media="print">
 		~[wc:pscb_init]
+		<script>
+			$j(function () {
+				$j("select#pid").on("change", function () {
+					var pid = "'" + $j("select#pid option:selected").map(function () { return $j(this).val() }).get().join("','") + "'";
+					$j("#pidList").val(pid);
+					console.log(pid);
+				})
+
+				var pidList = $j("#pidList").val()
+				if (pidList != "") {
+					pidList = pidList.split(",");
+					for (var i = 0; i < pidList.length; i++) {
+						$j("#pid option[value=" + pidList[i] + "]").attr("selected", true);
+					}
+				}
+			})
+		</script>
 	</head>
 
 	<body>
@@ -28,7 +45,7 @@
 						<th>Period</th>
 						<th>Course Name</th>
 						<th>Teacher</th>
-						<th>Department</th>
+						<th width="100%">Department</th>
 					</tr>
 					<tr>
 						<td>
@@ -72,13 +89,14 @@
 							</select>
 						</td>
 						<td>
-							<select name="exp" id="exp">
+							<select name="pid" id="pid" multiple="multiple" size="5">
 								~[tlist_sql;
-								SELECT DISTINCT cc.expression, CASE WHEN cc.expression = '~(gpv.exp)' THEN 'selected'
+								SELECT DISTINCT cc.expression, CASE WHEN cc.expression = '~(gpv.pid)' THEN 'selected'
 								END isSelected
 								FROM cc
 								WHERE cc.SchoolID = ~(curschoolid) AND cc.termid like '~(curyearid)__'
-								ORDER BY cc.expression]
+								ORDER BY to_number(NVL(SUBSTR(cc.expression, 0, INSTR(cc.expression, '(')-1),
+								cc.expression)), cc.expression]
 								<option value="~(expression;t)" ~(isSelected)>~(expression;t;externalExpression)
 								</option>
 								[/tlist_sql]
@@ -128,6 +146,7 @@
 				</table>
 				<div class="button-row" style="float: left;">
 					<input type="hidden" name="showData" value="1">
+					<input type="hidden" name="pidList" id="pidList" value="~(gpv.pidList)">
 					<span class="red">&nbsp;&nbsp;Select parameters and click submit</span>
 					<input type="hidden" name="ac" value="prim">~[submitbutton]
 				</div>
@@ -144,26 +163,26 @@
 				<thead>
 					<tr>
 						<th class="left">Student #</th>
-						<th class="left filter-selec">Student</th>
-						<th class="left filter-selec">Grade</th>
-						<th class="left filter-selec">Gender</th>
+						<th class="left filter-select">Student</th>
+						<th class="left filter-select">Grade</th>
+						<th class="left filter-select">Gender</th>
 						<th class="left filter-select">Term</th>
-						<th class="left filter-selec">Period</th>
+						<th class="left filter-select">Period</th>
 						<th class="left">Course Number</th>
 						<th class="left">Section</th>
-						<th class="left filter-selec">Course</th>
+						<th class="left filter-select">Course</th>
 						<th class="left filter-select">Teacher</th>
 						<th class="left">Teacher Number</th>
 						<th class="left filter-select">Course Dept</th>
 						<th class="left filter-select">Room</th>
-						<th class="left filter-selec">School</th>
+						<th class="left filter-select">School</th>
 					</tr>
 				</thead>
 				<tbody>
 					~[tlist_sql;
 					SELECT s.dcid
 					,s.Student_Number
-					,s.LastFirst AS StudName
+					,s.Last_name || ' ' || s.first_name AS StudName
 					,s.grade_Level AS GradeLvl
 					,s.Gender
 					,Decode(Trm.IsYearRec, 1, 'YR', Trm.Abbreviation) AS Term
@@ -191,9 +210,10 @@
 					~[if.~(gpv.cn)#] AND Upper(c.course_name)='~(gpv.cn;sqlText)' [/if]
 					~[if.~(gpv.TchName)#] AND ss.Teacher=~(gpv.TchName;sqlText) [/if]
 					~[if.~(gpv.term)#] AND ss.termid=~(gpv.term;sqlText) [/if]
-					~[if.~(gpv.exp)#] AND cc.Expression IN ('~(gpv.exp)') [/if]
+					~[if.~(gpv.pidList)#] AND cc.Expression IN (~(gpv.pidList)) [/if]
 					~[if#gr.~(gpv.gr;sqlText)#] AND s.grade_level = ~(gpv.gr) [/if#gr]
-					ORDER BY Upper(Trim(s.LastFirst)), Upper(Trim(CrsTitle)) ;alternatecolor;nonemessage=<tr>
+					ORDER BY Upper(Trim(s.LastFirst)), cc.expression, Upper(Trim(CrsTitle)) ;alternatecolor;nonemessage=
+					<tr>
 						<td colspan="100%">No records returned.</td>
 					</tr>]
 					<tr class="Record" data-StudentID="~(dcid;t)">
