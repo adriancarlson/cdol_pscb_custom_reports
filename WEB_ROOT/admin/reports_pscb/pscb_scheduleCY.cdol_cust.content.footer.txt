@@ -11,6 +11,10 @@
 		<td><a href="/admin/reports_pscb/scheduleCY/cdol_specialty_grading_scale.html">Sections - Specialty Grading Scales</a></td>
 		<td>List all of the sections at your school that have the Specialty Grading Scale. H, DW, S, NI, E</td>
 	</tr>
+	<tr id="classByPeriod">
+		<td><a href="/admin/reports_pscb/scheduleCY/cdol_student_class_by_period.html">Students - Class by Period</a></td>
+		<td>Lists all students in a course by a selected period.</td>
+	</tr>
 </table>
 
 <script>
@@ -24,6 +28,8 @@
 		$j("td:contains('Students - Non Scheduled Periods')").closest('tr').after(studentDoubleBooked);
 		var sectionsSpecialty = $j('#sectionsSpecialty').closest('tr');
 		$j("td:contains('Sections - No Room Assigned')").closest('tr').after(sectionsSpecialty);
+		var classByPeriod = $j('#classByPeriod').closest('tr');
+		$j("td:contains('Students - Class Roster')").closest('tr').after(classByPeriod);
 		/* remove the hidden tables  and divs */
 		$j("#hiddenTable").remove();
 	});

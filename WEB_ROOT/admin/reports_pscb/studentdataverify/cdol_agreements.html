@@ -83,10 +83,17 @@
                         <th class="left">Name</th>
                         <th class="left filter-select">Grade Level</th>
                         <th class="left filter-select">Gender</th>
+                        <th class="left filter-select">Allergies</th>
+                        <th class="center filter-select">Asthma?</th>
+                        <th class="center filter-select">Medication?</th>
                         <th class="center filter-select">Agreed to Handbook?</th>
                         <th class="center filter-select">Agreed to AUP?</th>
                         <th class="center filter-select">Agreed to Print Release?</th>
                         <th class="center filter-select">Agreed to Web Release?</th>
+                        <th class="center filter-select">Agreed to Lunch Policy?</th>
+                        <th class="center filter-select">Agreed to Late Policy?</th>
+                        <th class="center filter-select">Agreed to Field Trip?</th>
+                        <th class="center filter-select">Early Dismissal</th>
                         <th class="left ">School</th>
                     </tr>
                 </thead>
@@ -108,10 +115,17 @@
                     WHEN UPPER(s.gender) = 'F' THEN 'Female'
                     ELSE s.gender
                     END as GENDER,
+                    SCF.allergies,
+                    DECODE(AD.asthma,1,'Yes',0,'No','TBD') AS Asthma,
+                    DECODE(AD.STUDENT_MEDICATION,1,'Yes',0,'No','TBD') AS Medication,
                     DECODE(AD.HANDBOOK_AGREE,1,'Yes',0,'No','TBD') AS "Agreed to Handbook",
                     DECODE(AD.APU_AGREE,1,'Yes',0,'No','TBD') AS "Agreed to AUP",
                     DECODE(AD.PRINT_PUBLICITY,1,'Yes',0,'No','TBD') AS "Agreed to Print Release",
                     DECODE(AD.WEB_PUBLICITY,1,'Yes',0,'No','TBD') AS "Agreed to Web Release",
+                    DECODE(AD.LUNCH_POLICY_AGREE,1,'Yes',0,'No','TBD') AS "Agreed to Lunch Policy",
+                    DECODE(AD.LATE_POLICY_AGREE,1,'Yes',0,'No','TBD') AS "Agreed to Late Policy",
+                    DECODE(AD.FIELD_TRIP_PERMISSION,1,'Yes',0,'No','TBD') AS "Agreed to Field Trip",
+                    AD.STUDENT_EARLY_DISMISSAL,
                     sch.abbreviation
                     FROM Students s
                     ~[if#ss.~(gpv.ss;sqlText)=cur] INNER JOIN ~[temp.table.current.selection:students] temp ON (s.dcid =
@@ -120,6 +134,8 @@
                     JOIN schools sch ON (s.schoolid = sch.school_number)
                     LEFT JOIN U_STUDENT_ADDITIONAL_INFO AD
                     ON AD.STUDENTSDCID = s.DCID
+                    LEFT JOIN studentcorefields SCF
+                    ON SCF.STUDENTSDCID =S.DCID
                     WHERE s.enroll_status in (-1,0)
                     ~[if.is.a.school] AND s.schoolid = ~(curschoolid) [/if.is.a.school]
                     ~[if#gr.~(gpv.gr;sqlText)#] AND s.grade_level = ~(gpv.gr) [/if#gr]
@@ -132,10 +148,17 @@
                         <td>~(name;t)</td>
                         <td class="center">~(grade_level)</td>
                         <td>~(gender;t)</td>
+                        <td>~(allergy;t)</td>
+                        <td class="nowrap center">~(asthma;t)</td>
+                        <td class="nowrap center">~(medication;t)</td>
                         <td class="nowrap center">~(handbook;t)</td>
                         <td class="nowrap center">~(APU;t)</td>
                         <td class="nowrap center">~(pr;t)</td>
                         <td class="nowrap center">~(wr;t)</td>
+                        <td class="nowrap center">~(lur;t)</td>
+                        <td class="nowrap center">~(lar;t)</td>
+                        <td class="nowrap center">~(ft;t)</td>
+                        <td class="nowrap center">~(ed;t)</td>
                         <td>~(school;t)</td>
                     </tr>
                     [/tlist_sql]
