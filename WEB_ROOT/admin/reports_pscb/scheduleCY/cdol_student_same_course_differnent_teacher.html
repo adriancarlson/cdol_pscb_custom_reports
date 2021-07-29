@@ -17,29 +17,6 @@
         Different Teacher at Semester
         <!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
         <h1>Student - Same Course Different Teacher at Semester</h1>
-        <form name="rptFilters" action="#" method="POST">
-            <div class="box-round">
-                <h2>Report Filters</h2>
-                <table border="0" cellspacing="0" cellpadding="0" class="linkDescList">
-                    <tr>
-                        <th style="white-space: nowrap;" width="180px"> Student Selection</th>
-                    </tr>
-                    <tr>
-                        <td>
-                            <select name="ss">
-                                <option value="cur" ~[if.~[gpv:ss]=cur]selected[/if]>Current Selection (~[x:studsinset])
-                                <option value='' ~[if.~[gpv:ss]=]selected[/if]>All Students
-                            </select>
-                        </td>
-                    </tr>
-                </table>
-                <div class="button-row">
-                    <input type="hidden" name="showData" value="1">
-                    <span class="red">&nbsp;&nbsp;Select parameters and click submit</span>
-                    <input type="hidden" name="ac" value="prim">~[submitbutton]
-                </div>
-            </div>
-        </form>
         <!-- end of Options -->
 
         <!-- Start of Results -->
