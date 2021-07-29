@@ -43,8 +43,6 @@
 		$j("td:contains('Sections - No Room Assigned')").closest('tr').after(sectionsSpecialty);
 		var classByPeriod = $j('#classByPeriod').closest('tr');
 		$j("td:contains('Students - Class Roster')").closest('tr').after(classByPeriod);
-		var diffTeacher = $j('#diffTeacher').closest('tr');
-		$j("td:contains('Not Enrolled in a Course')").closest('tr').after(diffTeacher);
 		/* remove the hidden tables  and divs */
 		$j("#hiddenTable").remove();
 	});
