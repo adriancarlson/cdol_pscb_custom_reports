@@ -60,10 +60,10 @@
 	/*checks to make sure page is loaded */
 	$j(document).ready(function () {
 		/* insert custom CDOL fields onto the page. */
-		var potentialContacts = $j('#potentialContacts').closest('tr');
-		$j("td:contains('Contacts - Duplicates')").closest('tr').before(potentialContacts);
+		// var potentialContacts = $j('#potentialContacts').closest('tr');
+		// $j("td:contains('Contacts - Duplicates')").closest('tr').before(potentialContacts);
 
-		/* insert custom CDOL fields onto the page. */
+		
 		var motherFatherEmail = $j('#motherFatherEmail').closest('tr');
 		$j("td:contains('Students - Contacts List')").closest('tr').after(motherFatherEmail);
 
