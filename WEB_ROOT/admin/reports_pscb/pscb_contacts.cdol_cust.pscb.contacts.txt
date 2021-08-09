@@ -10,8 +10,13 @@
 	</tr>
 	<tr id="receiveMailEmail">
 		<td><a href="/admin/reports_pscb/contacts/cdol_receive_mail_email.html">Students - Contacts Receive
-        Mail with Email</a></td>
+				Mail with Email</a></td>
 		<td>List Student with Contacts that are marked as receive Mail with contact email addresses</td>
+	</tr>
+	<tr id="contactsMailingPerFamily">
+		<td><a href="/admin/reports_pscb/contacts/cdol_student_contact_mailing_label_per_family">Contacts - Mailing
+				Label Per Family</a></td>
+		<td>List Contacts and associated students per address</td>
 	</tr>
 </table>
 <table id="bottomTable" border="0" cellspacing="0" cellpadding="4" class="table grid">
@@ -63,17 +68,20 @@
 		// var potentialContacts = $j('#potentialContacts').closest('tr');
 		// $j("td:contains('Contacts - Duplicates')").closest('tr').before(potentialContacts);
 
-		
+
 		var motherFatherEmail = $j('#motherFatherEmail').closest('tr');
 		$j("td:contains('Students - Contacts List')").closest('tr').after(motherFatherEmail);
 
 		var receiveMailEmail = $j('#receiveMailEmail').closest('tr');
 		$j(motherFatherEmail).after(receiveMailEmail);
 
+		var contactsMailingPerFamily = $j('#contactsMailingPerFamily').closest('tr');
+		$j("td:contains('Contacts - Students List')").after(contactsMailingPerFamily);
+
 		var bottomTable = $j('#bottomTable');
 		$j("td:contains('Students - Contacts List')").closest('tr').parent().parent().after(bottomTable);
 		/* remove the hidden tables  and divs */
-		
+
 		$j("#hiddenTable").remove();
 	});
 </script>

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <title>Contacts - Mailing Label Per Family </title>
+        ~[wc:commonscripts]
+        <link href="/images/css/screen.css" rel="stylesheet" media="screen">
+        <link href="/images/css/print.css" rel="stylesheet" media="print">
+        ~[wc:pscb_init]
+        <!-- <script>
+            $j(function () {
+                $j("select#pid").on("change", function () {
+                    var pid = "'" + $j("select#pid option:selected").map(function () { return $j(this).val() }).get().join("','") + "'";
+                    $j("#pidList").val(pid);
+                    console.log(pid);
+                })
+
+                var pidList = $j("#pidList").val()
+                if (pidList != "") {
+                	pidList = pidList.split(",");
+                	for (var i = 0; i < pidList.length; i++) {
+                		$j("#pid option[value=" + pidList[i] + "]").attr("selected", true);
+                	}
+                }
+            })
+        </script> -->
+    </head>
+
+    <body>
+        ~[wc:admin_header_frame_css]
+        <!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a> &gt; <a
+            href="/admin/reports_pscb/pscb_home.html">PSCB Custom Reports</a> &gt; <a
+            href="/admin/reports_pscb/pscb_contacts.html">Contacts</a> &gt; Contacts - Mailing Label Per Family
+        <!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
+        <h1>Contacts - Mailing Label Per Family</h1>
+        <form name="rptFilters" action="#" method="POST">
+            <div class="box-round" style="overflow: hidden;">
+                <h2>Report Filters</h2>
+                <table border="0" cellspacing="0" cellpadding="4" style="line-height: 25px">
+                    <tr>
+                        <th>Student Selection</th>
+                        <th>Include Student Last Name</th>
+                        <th>Use Custody</th>
+                        <th width="100%">Use Mailing</th>
+                    </tr>
+                    <tr>
+                        <td>
+                            <select name="ss">
+                                <option value="cur" ~[if.~(gpv.ss)=cur]selected[/if]>Current Selection (~[x:studsinset])
+                                </option>
+                                <option value='' ~[if.~(gpv.ss)=]selected[/if]>All Students</option>
+                            </select>
+                        </td>
+                        <td valign="top" nowrap>
+                            <select id="lname" name="lname">
+                                <option value="yes" ~[if.~(gpv.lname)=yes]selected[/if]>Yes</option>
+                                <option value="no" ~[if.~(gpv.lname)=no]selected[/if]>No</option>
+                            </select>
+                        </td>
+                        <td valign="top" nowrap>
+                            <select id="custody" name="custody">
+                                <option value="yes" ~[if.~(gpv.custody)=yes]selected[/if]>Yes</option>
+                                <option value="no" ~[if.~(gpv.custody)=no]selected[/if]>No</option>
+                            </select>
+                        </td>
+                        <td valign="top" nowrap>
+                            <select id="mailing" name="mailing">
+                                <option value="yes" ~[if.~(gpv.mailing)=yes]selected[/if]>Yes</option>
+                                <option value="no" ~[if.~(gpv.mailing)=no]selected[/if]>No</option>
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+                <div class="button-row" style="float: left;">
+                    <input type="hidden" name="showData" value="1">
+                    <input type="hidden" name="pidList" id="pidList" value="~(gpv.pidList)">
+                    <span class="red">&nbsp;&nbsp;Select parameters and click submit</span>
+                    <input type="hidden" name="ac" value="prim">~[submitbutton]
+                </div>
+            </div>
+        </form>
+        <!-- end of Options -->
+
+        <!-- Start of Results -->
+        ~[if#showData.~(gpv.showData)=1]
+        <div class="box-round">
+            <h2>Contacts - Mailing Label Per Family <span><label id="lblRecordCount"></label></span></h2>
+            <table border="0" cellspacing="0" cellpadding="0" class="tablesorter grid" id="results" groupRowsByCol="1"
+                color1="#ffffff" color2="#d7edfe">
+                <thead>
+                    <tr>
+                        <th class="left">Contacts</th>
+                        <th class="left">Student</th>
+                        <th class="left filter-select">Address Line 1</th>
+                        <th class="left filter-select">Address Line 2</th>
+                        <th class="left filter-select">Unit</th>
+                        <th class="left filter-select">City</th>
+                        <th class="left">State</th>
+                        <th class="left">Zip</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ~[tlist_sql;
+                    SELECT
+                    DETAILS.CONTACTS,
+                    DETAILS.STUDENTS,
+                    PERSONADDRESS.STREET,
+                    PERSONADDRESS.LINETWO,
+                    PERSONADDRESS.UNIT,
+                    PERSONADDRESS.CITY,
+                    CODESET_STATE.CODE,
+                    PERSONADDRESS.POSTALCODE
+                    FROM PERSONADDRESS
+                    LEFT JOIN CODESET CODESET_STATE
+                    ON PERSONADDRESS.STATESCODESETID = CODESET_STATE.CODESETID
+                    INNER JOIN
+                    (
+                    SELECT
+                    PERSONADDRESSID,
+                    STUDENTS,
+                    regexp_replace(LISTAGG(FIRSTNAME || ' ' || LASTNAME, ', ')
+                    WITHIN GROUP (ORDER BY PERSON_ID) , ',('||'['||'^,'||']'||'+)$', ' and\1') AS CONTACTS,
+                    ROW_NUMBER() OVER(ORDER BY PERSONADDRESSID) MAILING_NUMBER
+                    FROM
+                    (
+                    SELECT
+                    PERSONADDRESSID,
+                    PERSON_ID,
+                    FIRSTNAME,
+                    LASTNAME,
+                    ~[if.~(gpv.lname)=yes] regexp_replace(LISTAGG(FIRST_NAME || ' ' || LAST_NAME, ', ') WITHIN GROUP
+                    (ORDER BY PERSON_ID) ,[/if]
+                    ~[if.~(gpv.lname)=no] regexp_replace(LISTAGG(LAST_NAME, ', ') WITHIN GROUP (ORDER BY PERSON_ID)
+                    ,[/if]
+                    ',('||'['||'^,'||']'||'+)$', ' and\1') AS STUDENTS
+                    FROM
+                    (
+                    SELECT DISTINCT
+                    PERSONADDRESSASSOC.PERSONADDRESSID,
+                    PERSON.ID AS PERSON_ID,
+                    PERSON.FIRSTNAME,
+                    PERSON.LASTNAME,
+                    STUDENTS.ID AS STUDENT_ID,
+                    STUDENTS.GRADE_LEVEL,
+                    STUDENTS.LAST_NAME,
+                    STUDENTS.FIRST_NAME,
+                    ROW_NUMBER() OVER( PARTITION BY PERSON.ID ORDER BY GRADE_LEVEL DESC) AS STUCONTACTORDER
+                    FROM STUDENTS
+                    ~[if#e.~(gpv.ss)=cur] INNER JOIN ~[temp.table.current.selection:students] stusel ON stusel.dcid =
+                    STUDENTS.dcid
+                    [/if#e]
+                    INNER JOIN SCHOOLS
+                    ON STUDENTS.SCHOOLID = SCHOOLS.SCHOOL_NUMBER
+                    ~[if.is.a.school] and STUDENTS.schoolid=~(curschoolid) [/if]
+                    INNER JOIN STUDENTCONTACTASSOC
+                    ON STUDENTCONTACTASSOC.STUDENTDCID = STUDENTS.DCID
+                    INNER JOIN PERSON
+                    ON PERSON.ID = STUDENTCONTACTASSOC.PERSONID
+                    LEFT JOIN CODESET CONTACT_REL
+                    ON STUDENTCONTACTASSOC.CURRRELTYPECODESETID = CONTACT_REL.CODESETID
+                    INNER JOIN STUDENTCONTACTDETAIL
+                    ON STUDENTCONTACTASSOC.STUDENTCONTACTASSOCID = STUDENTCONTACTDETAIL.STUDENTCONTACTASSOCID
+                    AND (CURRENT_DATE < STUDENTCONTACTDETAIL.ENDDATE OR STUDENTCONTACTDETAIL.ENDDATE IS NULL) AND
+                        (CURRENT_DATE>
+                        STUDENTCONTACTDETAIL.STARTDATE OR STUDENTCONTACTDETAIL.STARTDATE IS NULL)
+                        ~[if.~(gpv.custody)=yes] AND STUDENTCONTACTDETAIL.ISCUSTODIAL = 1 [/if]
+                        ~[if.~(gpv.mailing)=yes] AND STUDENTCONTACTDETAIL.RECEIVESMAILFLG = 1 [/if]
+                        LEFT JOIN PERSONADDRESSASSOC
+                        ON PERSONADDRESSASSOC.PERSONID = PERSON.ID
+                        AND PERSONADDRESSASSOC.ADDRESSTYPECODESETID = 19
+                        AND (CURRENT_DATE < PERSONADDRESSASSOC.ENDDATE OR PERSONADDRESSASSOC.ENDDATE IS NULL) AND
+                            (CURRENT_DATE>
+                            PERSONADDRESSASSOC.STARTDATE OR PERSONADDRESSASSOC.STARTDATE IS NULL)
+                            WHERE STUDENTS.ENROLL_STATUS = 0
+                            ORDER BY PERSON.ID
+                            )
+                            GROUP BY PERSONADDRESSID, PERSON_ID, FIRSTNAME, LASTNAME
+                            )
+                            GROUP BY PERSONADDRESSID, STUDENTS
+                            ) DETAILS
+                            ON PERSONADDRESS.PERSONADDRESSID = DETAILS.PERSONADDRESSID ;alternatecolor;nonemessage=
+                            <tr>
+                                <td colspan="100%">No records returned.</td>
+                            </tr>]
+                            <tr class="Record">
+                                <td class="nowrap">~(contacts;t)</a></td>
+                                <td>~(students;t)</td>
+                                <td>~(address1;t)</td>
+                                <td>~(address2;t)</td>
+                                <td>~(unit;t)</td>
+                                <td>~(city;t)</td>
+                                <td>~(state;t)</td>
+                                <td>~(zip)</td>
+                            </tr>
+                            [/tlist_sql]
+                </tbody>
+            </table>
+        </div>
+        [/if#showData]
+        <br>
+        <!-- end of content of bounding box -->
+        ~[wc:admin_footer_css]
+    </body>
+
+</html><!-- non framed -->
