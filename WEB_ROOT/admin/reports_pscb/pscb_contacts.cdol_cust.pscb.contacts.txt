@@ -14,7 +14,7 @@
 		<td>List Student with Contacts that are marked as receive Mail with contact email addresses</td>
 	</tr>
 	<tr id="contactsMailingPerFamily">
-		<td><a href="/admin/reports_pscb/contacts/cdol_student_contact_mailing_label_per_family">Contacts - Mailing
+		<td><a href="/admin/reports_pscb/contacts/cdol_student_contact_mailing_label_per_family.html">Contacts - Mailing
 				Label Per Family</a></td>
 		<td>List Contacts and associated students per address</td>
 	</tr>
@@ -76,7 +76,7 @@
 		$j(motherFatherEmail).after(receiveMailEmail);
 
 		var contactsMailingPerFamily = $j('#contactsMailingPerFamily').closest('tr');
-		$j("td:contains('Contacts - Students List')").after(contactsMailingPerFamily);
+		$j("td:contains('Contacts - Students List')").closest('tr').after(contactsMailingPerFamily);
 
 		var bottomTable = $j('#bottomTable');
 		$j("td:contains('Students - Contacts List')").closest('tr').parent().parent().after(bottomTable);
