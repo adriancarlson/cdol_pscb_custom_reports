@@ -143,7 +143,7 @@
                     on cst_schoolsubdistricts.subdistrictid = cst_subdistricts.id
                     WHERE
                     cc.course_number IN ('541001','541K01')
-                    AND cc.TERMID >= 3100
+                    AND cc.TERMID LIKE '~(curyearid)__'
                     ~[if.is.a.school] and STUDENTS.schoolid= ~(curschoolid) [/if]
                     ~[if#gr.~(gpv.gr;sqlText)#] AND STUDENTS.grade_level = ~(gpv.gr) [/if#gr]
                     ORDER BY students.grade_level, students.lastfirst
