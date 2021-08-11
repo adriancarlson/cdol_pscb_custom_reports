@@ -21,7 +21,12 @@
 	</tr>
 	<tr id="aqhdNonAcademic">
 		<td><a href="/admin/reports_pscb/scheduleCY/cdol_aqhd_non_academic.html">Non-Academic Sections Set Incorrectly</a></td>
-		<td>Lists Aquinas Non-Academic Sections that do not have Exclude from, GPA, Honor Roll, or Class Rank</td>
+		<td>Lists Non-Academic Sections that do not have Exclude from, GPA, Honor Roll, or Class Rank</td>
+	</tr>
+	<tr id="bnhoNonPercent">
+		<td><a href="/admin/reports_pscb/scheduleCY/cdol_aqhd_non_academic.html">Sections Not Set to
+        Percentage Scale</a></td>
+		<td>Lists Sections not set to the 100 point scale</td>
 	</tr>
 </table>
 
@@ -41,6 +46,14 @@
 	});
 </script>
 [/if#aqhd]
+~[if#bnho.~(curschoolid)=115]
+<script>
+	$j(document).ready(function () {
+		var aqhdNonAcademic = $j('#bnhoNonPercent').closest('tr');
+		$j("td:contains('Sections - Dependent Sections List')").closest('tr').after(bnhoNonPercent);
+	});
+</script>
+[/if#bnho]
 
 <script>
 	/*checks to make sure page is loaded */
