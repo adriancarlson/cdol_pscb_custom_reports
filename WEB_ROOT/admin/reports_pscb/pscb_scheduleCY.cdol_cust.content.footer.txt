@@ -24,7 +24,7 @@
 		<td>Lists Non-Academic Sections that do not have Exclude from, GPA, Honor Roll, or Class Rank</td>
 	</tr>
 	<tr id="bnhoNonPercent">
-		<td><a href="/admin/reports_pscb/scheduleCY/cdol_aqhd_non_academic.html">Sections Not Set to
+		<td><a href="/admin/reports_pscb/scheduleCY/cdol_bnho_100_point_scale.html">Sections Not Set to
         Percentage Scale</a></td>
 		<td>Lists Sections not set to the 100 point scale</td>
 	</tr>
