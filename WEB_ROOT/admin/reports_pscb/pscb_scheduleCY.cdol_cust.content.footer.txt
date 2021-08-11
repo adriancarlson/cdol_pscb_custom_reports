@@ -19,6 +19,10 @@
 		<td><a href="/admin/reports_pscb/scheduleCY/cdol_student_same_course_differnent_teacher.html">Students -Same Course Different Teacher</a></td>
 		<td>Lists students that have the same course each semester but a different teacher for the course</td>
 	</tr>
+	<tr id="aqhdNonAcademic">
+		<td><a href="/admin/reports_pscb/scheduleCY/cdol_aqhd_non_academic.html">AQHD - Non-Academic Sections Set Incorrectly</a></td>
+		<td>Lists Aquinas Non-Academic Sections that do not have Exclude from, GPA, Honor Roll, or Class Rank</td>
+	</tr>
 </table>
 
 ~[if#pius.~(curschoolid)=101]
@@ -29,6 +33,14 @@
 	});
 </script>
 [/if#pius]
+~[if#aqhd.~(curschoolid)=160]
+<script>
+	$j(document).ready(function () {
+		var aqhdNonAcademic = $j('#aqhdNonAcademic').closest('tr');
+		$j("td:contains('Sections - Dependent Sections List')").closest('tr').after(aqhdNonAcademic);
+	});
+</script>
+[/if#aqhd]
 
 <script>
 	/*checks to make sure page is loaded */

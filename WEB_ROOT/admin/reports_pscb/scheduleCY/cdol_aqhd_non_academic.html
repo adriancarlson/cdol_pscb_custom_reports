@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <title>AQHD - Non-Academic Sections Set Incorrectly</title>
+        ~[wc:commonscripts]
+        <link href="/images/css/screen.css" rel="stylesheet" media="screen">
+        <link href="/images/css/print.css" rel="stylesheet" media="print">
+        ~[wc:pscb_init]
+    </head>
+
+    <body>
+        ~[wc:admin_header_frame_css]
+        <!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a> &gt; <a
+            href="/admin/reports_pscb/pscb_home.html">PSCB Custom Reports</a> &gt; <a
+            href="/admin/reports_pscb/pscb_scheduleCY.html">Scheduling (Current Year)</a> &gt; AQHD - Non-Academic
+        Sections Set Incorrectly
+        <!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
+
+        <!-- Start of Results -->
+        <h1>AQHD - Non-Academic Sections Set Incorrectly</h1>
+        <div class="box-round">
+            <h2>AQHD - Non-Academic Sections Set Incorrectly</h2>
+            <table border="0" cellspacing="0" cellpadding="4" align="center" class="tablesorter grid" id="results">
+                <thead>
+                    <tr>
+                        <th class="left filter-select">Term</th>
+                        <th class="left filter-select">Expression</th>
+                        <th class="left">Course Number.Section Number</th>
+                        <th class="left filter-select">Course Name</th>
+                        <th class="left filter-select">Teacher Name</th>
+                        <th class="left filter-select">Grade Scale</th>
+                        <th class="left">Exclude GPA</th>
+                        <th class="left">Exclude Honor Roll</th>
+                        <th class="left">Exclude Class Rank</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ~[tlist_sql;
+                    SELECT
+                    trm.abbreviation AS term,
+                    sect.expression,
+                    c.dcid,
+                    sect.dcid,
+                    c.course_number,
+                    sect.course_number || '.' ||sect.section_number,
+                    c.course_name,
+                    t.lastfirst teacher_name,
+                    gs.name,
+                    gs.id,
+                    sect.excludefromgpa,
+                    sect.excludefromhonorroll,
+                    sect.excludefromclassrank
+                    FROM sections sect
+                    LEFT OUTER JOIN courses c
+                    ON c.course_number = sect.course_number
+                    LEFT OUTER JOIN teachers t
+                    ON t.id = sect.teacher
+                    LEFT OUTER JOIN terms Trm
+                    ON sect.termid = trm.id AND sect.schoolid = trm.schoolid
+                    LEFT OUTER JOIN GradeScaleItem gs
+                    ON sect.gradescaleid = gs.id
+                    WHERE sect.schoolid = ~(curschoolid)
+                    AND sect.termid BETWEEN ~(curyearid)00 AND ~(curyearid)99
+                    AND sect.GradescaleID = 425
+                    AND (
+                    sect.excludefromgpa !=1
+                    OR sect.excludefromhonorroll !=1
+                    OR sect.excludefromclassrank !=1
+                    )
+                    ;alternatecolor;nonemessage=
+                    <tr>
+                        <td colspan="100%">All Non-Academic sections set correctly for this year.</td>
+                    </tr>]
+                    <tr class="Record">
+                        <td>~(term;t)</td>
+                        <td>~(expression;t;externalExpression)</td>
+                        <td class="nowrap"><a href="/admin/sections/edit.html?lrn=002~(cdcid;t)&frn=003~(secdcid;t)&cn=~(crsnum;t)" target="_blank">~(crssect;t)</a></td>
+                        <td class="nowrap">~(coursename;t)</td>
+                        <td class="nowrap">~(teachername;t)</td>
+                        <td class="nowrap">~(gradescaele;t)</td>
+                        <td>~(ExcludeFromGPA;t)</td>
+                        <td>~(ExcludeFromHonorRoll;t)</td>
+                        <td>~(ExcludeFromClassRank;t)</td>
+                    </tr>
+                    [/tlist_sql]
+                </tbody>
+            </table>
+        </div>
+        <!-- End of results -->
+        <div style="clear: both;">
+            <p>
+                <center>Report generated at ~[time] on ~[date]</center>
+            </p>
+        </div>
+        ~[wc:admin_footer_frame_css]
+    </body>
+
+</html>
