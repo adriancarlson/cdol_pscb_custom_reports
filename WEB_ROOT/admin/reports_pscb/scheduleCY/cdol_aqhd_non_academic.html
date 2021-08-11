@@ -47,10 +47,18 @@
                     c.course_name,
                     t.lastfirst teacher_name,
                     gs.name,
-                    gs.id,
-                    sect.excludefromgpa,
-                    sect.excludefromhonorroll,
-                    sect.excludefromclassrank
+                    CASE
+                    WHEN sect.excludefromgpa = 1 THEN 'Yes'
+                    ELSE 'No'
+                    END,
+                    CASE
+                    WHEN sect.excludefromhonorroll = 1 THEN 'Yes'
+                    ELSE 'No'
+                    END,
+                    CASE
+                    WHEN sect.excludefromclassrank = 1 THEN 'Yes'
+                    ELSE 'No'
+                    END
                     FROM sections sect
                     LEFT OUTER JOIN courses c
                     ON c.course_number = sect.course_number
@@ -75,7 +83,9 @@
                     <tr class="Record">
                         <td>~(term;t)</td>
                         <td>~(expression;t;externalExpression)</td>
-                        <td class="nowrap"><a href="/admin/sections/edit.html?lrn=002~(cdcid;t)&frn=003~(secdcid;t)&cn=~(crsnum;t)" target="_blank">~(crssect;t)</a></td>
+                        <td class="nowrap"><a
+                                href="/admin/sections/edit.html?lrn=002~(cdcid;t)&frn=003~(secdcid;t)&cn=~(crsnum;t)"
+                                target="_blank">~(crssect;t)</a></td>
                         <td class="nowrap">~(coursename;t)</td>
                         <td class="nowrap">~(teachername;t)</td>
                         <td class="nowrap">~(gradescaele;t)</td>

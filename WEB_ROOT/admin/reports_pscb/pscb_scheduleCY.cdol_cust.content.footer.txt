@@ -20,7 +20,7 @@
 		<td>Lists students that have the same course each semester but a different teacher for the course</td>
 	</tr>
 	<tr id="aqhdNonAcademic">
-		<td><a href="/admin/reports_pscb/scheduleCY/cdol_aqhd_non_academic.html">AQHD - Non-Academic Sections Set Incorrectly</a></td>
+		<td><a href="/admin/reports_pscb/scheduleCY/cdol_aqhd_non_academic.html">Non-Academic Sections Set Incorrectly</a></td>
 		<td>Lists Aquinas Non-Academic Sections that do not have Exclude from, GPA, Honor Roll, or Class Rank</td>
 	</tr>
 </table>
