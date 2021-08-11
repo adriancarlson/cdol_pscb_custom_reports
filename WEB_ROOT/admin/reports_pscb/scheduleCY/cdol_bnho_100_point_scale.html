@@ -35,11 +35,11 @@
                 <tbody>
                     ~[tlist_sql;
                     SELECT
+                    trm.abbreviation AS term,
+                    sect.expression,
                     c.dcid,
                     sect.dcid,
                     c.course_number,
-                    trm.abbreviation AS term,
-                    sect.expression,
                     sect.course_number || '.' ||sect.section_number,
                     c.course_name,
                     t.lastfirst teacher_name,
