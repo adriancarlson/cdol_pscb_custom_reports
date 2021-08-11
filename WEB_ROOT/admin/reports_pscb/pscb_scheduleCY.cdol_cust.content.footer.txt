@@ -42,7 +42,7 @@
 <script>
 	$j(document).ready(function () {
 		var aqhdNonAcademic = $j('#aqhdNonAcademic').closest('tr');
-		$j("td:contains('Sections - Dependent Sections List')").closest('tr').after(aqhdNonAcademic);
+		$j("td:contains('Sections - Dependent Sections List')").closest('tr').before(aqhdNonAcademic);
 	});
 </script>
 [/if#aqhd]
@@ -50,7 +50,7 @@
 <script>
 	$j(document).ready(function () {
 		var aqhdNonAcademic = $j('#bnhoNonPercent').closest('tr');
-		$j("td:contains('Sections - Dependent Sections List')").closest('tr').after(bnhoNonPercent);
+		$j("td:contains('Sections - Dependent Sections List')").closest('tr').before(bnhoNonPercent);
 	});
 </script>
 [/if#bnho]
