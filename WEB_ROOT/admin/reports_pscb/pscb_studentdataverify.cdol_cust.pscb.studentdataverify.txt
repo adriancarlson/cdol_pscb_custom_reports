@@ -84,7 +84,7 @@
 		$j("td:contains('Email / Physical / Mailing Address')").closest('tr').before(sEmail);
 		
 
-		$j("a:contains('Birthday List')").text('Birthday List - All');
+		$j("a[href$='/admin/reports_pscb/misc/birthdaylist.html']").text('Birthday List - By Month');
 
 	});
 </script>
