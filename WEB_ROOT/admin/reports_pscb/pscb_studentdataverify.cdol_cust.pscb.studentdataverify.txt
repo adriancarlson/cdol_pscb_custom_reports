@@ -17,6 +17,10 @@
 		<td><a href="/admin/reports_pscb/misc/birthdaylist.html">Birthday List </a></td>
 		<td>View birthday list for a selected month.</td>
 	</tr>
+	<tr id="bithdatListAll">
+		<td><a href="/admin/reports_pscb/studentdataverify/cdol_birthday_list_all.html">Birthday List - All</a></td>
+		<td>View birthday list for whole year.</td>
+	</tr>
 	<tr>
 		<td><a href="/admin/reports_pscb/misc/siblings_list.html">Siblings List</a></td>
 		<td>Lists all students matched by Home Phone, Physical Address or Mailing Address (current school).</td>
@@ -69,10 +73,7 @@
 		<td><a href="/admin/reports_pscb/studentdataverify/cdol_student_email.html">Student Email</a></td>
 		<td>List of students and their emails</td>
 	</tr>
-	<tr id="bithdatListAll">
-		<td><a href="/admin/reports_pscb/studentdataverify/cdol_birthday_list_all.html">Birthday List - All</a></td>
-		<td>View birthday list for whole year.</td>
-	</tr>
+	
 </table>
 
 <script>
@@ -82,9 +83,8 @@
 		var sEmail = $j('#sEmail').closest('tr');
 		$j("td:contains('Email / Physical / Mailing Address')").closest('tr').before(sEmail);
 		
-		$j("td:contains('Birthday List')").closest('tr').after(bithdatListAll);
 
-		$j("a:contains('Birthday List')").text('Birthday List - By Month');
+		$j("a:contains('Birthday List')").text('Birthday List - All');
 
 	});
 </script>
