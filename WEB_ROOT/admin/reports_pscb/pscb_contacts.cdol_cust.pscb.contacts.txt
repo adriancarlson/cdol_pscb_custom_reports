@@ -75,6 +75,7 @@
 
 		var motherFatherEmail = $j('#motherFatherEmail').closest('tr');
 		$j("td:contains('Students - Contacts List')").closest('tr').after(motherFatherEmail);
+		
 		var motherFatherEmailPhone = $j('#motherFatherEmailPhone').closest('tr');
 		$j(motherFatherEmail).closest('tr').after(motherFatherEmailPhone);
 
