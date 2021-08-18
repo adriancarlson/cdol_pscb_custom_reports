@@ -22,6 +22,10 @@
 				Label Per Family</a></td>
 		<td>List Contacts and associated students per address</td>
 	</tr>
+	<tr id="pxhl8grade">
+		<td><a href="/admin/reports_pscb/contacts/pxhl_8th_grade_contacts.html">PXHL 8th Grade Contacts</a></td>
+		<td>List 8th graders at Lincoln Elementary Schools and their contacts</td>
+	</tr>
 </table>
 <table id="bottomTable" border="0" cellspacing="0" cellpadding="4" class="table grid">
 	<thead>
@@ -65,14 +69,22 @@
 	</tr>
 </table>
 
+~[if#pius.~(curschoolid)=101]
+<script>
+	$j(document).ready(function () {
+		var pxhl8grade = $j('#pxhl8grade').closest('tr');
+		$j("td:contains('Students - Contacts Access List')").closest('tr').before(pxhl8grade);
+	});
+</script>
+[/if#pius]
+
 <script>
 	/*checks to make sure page is loaded */
 	$j(document).ready(function () {
 		/* insert custom CDOL fields onto the page. */
 		// var potentialContacts = $j('#potentialContacts').closest('tr');
 		// $j("td:contains('Contacts - Duplicates')").closest('tr').before(potentialContacts);
-
-
+		
 		var motherFatherEmail = $j('#motherFatherEmail').closest('tr');
 		$j("td:contains('Students - Contacts List')").closest('tr').after(motherFatherEmail);
 		

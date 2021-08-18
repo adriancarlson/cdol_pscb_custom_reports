@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+    <!-- non framed -->
+
+    <head>
+        <title>8th Grade Contacts</title>
+        ~[wc:commonscripts]
+        <link href="/images/css/screen.css" rel="stylesheet" media="screen">
+        <link href="/images/css/print.css" rel="stylesheet" media="print">
+        ~[wc:pscb_init]
+        <script>
+            pscbToolButtons = { "copyData": "Yes", "csvFile": "Yes", "pdfFile": "Yes", "curSel": "Yes" };
+        </script>
+    </head>
+
+    <body>
+        ~[wc:admin_header_frame_css]
+        <!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a> &gt; <a
+            href="/admin/reports_pscb/pscb_home.html" target="_top">PSCB Custom Reports</a> &gt; <a
+            href="/admin/reports_pscb/pscb_contacts.html" target="_top">Contacts</a> &gt; 8th Grade Contacts
+        <!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
+        <!-- start of Options -->
+        <h1>8th Grade Contacts</h1>
+        <form name="searchform" action="#" method="POST">
+            <div class="box-round" style="overflow: hidden;">
+                <h2>Report Filters</h2>
+                <table border="0" cellspacing="0" cellpadding="0" class="linkDescList">
+                    <thead>
+                        <tr>
+                            <th style="white-space: nowrap;" width="180px">Student Selection</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <select name="ss" id="ss">
+                                    <option value='' ~[if.~[gpv:ss]=]selected[/if]>All Students</option>
+                                    <option value="cur" ~[if.~[gpv:ss]=cur]selected[/if]>Current Selection
+                                        (~[x:studsinset])</option>
+                                </select>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="button-row" style="float: left;">
+                    <input type="hidden" name="showData" value="1">
+                    <span class="red">&nbsp;&nbsp;Select parameters and click submit</span>
+                    <input type="hidden" name="ac" value="prim">~[submitbutton]
+                </div>
+            </div>
+        </form>
+        <!-- Start of Results -->
+        ~[if#showData.~(gpv.showData;sqlText)=1]
+        <div class="box-round">
+            <h2>8th Grade Contacts</h2>
+            <table border="0" cellspacing="0" cellpadding="0" class="tablesorter grid" id="results" groupRowsByCol="1"
+                color1="#ffffff" color2="#d7edfe">
+                <thead>
+                    <tr>
+                        <th class="left filter-select">School</th>
+                        <th class="left">Student Number</th>
+                        <th class="left filter-select">Student Last Name</th>
+                        <th class="left filter-select">Student First Name</th>
+                        <th class="left">Student Mailing Street</th>
+                        <th class="left">Student Mailing City</th>
+                        <th class="left">Student Mailing State</th>
+                        <th class="left">Student Mailing Zip</th>
+                        <th class="left filter-select">Relationship</th>
+                        <th class="left">Contact Last Name</th>
+                        <th class="left">Contact First Name</th>
+                        <th class="left">Contact Email Address </th>
+                        <th class="left">Contact Mailing Street</th>
+                        <th class="left">Contact Mailing City</th>
+                        <th class="left">Contact Mailing State</th>
+                        <th class="left">Contact Mailing Zip</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ~[tlist_sql;
+                    Select
+                    STUDENTS.dcid,
+                    SCHOOLS.NAME,STUDENTS.STUDENT_NUMBER, STUDENTS.LAST_NAME, STUDENTS.FIRST_NAME,
+                    STUDENTS.MAILING_STREET,
+                    STUDENTS.MAILING_CITY, STUDENTS.MAILING_STATE,
+                    STUDENTS.MAILING_ZIP, CODESET.CODE AS RELATION,
+                    PERSON.LASTNAME, PERSON.FIRSTNAME, CONTACT_DETAILS.EMAILADDRESS,
+                    CONTACT_DETAILS.STREET AS CONTACT_STREET, '' AS CONTACT_APTSUITE, CONTACT_DETAILS.CITY AS
+                    CONTACT_CITY,
+                    CONTACT_DETAILS.CODE AS CONTACT_STATE,
+                    CONTACT_DETAILS.POSTALCODE AS CONTACT_ZIP
+                    FROM STUDENTS
+                    INNER JOIN STUDENTCONTACTASSOC
+                    ON STUDENTS.DCID = STUDENTCONTACTASSOC.STUDENTDCID
+                    INNER JOIN STUDENTCONTACTDETAIL
+                    ON STUDENTCONTACTDETAIL.STUDENTCONTACTASSOCID = STUDENTCONTACTASSOC.STUDENTCONTACTASSOCID
+                    LEFT JOIN OriginalContactMap
+                    ON STUDENTCONTACTASSOC.STUDENTCONTACTASSOCID = OriginalContactMap.STUDENTCONTACTASSOCID
+                    INNER JOIN CODESET
+                    ON STUDENTCONTACTDETAIL.RELATIONSHIPTYPECODESETID= CODESET.CODESETID
+                    INNER JOIN PERSON
+                    ON STUDENTCONTACTASSOC.PERSONID = PERSON.ID
+                    INNER JOIN SCHOOLS
+                    ON STUDENTS.SCHOOLID = SCHOOLS.SCHOOL_NUMBER
+                    INNER JOIN
+                    (SELECT PERSON.DCID, PERSON.ID, HOME_PHONE.PhoneNumber as HOME_PHONE,
+                    MOBILE_PHONE.PhoneNumber as MOBILE_PHONE, WORK_PHONE.PhoneNumber as WORK_PHONE,
+                    WORK_PHONE.PHONENUMBEREXT as
+                    WORK_PHONE_EXT, SINGLE_EMAIL.EMAILADDRESS,
+                    SINGLE_MAILING_ADDRESS.STREET, SINGLE_MAILING_ADDRESS.CITY, SINGLE_MAILING_ADDRESS.CODE,
+                    SINGLE_MAILING_ADDRESS.POSTALCODE
+                    FROM PERSON
+                    LEFT JOIN
+                    (
+                    SELECT PERSON.DCID, PERSON.ID, PhoneNumber.PhoneNumber
+                    FROM PERSON
+                    INNER JOIN PersonPhoneNumberAssoc
+                    ON PERSON.ID = PersonPhoneNumberAssoc.PersonID
+                    INNER JOIN PhoneNumber
+                    ON PersonPhoneNumberAssoc.PhoneNumberID = PhoneNumber.PhoneNumberID
+                    INNER JOIN (
+                    SELECT PERSON.DCID, PERSONID,
+                    min(PersonPhoneNumberAssoc.PhoneNumberPriorityOrder) minPhoneNumberPriorityOrder
+                    FROM PERSON
+                    INNER JOIN PersonPhoneNumberAssoc
+                    ON PERSON.ID = PersonPhoneNumberAssoc.PersonID
+                    INNER JOIN PhoneNumber
+                    ON PersonPhoneNumberAssoc.PhoneNumberID = PhoneNumber.PhoneNumberID
+                    WHERE PersonPhoneNumberAssoc.PhoneTypeCodeSetID = 13
+                    GROUP BY PERSON.DCID, PERSONID
+                    ) SINGLE_MOBILE_NUMBER
+                    ON PERSON.DCID = SINGLE_MOBILE_NUMBER.DCID
+                    AND SINGLE_MOBILE_NUMBER.minPhoneNumberPriorityOrder =
+                    PersonPhoneNumberAssoc.PhoneNumberPriorityOrder
+                    AND PersonPhoneNumberAssoc.PhoneTypeCodeSetID = 13
+                    ) MOBILE_PHONE
+                    ON PERSON.DCID = MOBILE_PHONE.DCID
+                    LEFT JOIN
+                    (
+                    SELECT PERSON.DCID, PERSON.ID, PhoneNumber.PhoneNumber
+                    FROM PERSON
+                    INNER JOIN PersonPhoneNumberAssoc
+                    ON PERSON.ID = PersonPhoneNumberAssoc.PersonID
+                    INNER JOIN PhoneNumber
+                    ON PersonPhoneNumberAssoc.PhoneNumberID = PhoneNumber.PhoneNumberID
+                    INNER JOIN (
+                    SELECT PERSON.DCID, PERSONID,
+                    min(PersonPhoneNumberAssoc.PhoneNumberPriorityOrder) minPhoneNumberPriorityOrder
+                    FROM PERSON
+                    INNER JOIN PersonPhoneNumberAssoc
+                    ON PERSON.ID = PersonPhoneNumberAssoc.PersonID
+                    INNER JOIN PhoneNumber
+                    ON PersonPhoneNumberAssoc.PhoneNumberID = PhoneNumber.PhoneNumberID
+                    WHERE PersonPhoneNumberAssoc.PhoneTypeCodeSetID = 12
+                    GROUP BY PERSON.DCID, PERSONID
+                    ) SINGLE_HOME_NUMBER
+                    ON PERSON.DCID = SINGLE_HOME_NUMBER.DCID
+                    AND SINGLE_HOME_NUMBER.minPhoneNumberPriorityOrder = PersonPhoneNumberAssoc.PhoneNumberPriorityOrder
+                    AND PersonPhoneNumberAssoc.PhoneTypeCodeSetID = 12
+                    ) HOME_PHONE
+                    ON PERSON.DCID = HOME_PHONE.DCID
+                    LEFT JOIN
+                    (
+                    SELECT PERSON.DCID, PERSON.ID, PhoneNumber.PhoneNumber, PhoneNumber.PHONENUMBEREXT
+                    FROM PERSON
+                    INNER JOIN PersonPhoneNumberAssoc
+                    ON PERSON.ID = PersonPhoneNumberAssoc.PersonID
+                    INNER JOIN PhoneNumber
+                    ON PersonPhoneNumberAssoc.PhoneNumberID = PhoneNumber.PhoneNumberID
+                    INNER JOIN (
+                    SELECT PERSON.DCID, PERSONID,
+                    min(PersonPhoneNumberAssoc.PhoneNumberPriorityOrder) minPhoneNumberPriorityOrder
+                    FROM PERSON
+                    INNER JOIN PersonPhoneNumberAssoc
+                    ON PERSON.ID = PersonPhoneNumberAssoc.PersonID
+                    INNER JOIN PhoneNumber
+                    ON PersonPhoneNumberAssoc.PhoneNumberID = PhoneNumber.PhoneNumberID
+                    WHERE PersonPhoneNumberAssoc.PhoneTypeCodeSetID = 15
+                    GROUP BY PERSON.DCID, PERSONID
+                    ) SINGLE_WORK_NUMBER
+                    ON PERSON.DCID = SINGLE_WORK_NUMBER.DCID
+                    AND SINGLE_WORK_NUMBER.minPhoneNumberPriorityOrder = PersonPhoneNumberAssoc.PhoneNumberPriorityOrder
+                    AND PersonPhoneNumberAssoc.PhoneTypeCodeSetID = 15
+                    ) WORK_PHONE
+                    ON PERSON.DCID = WORK_PHONE.DCID
+                    LEFT JOIN
+                    ( SELECT PERSON.DCID, PERSONID, LISTAGG(EMAILADDRESS.EMAILADDRESS,';') WITHIN GROUP (ORDER BY
+                    EMAILADDRESS.EMAILADDRESS
+                    ASC) EMAILADDRESS
+                    FROM PERSON
+                    LEFT JOIN PERSONEMAILADDRESSASSOC
+                    ON PERSON.ID = PERSONEMAILADDRESSASSOC.PERSONID
+                    LEFT JOIN EMAILADDRESS
+                    ON PERSONEMAILADDRESSASSOC.EMAILADDRESSID = EMAILADDRESS.EMAILADDRESSID
+                    GROUP BY PERSON.DCID, PERSONID, PERSON.FIRSTNAME, PERSON.LASTNAME) SINGLE_EMAIL
+                    ON PERSON.DCID = SINGLE_EMAIL.DCID
+                    LEFT JOIN
+                    ( SELECT PERSON.DCID, PERSON.ID, PERSONADDRESS.STREET, PERSONADDRESS.CITY, STATECODE.CODE
+                    ,PERSONADDRESS.POSTALCODE
+                    FROM PERSON
+                    INNER JOIN PERSONADDRESSASSOC
+                    ON PERSON.ID = PERSONADDRESSASSOC.PERSONID
+                    INNER JOIN PERSONADDRESS
+                    ON PERSONADDRESSASSOC.PERSONADDRESSID = PERSONADDRESS.PERSONADDRESSID
+                    INNER JOIN CODESET STATECODE
+                    ON PERSONADDRESS.STATESCODESETID = STATECODE.CODESETID
+                    INNER JOIN (SELECT PERSON.DCID, PERSONID, min(PERSONADDRESSASSOC.ADDRESSPRIORITYORDER)
+                    ADDRESSPRIORITYORDER
+                    FROM PERSON
+                    INNER JOIN PERSONADDRESSASSOC
+                    ON PERSON.ID = PERSONADDRESSASSOC.PERSONID
+                    INNER JOIN PERSONADDRESS
+                    ON PERSONADDRESSASSOC.PERSONADDRESSID = PERSONADDRESS.PERSONADDRESSID
+                    GROUP BY PERSON.DCID, PERSONID) ADDRESS
+                    ON PERSON.DCID = ADDRESS.DCID
+                    AND ADDRESS.ADDRESSPRIORITYORDER = PERSONADDRESSASSOC.ADDRESSPRIORITYORDER) SINGLE_MAILING_ADDRESS
+                    ON PERSON.DCID = SINGLE_MAILING_ADDRESS.DCID
+                    ) CONTACT_DETAILS
+                    ON CONTACT_DETAILS.DCID = PERSON.DCID
+                    WHERE (STUDENTCONTACTDETAIL.ISCUSTODIAL = 1 OR STUDENTCONTACTDETAIL.LIVESWITHFLG = 1 OR
+                    OriginalContactMap.ORIGINALCONTACTTYPE IN ('mother','father','guardian'))
+                    AND STUDENTS.ENROLL_STATUS = 0
+                    AND STUDENTS.SCHOOLID IN (102,120,109,104,107,110,111,103,105,106,108)
+                    AND STUDENTS.GRADE_LEVEL = 8
+                    order by students.schoolid, students.last_name, students.first_name
+                    ;]
+                    <tr data-StudentID="~(dcid)">
+                        <td class="nowrap">~(school;t)</td>
+                        <td>~(stunum)</td>
+                        <td class="nowrap">~(stulname;t)</td>
+                        <td class="nowrap">~(stufname;t)</td>
+                        <td class="nowrap">~(stustreet;t)</td>
+                        <td>~(stucity;t)</td>
+                        <td>~(stustate;t)</td>
+                        <td>~(stuzip)</td>
+                        <td>~(relationship;t)</td>
+                        <td class="nowrap">~(contlname;t)</td>
+                        <td class="nowrap">~(contfname;t)</td>
+                        <td class="nowrap">~(contemail;t)</td>
+                        <td class="nowrap">~(contstreet;t)</td>
+                        <td >~(contcity;t)</td>
+                        <td >~(contstate;t)</td>
+                        <td >~(contzip)</td>
+                    </tr>
+                    [/tlist_sql]
+                </tbody>
+            </table>
+        </div>
+        [/if#showData]
+        <!-- end of content of bounding box -->
+        ~[wc:admin_footer_frame_css]
+    </body>
+
+</html><!-- end right frame -->
