@@ -9,7 +9,7 @@
         <link href="/images/css/print.css" rel="stylesheet" media="print">
         ~[wc:pscb_init]
         <script>
-            pscbToolButtons = { "copyData": "Yes", "csvFile": "Yes", "pdfFile": "Yes", "curSel": "Yes" };
+            pscbToolButtons = { "copyData": "Yes", "csvFile": "Yes", "pdfFile": "Yes" };
         </script>
     </head>
 
@@ -21,39 +21,10 @@
         <!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
         <!-- start of Options -->
         <h1>8th Grade Contacts</h1>
-        <form name="searchform" action="#" method="POST">
-            <div class="box-round" style="overflow: hidden;">
-                <h2>Report Filters</h2>
-                <table border="0" cellspacing="0" cellpadding="0" class="linkDescList">
-                    <thead>
-                        <tr>
-                            <th style="white-space: nowrap;" width="180px">Student Selection</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>
-                                <select name="ss" id="ss">
-                                    <option value='' ~[if.~[gpv:ss]=]selected[/if]>All Students</option>
-                                    <option value="cur" ~[if.~[gpv:ss]=cur]selected[/if]>Current Selection
-                                        (~[x:studsinset])</option>
-                                </select>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                <div class="button-row" style="float: left;">
-                    <input type="hidden" name="showData" value="1">
-                    <span class="red">&nbsp;&nbsp;Select parameters and click submit</span>
-                    <input type="hidden" name="ac" value="prim">~[submitbutton]
-                </div>
-            </div>
-        </form>
         <!-- Start of Results -->
-        ~[if#showData.~(gpv.showData;sqlText)=1]
         <div class="box-round">
             <h2>8th Grade Contacts</h2>
-            <table border="0" cellspacing="0" cellpadding="0" class="tablesorter grid" id="results" groupRowsByCol="1"
+            <table border="0" cellspacing="0" cellpadding="0" class="tablesorter grid" id="results" groupRowsByCol="2"
                 color1="#ffffff" color2="#d7edfe">
                 <thead>
                     <tr>
@@ -250,7 +221,6 @@
                 </tbody>
             </table>
         </div>
-        [/if#showData]
         <!-- end of content of bounding box -->
         ~[wc:admin_footer_frame_css]
     </body>
