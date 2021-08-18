@@ -78,16 +78,21 @@
                 <tbody>
                     ~[tlist_sql;
                     Select
-                    STUDENTS.dcid,
+                    students.dcid,
                     SCHOOLS.NAME,STUDENTS.STUDENT_NUMBER, STUDENTS.LAST_NAME, STUDENTS.FIRST_NAME,
                     STUDENTS.MAILING_STREET,
                     STUDENTS.MAILING_CITY, STUDENTS.MAILING_STATE,
                     STUDENTS.MAILING_ZIP, CODESET.CODE AS RELATION,
                     PERSON.LASTNAME, PERSON.FIRSTNAME, CONTACT_DETAILS.EMAILADDRESS,
+
+
                     CONTACT_DETAILS.STREET AS CONTACT_STREET, '' AS CONTACT_APTSUITE, CONTACT_DETAILS.CITY AS
                     CONTACT_CITY,
                     CONTACT_DETAILS.CODE AS CONTACT_STATE,
                     CONTACT_DETAILS.POSTALCODE AS CONTACT_ZIP
+
+
+
                     FROM STUDENTS
                     INNER JOIN STUDENTCONTACTASSOC
                     ON STUDENTS.DCID = STUDENTCONTACTASSOC.STUDENTDCID
@@ -183,9 +188,8 @@
                     ) WORK_PHONE
                     ON PERSON.DCID = WORK_PHONE.DCID
                     LEFT JOIN
-                    ( SELECT PERSON.DCID, PERSONID, LISTAGG(EMAILADDRESS.EMAILADDRESS,';') WITHIN GROUP (ORDER BY
-                    EMAILADDRESS.EMAILADDRESS
-                    ASC) EMAILADDRESS
+                    ( SELECT PERSON.DCID, PERSONID, LISTAGG(EMAILADDRESS.EMAILADDRESS,Chr(59)) WITHIN GROUP (ORDER BY
+                    EMAILADDRESS.EMAILADDRESS ASC) EMAILADDRESS
                     FROM PERSON
                     LEFT JOIN PERSONEMAILADDRESSASSOC
                     ON PERSON.ID = PERSONEMAILADDRESSASSOC.PERSONID
@@ -221,6 +225,7 @@
                     AND STUDENTS.ENROLL_STATUS = 0
                     AND STUDENTS.SCHOOLID IN (102,120,109,104,107,110,111,103,105,106,108)
                     AND STUDENTS.GRADE_LEVEL = 8
+
                     order by students.schoolid, students.last_name, students.first_name
                     ;]
                     <tr data-StudentID="~(dcid)">
@@ -237,9 +242,9 @@
                         <td class="nowrap">~(contfname;t)</td>
                         <td class="nowrap">~(contemail;t)</td>
                         <td class="nowrap">~(contstreet;t)</td>
-                        <td >~(contcity;t)</td>
-                        <td >~(contstate;t)</td>
-                        <td >~(contzip)</td>
+                        <td>~(contcity;t)</td>
+                        <td>~(contstate;t)</td>
+                        <td>~(contzip)</td>
                     </tr>
                     [/tlist_sql]
                 </tbody>
