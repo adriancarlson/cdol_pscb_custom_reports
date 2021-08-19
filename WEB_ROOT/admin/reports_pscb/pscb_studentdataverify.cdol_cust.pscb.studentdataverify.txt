@@ -34,7 +34,7 @@
 		<td>View student list for a selected Alert type.</td>
 	</tr>
 	<tr>
-		<td><a href="/admin/reports_pscb/studentdataverify/student_alerts_list_all.html">Student Alerts List - All</a></td>
+		<td><a href="/admin/reports_pscb/studentdataverify/cdol_alert_list_all.html">Student Alerts List - All</a></td>
 		<td>View student list for all alerts including custom alerts</td>
 	</tr>
 	<tr id="raceReligion">
