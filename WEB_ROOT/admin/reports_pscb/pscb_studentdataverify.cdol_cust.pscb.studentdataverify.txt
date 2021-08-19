@@ -7,14 +7,14 @@
 	</thead>
 	<tr>
 		<td><a href="/admin/reports_pscb/misc/activityparticipants.html">Student Activities</a></td>
-		<td>View membership list for a selected school activty.</td>
+		<td>View membership list for a selected school activity.</td>
 	</tr>
 	<tr>
 		<td><a href="/admin/reports_pscb/misc/ages.html">Age Report</a></td>
 		<td>View age/birthday list for selected parameters.</td>
 	</tr>
 	<tr>
-		<td><a href="/admin/reports_pscb/misc/birthdaylist.html">Birthday List </a></td>
+		<td><a href="/admin/reports_pscb/misc/birthdaylist.html">Birthday List - By Month</a></td>
 		<td>View birthday list for a selected month.</td>
 	</tr>
 	<tr id="bithdatListAll">
@@ -30,8 +30,12 @@
 		<td>Lists youngest child at the address (current school)</td>
 	</tr>
 	<tr>
-		<td><a href="/admin/reports_pscb/misc/student_alerts_list.html">Student Alerts List</a></td>
+		<td><a href="/admin/reports_pscb/misc/student_alerts_list.html">Student Alerts List - By Alert</a></td>
 		<td>View student list for a selected Alert type.</td>
+	</tr>
+	<tr>
+		<td><a href="/admin/reports_pscb/misc/student_alerts_list_all.html">Student Alerts List - All</a></td>
+		<td>View student list for all alerts including custom alerts</td>
 	</tr>
 	<tr id="raceReligion">
 		<td><a href="/admin/reports_pscb/studentdataverify/cdol_race_religion.html">Race / Religion</a></td>
@@ -82,9 +86,6 @@
 		$j('.box-round').append($j('#bottomTable'));
 		var sEmail = $j('#sEmail').closest('tr');
 		$j("td:contains('Email / Physical / Mailing Address')").closest('tr').before(sEmail);
-		
-
-		$j("a[href$='/admin/reports_pscb/misc/birthdaylist.html']").text('Birthday List - By Month');
 
 	});
 </script>
