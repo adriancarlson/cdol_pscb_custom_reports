@@ -119,7 +119,7 @@
                     where
                     status = '1' and
                     schoolid <> '0'
-                        ~[if.is.a.school] AND schoolid = ~(curschoolid) [/if.is.a.school]
+                        ~[if.is.a.school] ANDschools.school_number = ~(curschoolid) [/if.is.a.school]
                         Order BY schoolname, last_name, first_name
                         ;alternatecolor;
                         <tr>
