@@ -176,10 +176,8 @@
                     WHERE s.enroll_status = 0
                     ~[if.is.a.school] AND s.schoolid = ~(curschoolid) [/if.is.a.school]
                     ~[if#Mandatory.~(gpv.status;sqlText)=0]
-                    AND s.gender is null
-                    or s_stu_ncea_x.RELIGIOUSAFFILIATION is null
-                    or r.racecd is NULL
-                    or s.fedethnicity is null
+                    AND (s.gender is NULL OR s_stu_ncea_x.RELIGIOUSAFFILIATION is NULL OR r.racecd is NULL OR
+                    s.fedethnicity is NULL)
                     [/if#Mandatory]
                     ~[if#cursel.~(gpv.status;sqlText)=2] AND s.dcid IN (SELECT dcid FROM
                     ~[temp.table.current.selection:students])[/if#cursel]
