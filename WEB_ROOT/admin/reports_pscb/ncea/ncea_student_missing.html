@@ -18,6 +18,40 @@
 
         <!-- Start of Results -->
         <h1>NCEA - Students Missing Info</h1>
+        <form name="searchform" action="#" method="POST">
+            <div class="box-round" style="overflow: hidden;">
+                <h2>Report Filters</h2>
+                <table border="0" cellspacing="0" cellpadding="0" class="linkDescList">
+                    <thead>
+                        <tr>
+                            <th style="white-space: nowrap;">Student Selection</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <select name="status">
+                                    <option value="0" ~[if.~[gpv:status]=0]selected[/if]>Students Missing Mandatory NCEA
+                                        Data</option>
+                                    <option value="1" ~[if.~[gpv:status]=1]selected[/if]>All Students</option>
+                                    <option value="2" ~[if.~[gpv:status]=2]selected[/if]>Current Selection
+                                        (~[x:studsinset])
+                                    </option>
+                                </select>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="button-row" style="float: left;">
+                    <input type="hidden" name="showData" value="1">
+                    <span class="red">&nbsp;&nbsp;Select parameters and click submit</span>
+                    <input type="hidden" name="ac" value="prim">~[submitbutton]
+                </div>
+            </div>
+        </form>
+
+        <!-- end of Options -->
+        ~[if#showData.~[gpv:showData]=1]
         <div class="box-round">
             <h2>NCEA - Students Missing Info</h2>
             <table border="0" cellspacing="0" cellpadding="4" align="center" class="tablesorter grid" id="results">
@@ -141,6 +175,14 @@
                     ON (s.id = r.studentid)
                     WHERE s.enroll_status = 0
                     ~[if.is.a.school] AND s.schoolid = ~(curschoolid) [/if.is.a.school]
+                    ~[if#Mandatory.~(gpv.status;sqlText)=0]
+                    AND s.gender is null
+                    or s_stu_ncea_x.RELIGIOUSAFFILIATION is null
+                    or r.racecd is NULL
+                    or s.fedethnicity is null
+                    [/if#Mandatory]
+                    ~[if#cursel.~(gpv.status;sqlText)=2] AND s.dcid IN (SELECT dcid FROM
+                    ~[temp.table.current.selection:students])[/if#cursel]
                     ORDER BY
                     schools.name, s.lastfirst
                     ;alternatecolor;
@@ -173,12 +215,14 @@
                 </tbody>
             </table>
         </div>
+
         <!-- End of results -->
         <div style="clear: both;">
             <p>
                 <center>Report generated at ~[time] on ~[date]</center>
             </p>
         </div>
+        [/if#showData]
         ~[wc:admin_footer_frame_css]
     </body>
 
