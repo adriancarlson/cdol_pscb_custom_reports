@@ -23,96 +23,65 @@
             <table border="0" cellspacing="0" cellpadding="4" align="center" class="tablesorter grid" id="results">
                 <thead>
                     <tr>
-                        <th class="left">Stu Numb</th>
-                        <th class="left">Student Name</th>
+                        <th class="left">Stu #</th>
+                        <th class="left">Name</th>
                         <th class="left">Grade</th>
-                        <th class="left">Exclude from NCEA</th>
                         <th class="left">Gender</th>
                         <th class="left">Ethnicity</th>
                         <th class="left">Race</th>
                         <th class="left">Religion</th>
-                        <th class="left">Title 1</th>
                         <th class="left">Diagnosed Disability</th>
                         <th class="left">Ungraded</th>
-                        <th class="left">Free/Reduced</th>
-                        <th class="left">Subsidized Transportation</th>
+                        <th class="left">Receives Title 1</th>
+                        <th class="left">Eligible for Title 1</th>
+                        <th class="left">Receives Free/Reduced</th>
+                        <th class="left">Eligible for Free/Reduced</th>
+                        <th class="left">Parent Choice Funded</th>
+                        <th class="left">International Student</th>
+                        <th class="left">Exclude from NCEA</th>
                         <th class="left">School</th>
                     </tr>
                 </thead>
                 <tbody>
                     ~[tlist_sql;
-                    select
-                    dcid,
-                    student_number,
-                    lastfirst,
-                    grade_level,
-                    CASE
-                    WHEN EXCLUDE_FROM_NCEA ='Excluded from NCEA' THEN '#ffb3ba'
-                    ELSE ''
-                    END excludeHighlight,
-                    EXCLUDE_FROM_NCEA,
-                    CASE
-                    WHEN GENDER IS NULL THEN '#ffdfba'
-                    ELSE ''
-                    END genderHighlight,
-                    GENDER,
-                    CASE
-                    WHEN ETHNICITY IS NULL THEN '#ffffba'
-                    ELSE ''
-                    END ETHNICITYHighlight,
-                    ETHNICITY,
-                    CASE WHEN RACE IS NULL THEN '#baffc9'
-                    ELSE ''
-                    END raceHighlight,
-                    RACE,
-                    CASE
-                    WHEN religiousaffiliation IS NULL THEN '#bae1ff'
-                    ELSE ''
-                    END religiousaffiliationHighlight,
-                    religiousaffiliation,
-                    title1,
-                    disability,
-                    ungraded,
-                    federalnutrition,
-                    transportation,
-                    schoolname
-                    from
-                    (select DISTINCT
-                    schools.name as schoolname,
-                    s.schoolid,
+                    SELECT DISTINCT
                     s.dcid,
                     s.student_number,
-                    s.last_name,
-                    s.first_name,
                     s.lastfirst,
                     s.grade_level,
                     CASE
-                    WHEN TO_CHAR(s_stu_ncea_x.EXCLUDEFROMNCEA_TF) = '1' then 'Excluded from NCEA'
-                    ELSE 'Included in NCEA'
-                    END as EXCLUDE_FROM_NCEA,
+                    WHEN s.gender IS NULL THEN '#ffdfba'
+                    ELSE ''
+                    END genderHighlight,
                     CASE
                     WHEN UPPER(s.gender) = 'F' then 'Female'
                     WHEN UPPER(s.gender) = 'M' then 'Male'
                     ELSE s.gender
-                    END as GENDER,
+                    END gender,
                     CASE
-                    WHEN s_stu_ncea_x.RELIGIOUSAFFILIATION = 'C' then 'Catholic'
-                    WHEN s_stu_ncea_x.RELIGIOUSAFFILIATION = 'N' then 'Non-Catholic'
-                    ELSE s_stu_ncea_x.RELIGIOUSAFFILIATION
-                    END as religiousaffiliation,
+                    WHEN s.fedethnicity IS NULL THEN '#ffffba'
+                    ELSE ''
+                    END ethnicityHighlight,
                     CASE
                     WHEN TO_CHAR(s.fedethnicity) = '1' then 'Hispanic/Latino'
                     WHEN TO_CHAR(s.fedethnicity) = '0' then 'Not Hispanic/Latino'
                     WHEN TO_CHAR(s.fedethnicity) = '-1' then NULL
                     ELSE TO_CHAR(s.fedethnicity)
                     END as ETHNICITY,
-                    LISTAGG(studentrace.racecd,', ') WITHIN GROUP (ORDER BY studentrace.racecd) OVER (PARTITION BY
-                    s.dcid) RACE,
                     CASE
-                    WHEN TO_CHAR(s_stu_ncea_x.TITLEI_TF) = '1' then 'Yes'
-                    WHEN TO_CHAR(s_stu_ncea_x.TITLEI_TF) = '0' then 'No'
-                    ELSE TO_CHAR(s_stu_ncea_x.TITLEI_TF)
-                    END as title1,
+                    WHEN r.racecd IS NULL THEN '#baffc9'
+                    ELSE ''
+                    END raceHighlight,
+                    LISTAGG(r.racecd,', ') WITHIN GROUP (ORDER BY r.racecd) OVER (PARTITION BY s.dcid) racecodes,
+                    CASE
+                    WHEN s_stu_ncea_x.RELIGIOUSAFFILIATION IS NULL THEN '#bae1ff'
+                    ELSE ''
+                    END religiousaffiliationHighlight,
+                    CASE
+                    WHEN s_stu_ncea_x.RELIGIOUSAFFILIATION = 'C' then 'Catholic'
+                    WHEN s_stu_ncea_x.RELIGIOUSAFFILIATION = 'N' then 'Non-Catholic'
+                    ELSE s_stu_ncea_x.RELIGIOUSAFFILIATION
+                    END as religiousaffiliation,
                     CASE
                     WHEN TO_CHAR(s_stu_ncea_x.DIAGNOSEDDISABILITY_TF) = '1' then 'Yes'
                     WHEN TO_CHAR(s_stu_ncea_x.DIAGNOSEDDISABILITY_TF) = '0' then 'No'
@@ -124,33 +93,56 @@
                     ELSE TO_CHAR(s_stu_ncea_x.ungraded_tf)
                     END as ungraded,
                     CASE
-                    WHEN s_stu_ncea_x.FEDERALNUTRITION = 'BR' then 'Breakfast only'
-                    WHEN s_stu_ncea_x.FEDERALNUTRITION = 'LU' then 'Lunch only'
-                    WHEN s_stu_ncea_x.FEDERALNUTRITION = 'BT' then 'Both breakfast and Lunch'
-                    ELSE s_stu_ncea_x.FEDERALNUTRITION
-                    END as federalnutrition,
+                    WHEN TO_CHAR(s_stu_ncea_x.TITLEI_TF) = '1' then 'Yes'
+                    WHEN TO_CHAR(s_stu_ncea_x.TITLEI_TF) = '0' then 'No'
+                    ELSE TO_CHAR(s_stu_ncea_x.TITLEI_TF)
+                    END as rectitle1,
                     CASE
-                    WHEN TO_CHAR(s_stu_ncea_x.subsidizedtrans_tf) = '1' then 'Yes'
-                    WHEN TO_CHAR(s_stu_ncea_x.subsidizedtrans_tf) = '0' then 'No'
-                    ELSE TO_CHAR(s_stu_ncea_x.subsidizedtrans_tf)
-                    END as transportation
-                    from students s
-                    left join schools
-                    on schools.school_number = s.schoolid
-                    left join s_stu_ncea_x
-                    on s_stu_ncea_x.STUDENTSDCID = s.DCID
-                    left join studentrace
-                    on studentrace.studentid = s.id
-                    where s.enroll_status = 0
+                    WHEN TO_CHAR(s_stu_ncea_x.TitleI_Elig_TF) = '1' then 'Yes'
+                    WHEN TO_CHAR(s_stu_ncea_x.TitleI_Elig_TF) = '0' then 'No'
+                    ELSE TO_CHAR(s_stu_ncea_x.TitleI_Elig_TF)
+                    END as eligtitle1,
+                    CASE
+                    WHEN TO_CHAR(s_stu_ncea_x.FederalNutrition_TF) = '1' then 'Yes'
+                    WHEN TO_CHAR(s_stu_ncea_x.FederalNutrition_TF) = '0' then 'No'
+                    ELSE TO_CHAR(s_stu_ncea_x.FederalNutrition_TF)
+                    END as recFreeRdc,
+                    CASE
+                    WHEN TO_CHAR(s_stu_ncea_x.FederalNutrition_Elig_TF) = '1' then 'Yes'
+                    WHEN TO_CHAR(s_stu_ncea_x.FederalNutrition_Elig_TF) = '0' then 'No'
+                    ELSE TO_CHAR(s_stu_ncea_x.FederalNutrition_Elig_TF)
+                    END as eligFreeRdc,
+                    CASE
+                    WHEN TO_CHAR(s_stu_ncea_x.Parental_Choice_TF) = '1' then 'Yes'
+                    WHEN TO_CHAR(s_stu_ncea_x.Parental_Choice_TF) = '0' then 'No'
+                    ELSE TO_CHAR(s_stu_ncea_x.Parental_Choice_TF)
+                    END as parentchoice,
+                    CASE
+                    WHEN TO_CHAR(s_stu_ncea_x.Intl_Visa_TF) = '1' then 'Yes'
+                    WHEN TO_CHAR(s_stu_ncea_x.Intl_Visa_TF) = '0' then 'No'
+                    ELSE TO_CHAR(s_stu_ncea_x.Intl_Visa_TF)
+                    END as visa,
+                    CASE
+                    WHEN s_stu_ncea_x.EXCLUDEFROMNCEA_TF ='1' THEN '#ffb3ba'
+                    ELSE ''
+                    END excludeHighlight,
+                    CASE
+                    WHEN TO_CHAR(s_stu_ncea_x.EXCLUDEFROMNCEA_TF) = '1' then 'Excluded from NCEA'
+                    ELSE 'Included in NCEA'
+                    END as EXCLUDE_FROM_NCEA,
+                    schools.name
+                    FROM
+                    students s
+                    LEFT JOIN schools
+                    ON schools.school_number = s.schoolid
+                    LEFT JOIN s_stu_ncea_x
+                    ON s_stu_ncea_x.STUDENTSDCID = s.DCID
+                    LEFT OUTER JOIN studentrace r
+                    ON (s.id = r.studentid)
+                    WHERE s.enroll_status = 0
                     ~[if.is.a.school] AND s.schoolid = ~(curschoolid) [/if.is.a.school]
-                    and (s_stu_ncea_x.EXCLUDEFROMNCEA_TF = '0'
-                    or s_stu_ncea_x.EXCLUDEFROMNCEA_TF IS NULL)) a
-                    where
-                    gender is null
-                    or religiousaffiliation is null
-                    or race is NULL
-                    or ethnicity is null
-                    Order BY schoolname, last_name, first_name
+                    ORDER BY
+                    schools.name, s.lastfirst
                     ;alternatecolor;
                     <tr>
                         <td colspan="100%">All Students have Mandatory NCEA values set. Optional values will still need
@@ -162,16 +154,19 @@
                                 target="_blank">~(studname;t)</a>
                         </td>
                         <td>~(grlvl;t)</td>
-                        <td style="background-color:~(excludeHighlight;t);">~(exclude;t)</td>
                         <td style="background-color:~(genderHighlight;t);">~(gender;t)</td>
                         <td style="background-color:~(ethnicityHighlight;t);">~(ethnicity;t)</td>
                         <td style="background-color:~(raceHighlight;t);">~(race;t)</td>
                         <td style="background-color:~(religionHlight;t);">~(religion;t)</td>
-                        <td>~(title1;t)</td>
                         <td>~(disability;t)</td>
                         <td>~(ungraded;t)</td>
-                        <td>~(federalnutrition;t)</td>
-                        <td>~(transport;t)</td>
+                        <td>~(rectitle1;t)</td>
+                        <td>~(eligtitle1;t)</td>
+                        <td>~(recFREERdc;t)</td>
+                        <td>~(eligFREERdc;t)</td>
+                        <td>~(parentchoice;t)</td>
+                        <td>~(visa;t)</td>
+                        <td style="background-color:~(excludeHighlight;t);">~(exclude;t)</td>
                         <td>~(school;t)</td>
                     </tr>
                     [/tlist_sql]
