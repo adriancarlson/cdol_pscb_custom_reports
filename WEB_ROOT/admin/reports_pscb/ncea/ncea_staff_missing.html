@@ -24,88 +24,58 @@
                 <thead>
                     <tr>
                         <th class="left">Staff Name</th>
-                        <th class="left">Exclude from NCEA</th>
                         <th class="left">Gender</th>
                         <th class="left">Ethnicity</th>
                         <th class="left">Race</th>
                         <th class="left">Religion</th>
                         <th class="left">Staff Type</th>
                         <th class="left">FTE</th>
+                        <th class="left">Exclude from NCEA</th>
                         <th class="left">School</th>
                     </tr>
                 </thead>
                 <tbody>
                     ~[tlist_sql;
-                    select
-                    dcid,
-                    lastfirst,
-                    CASE
-                    WHEN EXCLUDE_FROM_NCEA IS NULL THEN '#ffb3ba'
-                    ELSE ''
-                    END excludeHighlight,
-                    EXCLUDE_FROM_NCEA,
-                    CASE
-                    WHEN GENDER IS NULL THEN '#ffdfba'
-                    ELSE ''
-                    END genderHighlight,
-                    GENDER,
-                    CASE
-                    WHEN ETHNICITY IS NULL THEN '#ffffba'
-                    ELSE ''
-                    END ETHNICITYHighlight,
-                    ETHNICITY,
-                    CASE WHEN RACE IS NULL THEN '#baffc9'
-                    ELSE ''
-                    END raceHighlight,
-                    RACE,
-                    CASE
-                    WHEN religiousaffiliation IS NULL THEN '#bae1ff'
-                    ELSE ''
-                    END religiousaffiliationHighlight,
-                    religiousaffiliation,
-                    CASE
-                    WHEN STAFF_TYPE IS NULL THEN '#ffb3ba'
-                    ELSE ''
-                    END STAFF_TYPEHighlight,
-                    STAFF_TYPE,
-                    CASE
-                    WHEN FTE IS NULL THEN '#ffdfba'
-                    ELSE ''
-                    END FTEHighlight,
-                    FTE,
-                    schoolname
-                    from
-                    (select DISTINCT
-                    schools.name as schoolname,
-                    schoolstaff.schoolid,
+                    SELECT DISTINCT
                     schoolstaff.dcid,
-                    --schoolstaff.users_dcid,
-                    --schoolstaff.status,
-                    users.last_name,
-                    users.first_name,
                     users.lastfirst,
                     CASE
-                    WHEN TO_CHAR(s_ssf_ncea_x.excludefromncea_tf) = '1' then 'Excluded from NCEA'
-                    WHEN TO_CHAR(s_ssf_ncea_x.excludefromncea_tf) = '0' then 'Included in NCEA'
-                    ELSE TO_CHAR(s_ssf_ncea_x.excludefromncea_tf)
-                    END as EXCLUDE_FROM_NCEA,
+                    WHEN userscorefields.gender IS NULL THEN '#ffdfba'
+                    ELSE ''
+                    END genderHighlight,
                     CASE
                     WHEN UPPER(userscorefields.gender) = 'F' then 'Female'
                     WHEN UPPER(userscorefields.gender) = 'M' then 'Male'
                     ELSE userscorefields.gender
                     END as GENDER,
                     CASE
-                    WHEN s_usr_ncea_x.religiousaffiliation = 'C' then 'Catholic'
-                    WHEN s_usr_ncea_x.religiousaffiliation = 'N' then 'Non-Catholic'
-                    ELSE s_usr_ncea_x.religiousaffiliation
-                    END as religiousaffiliation,
+                    WHEN users.fedethnicity IS NULL THEN '#ffffba'
+                    ELSE ''
+                    END ETHNICITYHighlight,
                     CASE
                     WHEN TO_CHAR(users.fedethnicity) = '1' then 'Hispanic/Latino'
                     WHEN TO_CHAR(users.fedethnicity) = '0' then 'Not Hispanic/Latino'
                     ELSE TO_CHAR(users.fedethnicity)
                     END as ETHNICITY,
+                    CASE
+                    WHEN teacherrace.racecd IS NULL THEN '#baffc9'
+                    ELSE ''
+                    END raceHighlight,
                     LISTAGG(teacherrace.racecd,', ') WITHIN GROUP (ORDER BY teacherrace.racecd) OVER (PARTITION BY
                     schoolstaff.dcid) RACE,
+                    CASE
+                    WHEN s_usr_ncea_x.religiousaffiliation IS NULL THEN '#bae1ff'
+                    ELSE ''
+                    END religiousaffiliationHighlight,
+                    CASE
+                    WHEN s_usr_ncea_x.religiousaffiliation = 'C' then 'Catholic'
+                    WHEN s_usr_ncea_x.religiousaffiliation = 'N' then 'Non-Catholic'
+                    ELSE s_usr_ncea_x.religiousaffiliation
+                    END as religiousaffiliation,
+                    CASE
+                    WHEN s_usr_ncea_x.religiousclergylay IS NULL THEN '#ffb3ba'
+                    ELSE ''
+                    END STAFF_TYPEHighlight,
                     CASE
                     WHEN s_usr_ncea_x.religiousclergylay = 'C' then 'Clergy'
                     WHEN s_usr_ncea_x.religiousclergylay = 'R' then 'Relgious'
@@ -113,11 +83,24 @@
                     ELSE s_usr_ncea_x.religiousclergylay
                     END as STAFF_TYPE,
                     CASE
+                    WHEN S_SSF_NCEA_X.FTE_CODE IS NULL THEN '#ffdfba'
+                    ELSE ''
+                    END FTEHighlight,
+                    CASE
                     WHEN S_SSF_NCEA_X.FTE_CODE = 'FT' then 'Full-Time'
                     WHEN S_SSF_NCEA_X.FTE_CODE = 'PT' then 'Part-Time'
                     ELSE S_SSF_NCEA_X.FTE_CODE
                     END as FTE,
-                    teacherrace.teacherid
+                    CASE
+                    WHEN s_ssf_ncea_x.excludefromncea_tf IS NULL THEN '#ffb3ba'
+                    ELSE ''
+                    END excludeHighlight,
+                    CASE
+                    WHEN TO_CHAR(s_ssf_ncea_x.excludefromncea_tf) = '1' then 'Excluded from NCEA'
+                    WHEN TO_CHAR(s_ssf_ncea_x.excludefromncea_tf) = '0' then 'Included in NCEA'
+                    ELSE TO_CHAR(s_ssf_ncea_x.excludefromncea_tf)
+                    END as EXCLUDE_FROM_NCEA,
+                    schools.name
                     from schoolstaff
                     inner join users
                     on users.dcid = schoolstaff.users_dcid
@@ -137,14 +120,6 @@
                     status = '1' and
                     schoolid <> '0'
                         ~[if.is.a.school] AND schoolid = ~(curschoolid) [/if.is.a.school]
-                        and (s_ssf_ncea_x.excludefromncea_tf = '0'
-                        or s_ssf_ncea_x.excludefromncea_tf IS NULL)) a
-                        where exclude_from_ncea is null
-                        or gender is null
-                        or religiousaffiliation is null
-                        or race is null
-                        or staff_type is null
-                        or fte is null
                         Order BY schoolname, last_name, first_name
                         ;alternatecolor;
                         <tr>
@@ -153,13 +128,13 @@
                         <tr class="Record">
                             <td><a href="/admin/faculty/facultyNCEA.html?frn=005~(dcid;t)"
                                     target="_blank">~(staffname;t)</a>
-                            <td style="background-color:~(excludeHighlight;t);">~(exclude;t)</td>
                             <td style="background-color:~(genderHighlight;t);">~(gender;t)</td>
                             <td style="background-color:~(ethnicityHighlight;t);">~(ethnicity;t)</td>
                             <td style="background-color:~(raceHighlight;t);">~(race;t)</td>
                             <td style="background-color:~(religionHlight;t);">~(religion;t)</td>
                             <td style="background-color:~(staffHighlight;t);">~(stafftype;t)</td>
                             <td style="background-color:~(fteHighlight;t);">~(fte;t)</td>
+                            <td style="background-color:~(excludeHighlight;t);">~(exclude;t)</td>
                             <td>~(school;t)</td>
                         </tr>
                         [/tlist_sql]
