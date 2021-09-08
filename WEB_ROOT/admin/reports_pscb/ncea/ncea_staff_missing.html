@@ -119,7 +119,7 @@
                     where
                     status = '1' and
                     schoolid <> '0'
-                        ~[if.is.a.school] ANDschools.school_number = ~(curschoolid) [/if.is.a.school]
+                        ~[if.is.a.school] AND schools.school_number = ~(curschoolid) [/if.is.a.school]
                         ORDER BY schools.name, users.lastfirst
                         ;alternatecolor;
                         <tr>
