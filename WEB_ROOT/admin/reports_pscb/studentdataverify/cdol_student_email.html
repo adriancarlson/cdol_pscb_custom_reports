@@ -80,7 +80,8 @@
                 <thead>
                     <tr>
                         <th class="left">Student Number</th>
-                        <th class="left">Name</th>
+                        <th class="left">Last Name</th>
+                        <th class="left">First Name</th>
                         <th class="left filter-select">Grade Level</th>
                         <th class="left">Email</th>
                         <th class="left ">School</th>
@@ -91,7 +92,8 @@
                     SELECT
                     s.dcid,
                     s.student_number,
-                    s.lastfirst,
+                    s.last_name,
+                    s.first_name,
                     CASE
                     WHEN TO_CHAR(s.grade_level) = -2 then 'PK3'
                     WHEN TO_CHAR(s.grade_level) = -1 then 'PK4'
@@ -116,7 +118,8 @@
                     ;]
                     <tr data-StudentID="~(dcid)">
                         <td class="nowrap">~(studentnumb)</td>
-                        <td>~(name;t)</td>
+                        <td>~(last_name;t)</td>
+                        <td>~(first_name;t)</td>
                         <td class="center">~(grade_level)</td>
                         <td class="nowrap">~(email;t)</td>
                         <td>~(school;t)</td>
