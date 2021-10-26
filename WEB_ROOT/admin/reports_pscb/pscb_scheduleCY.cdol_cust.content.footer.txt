@@ -16,7 +16,7 @@
 		<td>Lists all students in a course by a selected period.</td>
 	</tr>
 	<tr id="diffTeacher">
-		<td><a href="/admin/reports_pscb/scheduleCY/cdol_student_same_course_differnent_teacher.html">Students -Same Course Different Teacher</a></td>
+		<td><a href="/admin/reports_pscb/scheduleCY/cdol_student_same_course_differnent_teacher.html">Students - Same Course Different Teacher</a></td>
 		<td>Lists students that have the same course each semester but a different teacher for the course</td>
 	</tr>
 	<tr id="aqhdNonAcademic">
@@ -27,6 +27,10 @@
 		<td><a href="/admin/reports_pscb/scheduleCY/cdol_bnho_100_point_scale.html">Sections Not Set to
         Percentage Scale</a></td>
 		<td>Lists Sections not set to the 100 point scale</td>
+	</tr>
+	<tr id="teacherClassRoster">
+		<td><a href="/admin/reports_pscb/scheduleCY/cdol_teacher_class_roster.html">Teacher - Class Roster</a></td>
+		<td>List class roster by selecting teacher and period</td>
 	</tr>
 </table>
 
@@ -61,6 +65,8 @@
 		/* insert custom CDOL fields onto the page. */
 		var teacherNoRoom = $j('#teacherNoRoom').closest('tr');
 		$j("td:contains('Teacher - Sections List')").closest('tr').after(teacherNoRoom);
+		var teacherClassRoster = $j('#teacherClassRoster').closest('tr');
+		$j('#teacherNoRoom').closest('tr').after(teacherClassRoster);
 		/* insert custom CDOL fields onto the page. */
 		var studentDoubleBooked = $j('#studentDoubleBooked').closest('tr');
 		$j("td:contains('Students - Non Scheduled Periods')").closest('tr').after(studentDoubleBooked);
