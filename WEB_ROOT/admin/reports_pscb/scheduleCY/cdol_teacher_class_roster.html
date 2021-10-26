@@ -15,29 +15,13 @@
                     console.log(pid);
                 })
 
-                var pidList = $j("#pidList").val()
-                if (pidList != "") {
-                    pidList = pidList.split(",");
-                    for (var i = 0; i < pidList.length; i++) {
-                        $j("#pid option[value=" + pidList[i] + "]").attr("selected", true);
-                    }
-                }
-            })
-        </script>
-        <script>
-            $j(function () {
-                $j("select#did").on("change", function () {
-                    var did = "'" + $j("select#did option:selected").map(function () { return $j(this).val() }).get().join("','") + "'";
-                    $j("#didList").val(did);
-                })
-
-                var didList = $j("#didList").val()
-                if (didList != "") {
-                    didList = didList.split(",");
-                    for (var i = 0; i < didList.length; i++) {
-                        $j("#did option[value=" + didList[i] + "]").attr("selected", true);
-                    }
-                }
+                // var pidList = $j("#pidList").val()
+                // if (pidList != "") {
+                // 	pidList = pidList.split(",");
+                // 	for (var i = 0; i < pidList.length; i++) {
+                // 		$j("#pid option[value=" + pidList[i] + "]").attr("selected", true);
+                // 	}
+                // }
             })
         </script>
     </head>
@@ -47,7 +31,6 @@
         <!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a> &gt; <a
             href="/admin/reports_pscb/pscb_home.html">PSCB Custom Reports</a> &gt; <a
             href="/admin/reports_pscb/pscb_scheduleCY.html">Scheduling (Current Year)</a> &gt; Teacher - Class Roster
-        Periods
         <!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
 
         <!-- start of Options -->
@@ -61,7 +44,6 @@
                             <th width="100px">Search Date</th>
                             <th width="100px">Teacher</th>
                             <th width="100px">Period</th>
-                            <th width="100%">Day in Rotation</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -75,14 +57,18 @@
                                 <select name="tid">
                                     <option value="" selected="selected">Any Teacher</option>
                                     ~[tlist_sql;
-                                    SELECT ID, LastFirst
+                                    SELECT ID,
+                                    CASE WHEN id = '~(gpv.pid)' THEN 'selected'
+                                    END isSelected
+                                    LastFirst
                                     FROM Teachers
                                     WHERE SchoolID = ~(curschoolid) AND Status = 1 AND StaffStatus = 1
                                     ORDER BY LastFirst]
-                                    <option value="~(ID;l)">~(Student;t)</option>
+                                    <option value="~(ID;l)" ~(isSelected) >~(teacher;t)</option>
                                     [/tlist_sql]
                                 </select>
                             </td>
+                            <td>
                             <select name="pid" id="pid" size="5">
                                 ~[tlist_sql;
                                 SELECT DISTINCT cc.expression, CASE WHEN cc.expression = '~(gpv.pid)' THEN 'selected'
@@ -102,7 +88,6 @@
                 <div class="button-row" style="float: left;">
                     <input type="hidden" name="showData" value="1">
                     <input type="hidden" name="pidList" id="pidList" value="~(gpv.pidList)">
-                    <input type="hidden" name="didList" id="didList" value="~(gpv.didList)">
                     <span class="red">&nbsp;&nbsp;Select parameters and click submit</span>
                     <input type="hidden" name="ac" value="prim">~[submitbutton]
                 </div>
@@ -128,6 +113,7 @@
                     ~[tlist_sql;
                     SELECT
                     students.dcid,
+                    ~(curtermid),
                     CASE
                     WHEN u_student_additional_info.student_preferred_name IS NULL THEN students.last_name||',
                     '||students.first_name
@@ -156,7 +142,7 @@
                         <td colspan="100%">No records returned.</td>
                     </tr>]
                     <tr class="oddrow">
-                        <td><a href="/admin/students/scheduleplusreq.html?frn=001~(sdcid)6&schedulerequestyearid=~(curtermid)"
+                        <td><a href="/admin/students/scheduleplusreq.html?frn=001~(sdcid)&schedulerequestyearid=~(curtermid)"
                                 target="_blank">~(stuname;t)</a></td>
                         <td>~(grlvl;t)</td>
                         <td>~(gender;t)</td>
