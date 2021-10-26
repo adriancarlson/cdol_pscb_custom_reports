@@ -66,7 +66,7 @@
 		var teacherNoRoom = $j('#teacherNoRoom').closest('tr');
 		$j("td:contains('Teacher - Sections List')").closest('tr').after(teacherNoRoom);
 		var teacherClassRoster = $j('#teacherClassRoster').closest('tr');
-		$j('#teacherNoRoom').closest('tr').before(teacherClassRoster);
+		$j('#teacherNoRoom').closest('tr').after(teacherClassRoster);
 		/* insert custom CDOL fields onto the page. */
 		var studentDoubleBooked = $j('#studentDoubleBooked').closest('tr');
 		$j("td:contains('Students - Non Scheduled Periods')").closest('tr').after(studentDoubleBooked);
