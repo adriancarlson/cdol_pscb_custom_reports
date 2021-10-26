@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <title>Teacher - Class Roster</title>
+        ~[wc:commonscripts]
+        <link href="/images/css/screen.css" rel="stylesheet" media="screen">
+        <link href="/images/css/print.css" rel="stylesheet" media="print">
+        ~[wc:pscb_init]
+        <script>
+            $j(function () {
+                $j("select#pid").on("change", function () {
+                    var pid = "'" + $j("select#pid option:selected").map(function () { return $j(this).val() }).get().join("','") + "'";
+                    $j("#pidList").val(pid);
+                    console.log(pid);
+                })
+
+                var pidList = $j("#pidList").val()
+                if (pidList != "") {
+                    pidList = pidList.split(",");
+                    for (var i = 0; i < pidList.length; i++) {
+                        $j("#pid option[value=" + pidList[i] + "]").attr("selected", true);
+                    }
+                }
+            })
+        </script>
+        <script>
+            $j(function () {
+                $j("select#did").on("change", function () {
+                    var did = "'" + $j("select#did option:selected").map(function () { return $j(this).val() }).get().join("','") + "'";
+                    $j("#didList").val(did);
+                })
+
+                var didList = $j("#didList").val()
+                if (didList != "") {
+                    didList = didList.split(",");
+                    for (var i = 0; i < didList.length; i++) {
+                        $j("#did option[value=" + didList[i] + "]").attr("selected", true);
+                    }
+                }
+            })
+        </script>
+    </head>
+
+    <body>
+        ~[wc:admin_header_frame_css]
+        <!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a> &gt; <a
+            href="/admin/reports_pscb/pscb_home.html">PSCB Custom Reports</a> &gt; <a
+            href="/admin/reports_pscb/pscb_scheduleCY.html">Scheduling (Current Year)</a> &gt; Teacher - Class Roster
+        Periods
+        <!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
+
+        <!-- start of Options -->
+        <h1>Teacher - Class Roster</h1>
+        <form name="rptFilters" action="#" method="POST">
+            <div class="box-round" style="overflow: hidden;">
+                <h2>Report Filters</h2>
+                <table border="0" cellspacing="0" cellpadding="0" class="linkDescList">
+                    <thead>
+                        <tr>
+                            <th width="100px">Search Date</th>
+                            <th width="100px">Teacher</th>
+                            <th width="100px">Period</th>
+                            <th width="100%">Day in Rotation</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td nowrap>
+                                <input name="sDate" id="sDate" class="psDateWidget" type="text"
+                                    value="~[if.~(gpv.sDate)=]~(f.currentdate;dateformat=MM/DD/YYYY)[else]~(gpv.sDate)[/if]"
+                                    size="10" />
+                            </td>
+                            <td>
+                                <select name="tid">
+                                    <option value="" selected="selected">Any Teacher</option>
+                                    ~[tlist_sql;
+                                    SELECT ID, LastFirst
+                                    FROM Teachers
+                                    WHERE SchoolID = ~(curschoolid) AND Status = 1 AND StaffStatus = 1
+                                    ORDER BY LastFirst]
+                                    <option value="~(ID;l)">~(Student;t)</option>
+                                    [/tlist_sql]
+                                </select>
+                            </td>
+                            <select name="pid" id="pid" size="5">
+                                ~[tlist_sql;
+                                SELECT DISTINCT cc.expression, CASE WHEN cc.expression = '~(gpv.pid)' THEN 'selected'
+                                END isSelected
+                                FROM cc
+                                WHERE cc.SchoolID = ~(curschoolid) AND cc.termid like '~(curyearid)__'
+                                ORDER BY to_number(NVL(SUBSTR(cc.expression, 0, INSTR(cc.expression, '(')-1),
+                                cc.expression)), cc.expression]
+                                <option value="~(expression;t)" ~(isSelected)>~(expression;t;externalExpression)
+                                </option>
+                                [/tlist_sql]
+                            </select>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="button-row" style="float: left;">
+                    <input type="hidden" name="showData" value="1">
+                    <input type="hidden" name="pidList" id="pidList" value="~(gpv.pidList)">
+                    <input type="hidden" name="didList" id="didList" value="~(gpv.didList)">
+                    <span class="red">&nbsp;&nbsp;Select parameters and click submit</span>
+                    <input type="hidden" name="ac" value="prim">~[submitbutton]
+                </div>
+            </div>
+        </form>
+
+
+
+        <!-- Start of Results -->
+        ~[if#showData.~(gpv.showData)=1]
+        <div class="box-round">
+            <h2>Teacher - Non Scheduled Periods</h2>
+            <table border="0" cellspacing="0" cellpadding="4" align="center" class="tablesorter grid" id="results">
+                <thead>
+                    <tr>
+                        <th class="left">Name</th>
+                        <th class="left">Gr</th>
+                        <th class="left">Gender</th>
+                        <th class="left">Abs/Tar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ~[tlist_sql;
+                    SELECT
+                    students.dcid,
+                    CASE
+                    WHEN u_student_additional_info.student_preferred_name IS NULL THEN students.last_name||',
+                    '||students.first_name
+                    ELSE students.last_name||', '||u_student_additional_info.student_preferred_name
+                    END as Name,
+                    students.grade_level as Gr,
+                    CASE WHEN students.gender = 'M' THEN 'Male' WHEN students.gender = 'F' THEN 'Female' ELSE '' End AS
+                    Gender,
+                    ' ' AS AbsTar
+                    FROM students
+                    LEFT OUTER JOIN cc ON (students.dcid = cc.StudentID AND cc.TermID BETWEEN ~(curyearid)00 AND
+                    ~(curyearid)99)
+                    LEFT OUTER JOIN sections ON (cc.SectionID = sections.ID)
+                    LEFT OUTER JOIN teachers ON (sections.Teacher = teachers.ID)
+                    LEFT OUTER JOIN courses ON (cc.Course_Number = courses.Course_Number)
+                    INNER JOIN u_student_additional_info
+                    ON students.dcid = u_student_additional_info.studentsdcid
+                    WHERE
+                    students.enroll_status = 0
+                    ~[if#sdate.~(gpv.sDate)#] AND TO_DATE('~(gpv.sDate)','MM/DD/YYYY') BETWEEN cc.dateenrolled AND
+                    cc.dateleft [/if#sdate]
+                    ~[if#t.~(gpv.tid)#] AND sections.teacher = ~(gpv.tid;sqlText) [/if#t]
+                    ~[if.~(gpv.pidList)#] AND cc.Expression IN (~(gpv.pidList)) [/if]
+                    ;alternatecolor;nonemessage=
+                    <tr>
+                        <td colspan="100%">No records returned.</td>
+                    </tr>]
+                    <tr class="oddrow">
+                        <td><a href="/admin/students/scheduleplusreq.html?frn=001~(sdcid)6&schedulerequestyearid=~(curtermid)"
+                                target="_blank">~(stuname;t)</a></td>
+                        <td>~(grlvl;t)</td>
+                        <td>~(gender;t)</td>
+                        <td>~(abstar;t)</td>
+                    </tr>
+                    [/tlist_sql]
+                </tbody>
+            </table>
+        </div>
+        [/if#showData]
+
+        <!-- End of results -->
+        <div style="clear: both;">
+            <p>
+                <center>Report generated at ~[time] on ~[date]</center>
+            </p>
+        </div>
+        ~[wc:admin_footer_frame_css]
+    </body>
+
+</html>
