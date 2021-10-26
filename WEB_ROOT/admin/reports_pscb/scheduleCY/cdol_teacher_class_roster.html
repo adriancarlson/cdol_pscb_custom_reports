@@ -43,7 +43,7 @@
                         <tr>
                             <th width="100px">Search Date</th>
                             <th width="100px">Teacher</th>
-                            <th width="100px">Period</th>
+                            <th width="100%">Period</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -59,28 +59,29 @@
                                     ~[tlist_sql;
                                     SELECT ID,
                                     CASE WHEN id = '~(gpv.pid)' THEN 'selected'
-                                    END isSelected
+                                    END isSelected,
                                     LastFirst
                                     FROM Teachers
                                     WHERE SchoolID = ~(curschoolid) AND Status = 1 AND StaffStatus = 1
                                     ORDER BY LastFirst]
-                                    <option value="~(ID;l)" ~(isSelected) >~(teacher;t)</option>
+                                    <option value="~(ID;l)" ~(isSelected)>~(teacher;t)</option>
                                     [/tlist_sql]
                                 </select>
                             </td>
                             <td>
-                            <select name="pid" id="pid" size="5">
-                                ~[tlist_sql;
-                                SELECT DISTINCT cc.expression, CASE WHEN cc.expression = '~(gpv.pid)' THEN 'selected'
-                                END isSelected
-                                FROM cc
-                                WHERE cc.SchoolID = ~(curschoolid) AND cc.termid like '~(curyearid)__'
-                                ORDER BY to_number(NVL(SUBSTR(cc.expression, 0, INSTR(cc.expression, '(')-1),
-                                cc.expression)), cc.expression]
-                                <option value="~(expression;t)" ~(isSelected)>~(expression;t;externalExpression)
-                                </option>
-                                [/tlist_sql]
-                            </select>
+                                <select name="pid" id="pid" size="5">
+                                    ~[tlist_sql;
+                                    SELECT DISTINCT cc.expression, CASE WHEN cc.expression = '~(gpv.pid)' THEN
+                                    'selected'
+                                    END isSelected
+                                    FROM cc
+                                    WHERE cc.SchoolID = ~(curschoolid) AND cc.termid like '~(curyearid)__'
+                                    ORDER BY to_number(NVL(SUBSTR(cc.expression, 0, INSTR(cc.expression, '(')-1),
+                                    cc.expression)), cc.expression]
+                                    <option value="~(expression;t)" ~(isSelected)>~(expression;t;externalExpression)
+                                    </option>
+                                    [/tlist_sql]
+                                </select>
                             </td>
                         </tr>
                     </tbody>
