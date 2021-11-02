@@ -8,13 +8,17 @@
 		<td><a href="/admin/reports_pscb/contacts/CDOL_Mother_Father_Email.html">Students - Mother/Father Email</a></td>
 		<td>List Student with Mother and Father Email</td>
 	</tr>
-	<tr id="contactPrimaryEmailPhone">
-		<td><a href="/admin/reports_pscb/contacts/cdol_student_contacts_primary_email_and_phone">Students - Contacts Primary Email and Phone</a></td>
-		<td>List ctive contacts for students and the primary email address and phone number for the contact. Primary phone is determined first by preferred status and then priority order</td>
-	</tr>
+
 	<tr id="motherFatherEmailPhone">
-		<td><a href="/admin/reports_pscb/contacts/CDOL_Mother_Father_Email_phone.html">Students - Mother/Father Email & Phone</a></td>
+		<td><a href="/admin/reports_pscb/contacts/CDOL_Mother_Father_Email_phone.html">Students - Mother/Father Email &
+				Phone</a></td>
 		<td>List Student with Mother and Father Email and Phone Number</td>
+	</tr>
+	<tr id="contactPrimaryEmailPhone">
+		<td><a href="/admin/reports_pscb/contacts/cdol_student_contacts_primary_email_and_phone.html">Students -
+				Contacts Primary Email and Phone</a></td>
+		<td>List ctive contacts for students and the primary email address and phone number for the contact. Primary
+			phone is determined first by preferred status and then priority order</td>
 	</tr>
 	<tr id="receiveMailEmail">
 		<td><a href="/admin/reports_pscb/contacts/cdol_receive_mail_email.html">Students - Contacts Receive
@@ -88,15 +92,12 @@
 		/* insert custom CDOL fields onto the page. */
 		// var potentialContacts = $j('#potentialContacts').closest('tr');
 		// $j("td:contains('Contacts - Duplicates')").closest('tr').before(potentialContacts);
-		
+
 		var motherFatherEmail = $j('#motherFatherEmail').closest('tr');
 		$j("td:contains('Students - Contacts List')").closest('tr').after(motherFatherEmail);
-		
+
 		var motherFatherEmailPhone = $j('#motherFatherEmailPhone').closest('tr');
 		$j(motherFatherEmail).closest('tr').after(motherFatherEmailPhone);
-		
-		var contactPrimaryEmailPhone = $j('#contactPrimaryEmailPhone').closest('tr');
-		$j(contactsMailingPerFamily).closest('tr').after(contactPrimaryEmailPhone);
 
 		var receiveMailEmail = $j('#receiveMailEmail').closest('tr');
 		$j(motherFatherEmail).after(receiveMailEmail);
@@ -104,8 +105,13 @@
 		var contactsMailingPerFamily = $j('#contactsMailingPerFamily').closest('tr');
 		$j("td:contains('Contacts - Students List')").closest('tr').after(contactsMailingPerFamily);
 
+		var contactPrimaryEmailPhone = $j('#contactPrimaryEmailPhone').closest('tr');
+		$j(motherFatherEmailPhone).closest('tr').after(contactPrimaryEmailPhone);
+
 		var bottomTable = $j('#bottomTable');
 		$j("td:contains('Students - Contacts List')").closest('tr').parent().parent().after(bottomTable);
+
+
 		/* remove the hidden tables  and divs */
 
 		$j("#hiddenTable").remove();

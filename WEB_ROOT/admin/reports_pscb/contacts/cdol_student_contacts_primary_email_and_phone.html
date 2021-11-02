@@ -59,8 +59,8 @@
                 <thead>
                     <tr>
                         <th class="left">Student</th>
-                        <th class="left filter-select">Grade</th>
-                        <th class="left filter-select">Priority</th>
+                        <th class="center filter-select">Grade</th>
+                        <th class="center filter-select">Priority</th>
                         <th class="left">Contact Name</th>
                         <th class="left">Relationship</th>
                         <th class="left">Contact Email</th>
@@ -85,7 +85,8 @@
                     ~[if.~(gpv.ss)=cur]
                     and s.dcid in (select dcid from ~[temp.table.current.selection:students])
                     [/if]
-                    and s.schoolid = ~(curschoolid) and s.enroll_status = 0
+                    and s.enroll_status = 0
+                    ~[if.is.a.school] AND s.schoolid = ~(curschoolid) [/if.is.a.school]
                     order by s.dcid),
                     priemail as
                     (select ct.persid pid, ea.emailaddress emailaddr, row_number() over (partition by ct.persid order by
@@ -102,7 +103,6 @@
                     join cont ct on ct.persid = ppna.personid
                     join codeset phcs on phcs.codesetid = ppna.phonetypecodesetid
                     order by ct.persid)
-
                     select stu.dcid studcid, stu.lastfirst, stu.grade_level, c.rnk, c.pname, nvl(c.relname,'-None-'),
                     nvl(pem.emailaddr,'-None-'), nvl(pph.pnum,'-None-'), nvl(pph.ptype,'-None-')
                     from students stu
@@ -111,12 +111,13 @@
                     left outer join priphone pph on pph.pid = c.persid and pph.rnk = 1
                     ~[if.~(gpv.ss)=cur] INNER JOIN ~[temp.table.current.selection:students] stusel ON stusel.dcid =
                     stu.dcid [/if]
-                    where stu.schoolid = ~(curschoolid) and stu.enroll_status = 0
+                    where stu.enroll_status = 0
+                    ~[if.is.a.school] AND stu.schoolid = ~(curschoolid) [/if.is.a.school]
                     order by stu.lastfirst, c.rnk;]
                     <tr data-StudentID="~(dcid)">
                         <td class="nowrap">~(lastfirst;t)</td>
-                        <td>~(grade_level;t)</td>
-                        <td>~(priority;t)</td>
+                        <td class="center">~(grade_level;t)</td>
+                        <td class="center">~(priority;t)</td>
                         <td class="nowrap">~(contact;t)</td>
                         <td>~(relationship;t)</td>
                         <td class="nowrap">~(contact_email;t)</td>
