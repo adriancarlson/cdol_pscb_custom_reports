@@ -8,6 +8,10 @@
 		<td><a href="/admin/reports_pscb/contacts/CDOL_Mother_Father_Email.html">Students - Mother/Father Email</a></td>
 		<td>List Student with Mother and Father Email</td>
 	</tr>
+	<tr id="contactPrimaryEmailPhone">
+		<td><a href="/admin/reports_pscb/contacts/cdol_student_contacts_primary_email_and_phone">Students - Contacts Primary Email and Phone</a></td>
+		<td>List ctive contacts for students and the primary email address and phone number for the contact. Primary phone is determined first by preferred status and then priority order</td>
+	</tr>
 	<tr id="motherFatherEmailPhone">
 		<td><a href="/admin/reports_pscb/contacts/CDOL_Mother_Father_Email_phone.html">Students - Mother/Father Email & Phone</a></td>
 		<td>List Student with Mother and Father Email and Phone Number</td>
@@ -90,6 +94,9 @@
 		
 		var motherFatherEmailPhone = $j('#motherFatherEmailPhone').closest('tr');
 		$j(motherFatherEmail).closest('tr').after(motherFatherEmailPhone);
+		
+		var contactPrimaryEmailPhone = $j('#contactPrimaryEmailPhone').closest('tr');
+		$j(contactsMailingPerFamily).closest('tr').after(contactPrimaryEmailPhone);
 
 		var receiveMailEmail = $j('#receiveMailEmail').closest('tr');
 		$j(motherFatherEmail).after(receiveMailEmail);
