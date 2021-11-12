@@ -7,23 +7,24 @@ LEFT JOIN u_student_additional_info ad
 ON s.dcid = ad.studentsdcid
 WHERE s.dcid = '~(gpv.sdcid)'
 ;]
-
-<div class="box-round">
-    <table class="linkDescList">
-        <colgroup>
-            <col>
-            <col>
-        </colgroup>
-        <tbody>
-            <tr>
-                <td><label>User Name:</label></td>
-                <td>~(swebid)</td>
-            </tr>
-            <tr>
-                <td><label>Password:</label></td>
-                <td>~(scode)</td>
-            </tr>
-        </tbody>
-    </table>
+<div style="width: 400px;">
+    <div class="box-round">
+        <table class="linkDescList">
+            <colgroup>
+                <col>
+                <col>
+            </colgroup>
+            <tbody>
+                <tr>
+                    <td><label>User Name:</label></td>
+                    <td>~(swebid)</td>
+                </tr>
+                <tr>
+                    <td><label>Password:</label></td>
+                    <td>~(scode)</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 </div>
 [/tlist_sql]

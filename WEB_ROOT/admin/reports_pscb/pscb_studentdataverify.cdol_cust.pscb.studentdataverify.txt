@@ -78,7 +78,7 @@
 		<td>List of students and their emails</td>
 	</tr>
 	<tr id="slogins">
-		<td><a href="/admin/reports_pscb/studentdataverify/cdol_student_elogins.html">Student Logins</a></td>
+		<td><a href="/admin/reports_pscb/studentdataverify/cdol_student_logins.html">Student Logins</a></td>
 		<td>List of students, Usenames, and Passwords</td>
 	</tr>
 

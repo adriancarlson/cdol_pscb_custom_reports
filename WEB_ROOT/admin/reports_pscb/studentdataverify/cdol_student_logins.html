@@ -10,6 +10,13 @@
         ~[wc:pscb_init]
         <script>
             pscbToolButtons = { "csvFile": "Yes", "curSel": "Yes" };
+            $j(function () {
+                $j("select#pid").on("change", function () {
+                    var pid = "'" + $j("select#pid option:selected").map(function () { return $j(this).val() }).get().join("','") + "'";
+                    $j("#pidList").val(pid);
+                    console.log(pid);
+                })
+            })
         </script>
     </head>
 
@@ -28,8 +35,9 @@
                 <table border="0" cellspacing="0" cellpadding="0" class="linkDescList">
                     <thead>
                         <tr>
-                            <th style="white-space: nowrap;" width="180px">Student Selection</th>
+                            <th style="white-space: nowrap;">Student Selection</th>
                             <th style="white-space: nowrap;">Grade Selection</th>
+                            <th style="white-space: nowrap;" width="100%">Homeroom</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -56,17 +64,39 @@
                                     FROM STUDENTS
                                     WHERE TO_CHAR(SCHOOLID) LIKE CASE WHEN TO_CHAR(~(curschoolid)) = '0'
                                     THEN '%' ELSE TO_CHAR(~(curschoolid)) END
-                                    AND ENROLL_STATUS = 0
+                                    AND ENROLL_STATUS in (-1, 0)
                                     ORDER BY GRADE_LEVEL]
                                     <option value="'~(gr)'">~(prettygrade)</option>
                                     [/tlist_sql]
                                 </select>
                             </td>
+                            <td>
+                                <select name="hr" name="hr">
+                                    <option value='' ~[if.~[gpv:hr]=]selected[/if]>All Homerooms</option>
+                                    ~[tlist_sql;
+                                    SELECT DISTINCT Home_room,
+                                    CASE
+                                    WHEN Home_room LIKE '%PK%' then '-1'
+                                    WHEN Home_room LIKE '%PS%' then '-1'
+                                    WHEN Home_room LIKE 'K%' then '0'
+                                    ELSE Home_room
+                                    END as sortorder
+                                    FROM STUDENTS
+                                    WHERE TO_CHAR(SCHOOLID) LIKE CASE WHEN TO_CHAR(~(curschoolid)) = '0'
+                                    THEN '%' ELSE TO_CHAR(~(curschoolid)) END
+                                    AND ENROLL_STATUS in (-1, 0)
+                                    ORDER BY sortorder, Home_room]
+                                    <option value="'~(hr)'">~(hr)</option>
+                                    [/tlist_sql]
+                                </select>
+                            </td>
+
                         </tr>
                     </tbody>
                 </table>
                 <div class="button-row" style="float: left;">
                     <input type="hidden" name="showData" value="1">
+                    <input type="hidden" name="pidList" id="pidList" value="~(gpv.pidList)">
                     <span class="red">&nbsp;&nbsp;Select parameters and click submit</span>
                     <input type="hidden" name="ac" value="prim">~[submitbutton]
                 </div>
@@ -76,7 +106,8 @@
         ~[if#showData.~(gpv.showData;sqlText)=1]
         <div class="box-round">
             <h2>Student Logins</h2>
-            <table border="0" cellspacing="0" cellpadding="4" align="center" class="tablesorter grid" id="results">
+            <table border="0" cellspacing="0" cellpadding="4" align="center" class="tablesorter grid" id="results"
+                groupRowsByCol="1" color1="#ffffff" color2="#d7edfe">
                 <thead>
                     <tr>
                         <th class="left">Student Number</th>
@@ -94,7 +125,13 @@
                     s.dcid,
                     s.student_number,
                     s.lastfirst,
-                    s.grade_level,
+                    CASE
+                    WHEN TO_CHAR(s.grade_level) = -2 then 'PK3'
+                    WHEN TO_CHAR(s.grade_level) = -1 then 'PK4'
+                    WHEN TO_CHAR(s.grade_level) = 0 then 'K'
+                    WHEN TO_CHAR(s.grade_level) = 99 then 'Graduated'
+                    ELSE TO_CHAR(s.grade_level)
+                    END as prettygrade,
                     s.Student_Web_ID,
                     utl_raw.cast_to_varchar2(UTL_ENCODE.BASE64_DECODE(utl_raw.cast_to_raw(ad.student_code))),
                     ad.student_code,
@@ -109,6 +146,7 @@
                     WHERE s.enroll_status in (-1,0)
                     ~[if.is.a.school] AND s.schoolid = ~(curschoolid) [/if.is.a.school]
                     ~[if#gr.~(gpv.gr;sqlText)#] AND s.grade_level = ~(gpv.gr) [/if#gr]
+                    ~[if#hr.~(gpv.hr;sqlText)#] AND s.home_room = ~(gpv.hr) [/if#hr]
                     ORDER BY sch.abbreviation, s.grade_level desc, s.lastfirst
                     ;]
                     <tr data-StudentID="~(dcid)">
@@ -117,7 +155,8 @@
                         <td class="center">~(grade_level)</td>
                         <td>~(username;t)</td>
                         <td class="nowrap hidden">~(decode;t)</td>
-                        <td class="nowrap"><a class="dialogM" title="~(stuname;t)" href="code_popup.html?sdcid=~(dcid)">Click to
+                        <td class="nowrap"><a class="dialogM button" title="~(stuname;t)"
+                                href="code_popup.html?sdcid=~(dcid)">Click to
                                 Reveal</a></td>
                         ~[if.district.office]<td>~(school;t)</td>[/if.district.office]
                     </tr>
