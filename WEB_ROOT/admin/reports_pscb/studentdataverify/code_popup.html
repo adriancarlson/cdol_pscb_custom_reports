@@ -1,0 +1,29 @@
+~[tlist_sql;
+SELECT
+s.Student_Web_ID,
+utl_raw.cast_to_varchar2(UTL_ENCODE.BASE64_DECODE(utl_raw.cast_to_raw(ad.student_code)))
+FROM students s
+LEFT JOIN u_student_additional_info ad
+ON s.dcid = ad.studentsdcid
+WHERE s.dcid = '~(gpv.sdcid)'
+;]
+
+<div class="box-round">
+    <table class="linkDescList">
+        <colgroup>
+            <col>
+            <col>
+        </colgroup>
+        <tbody>
+            <tr>
+                <td><label>User Name:</label></td>
+                <td>~(swebid)</td>
+            </tr>
+            <tr>
+                <td><label>Password:</label></td>
+                <td>~(scode)</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+[/tlist_sql]

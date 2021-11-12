@@ -9,7 +9,7 @@
         <link href="/images/css/print.css" rel="stylesheet" media="print">
         ~[wc:pscb_init]
         <script>
-            pscbToolButtons = { "copyData": "Yes", "csvFile": "Yes", "pdfFile": "Yes", "curSel": "Yes" };
+            pscbToolButtons = { "csvFile": "Yes", "curSel": "Yes" };
         </script>
     </head>
 
@@ -75,7 +75,7 @@
         <!-- Start of Results -->
         ~[if#showData.~(gpv.showData;sqlText)=1]
         <div class="box-round">
-            <h2>Student Email</h2>
+            <h2>Student Logins</h2>
             <table border="0" cellspacing="0" cellpadding="4" align="center" class="tablesorter grid" id="results">
                 <thead>
                     <tr>
@@ -84,7 +84,8 @@
                         <th class="left filter-select">Grade Level</th>
                         <th class="left">User Name</th>
                         <th class="left ">Password</th>
-                        ~[if.is.a.school]<th class="left ">School</th>[/if.is.a.school]
+                        <th class="left hidden">Password</th>
+                        ~[if.district.office]<th class="left ">School</th>[/if.district.office]
                     </tr>
                 </thead>
                 <tbody>
@@ -95,8 +96,9 @@
                     s.lastfirst,
                     s.grade_level,
                     s.Student_Web_ID,
+                    utl_raw.cast_to_varchar2(UTL_ENCODE.BASE64_DECODE(utl_raw.cast_to_raw(ad.student_code))),
                     ad.student_code,
-                    s.schoolid
+                    sch.abbreviation
                     FROM students s
                     LEFT JOIN u_student_additional_info ad
                     ON s.dcid = ad.studentsdcid
@@ -107,15 +109,17 @@
                     WHERE s.enroll_status in (-1,0)
                     ~[if.is.a.school] AND s.schoolid = ~(curschoolid) [/if.is.a.school]
                     ~[if#gr.~(gpv.gr;sqlText)#] AND s.grade_level = ~(gpv.gr) [/if#gr]
-                    ORDER BY sch.abbreviation, s.lastfirst
+                    ORDER BY sch.abbreviation, s.grade_level desc, s.lastfirst
                     ;]
                     <tr data-StudentID="~(dcid)">
                         <td class="nowrap">~(studentnumb)</td>
-                        <td>~(last_name;t)</td>
-                        <td>~(first_name;t)</td>
+                        <td>~(stuname;t)</td>
                         <td class="center">~(grade_level)</td>
-                        <td class="nowrap">~(email;t)</td>
-                        ~[if.is.a.school]<td>~(school;t)</td>[/if.is.a.school]
+                        <td>~(username;t)</td>
+                        <td class="nowrap hidden">~(decode;t)</td>
+                        <td class="nowrap"><a class="dialogM" title="~(stuname;t)" href="code_popup.html?sdcid=~(dcid)">Click to
+                                Reveal</a></td>
+                        ~[if.district.office]<td>~(school;t)</td>[/if.district.office]
                     </tr>
                     [/tlist_sql]
                 </tbody>
