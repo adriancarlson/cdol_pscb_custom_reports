@@ -116,7 +116,7 @@
                         <th class="left">User Name</th>
                         <th class="left ">Password</th>
                         <th class="left hidden">Password</th>
-                        ~[if.district.office]<th class="left ">School</th>[/if.district.office]
+                        ~[if.district.office]<th class="left filter-select">School</th>[/if.district.office]
                     </tr>
                 </thead>
                 <tbody>
@@ -134,7 +134,6 @@
                     END as prettygrade,
                     s.Student_Web_ID,
                     utl_raw.cast_to_varchar2(UTL_ENCODE.BASE64_DECODE(utl_raw.cast_to_raw(ad.student_code))),
-                    ad.student_code,
                     sch.abbreviation
                     FROM students s
                     LEFT JOIN u_student_additional_info ad
