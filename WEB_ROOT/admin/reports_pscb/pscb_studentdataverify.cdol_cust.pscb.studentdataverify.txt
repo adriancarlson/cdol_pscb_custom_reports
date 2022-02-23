@@ -79,7 +79,7 @@
 	</tr>
 	<tr id="slogins">
 		<td><a href="/admin/reports_pscb/studentdataverify/cdol_student_logins.html">Student Logins</a></td>
-		<td>List of students, Usenames, and Passwords</td>
+		<td>List of students, Usernames, and Passwords</td>
 	</tr>
 
 </table>
