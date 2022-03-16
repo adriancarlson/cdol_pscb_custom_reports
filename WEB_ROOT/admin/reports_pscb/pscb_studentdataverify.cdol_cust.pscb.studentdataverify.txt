@@ -56,6 +56,10 @@
 			name and first name for Non-Public Digital Equity File Upload Collection for the NDE
 		</td>
 	</tr>
+	<tr id="healthscreening">
+		<td><a href="/admin/reports_pscb/studentdataverify/cdol_health_screening_list.html">Health Screening List</a></td>
+		<td>List fields needed for healthscreening report</td>
+	</tr>
 	<tr id="sLanguage">
 		<td><a href="/admin/reports_pscb/studentdataverify/cdol_student_languages.html">Student Languages</a></td>
 		<td>List students Home, First, and Primary Languages</td>
