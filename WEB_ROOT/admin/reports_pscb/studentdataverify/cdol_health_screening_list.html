@@ -97,7 +97,7 @@
                     SELECT dcid, state_studentnumber, student_number, student_first_name, student_last_name, gender,
                     dob, PRETTY_GRADE,
                     teacher_name, ADDRESS, LISTAGG(Contact, ' | ') WITHIN GROUP(ORDER BY DCID,contactpriorityorder) as
-                    Adults_students_live_with, school
+                    Adults_students_live_with, school, grade_level
                     FROM (
                     SELECT
                     s.dcid,
@@ -111,6 +111,7 @@
                     ELSE s.gender
                     END as GENDER,
                     s.dob,
+                    s.grade_level,
                     CASE
                     WHEN TO_CHAR(s.grade_level) = -2 then 'PK3'
                     WHEN TO_CHAR(s.grade_level) = -1 then 'PK4'
@@ -141,7 +142,7 @@
                     LEFT JOIN guardianpersonassoc gp ON (p.id = gp.personid)
                     LEFT JOIN guardianstudent gs ON (s.dcid = gs.studentsdcid AND gp.guardianid = gs.guardianid)
                     WHERE s.enroll_status = 0
-                    and cc.COURSE_NUMBER = '541001'
+                    and cc.COURSE_NUMBER IN ('541001','541K01')
                     and cc.TERMID BETWEEN ~(curyearid)00 AND ~(curyearid)99
                     AND scd.liveswithflg = 1
                     AND cs.code NOT IN ('Brother','Friend','Neighbor','Other','Sister','Resource Teacher')
@@ -150,8 +151,8 @@
                     ORDER BY s.lastfirst, sca.contactpriorityorder
                     ) GROUP BY dcid, state_studentnumber, student_number, student_first_name, student_last_name, gender,
                     dob, PRETTY_GRADE,
-                    teacher_name, ADDRESS, school
-                    ORDER BY GRADE_LEVEL, LASTFIRST;]
+                    teacher_name, ADDRESS, school, grade_level
+                    ORDER BY grade_level DESC, student_last_name, student_first_name;]
                     <tr data-StudentID="~(dcid)">
                         <td>~(state)</td>
                         <td>~(stunumb)</td>
