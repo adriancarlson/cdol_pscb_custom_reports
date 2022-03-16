@@ -150,7 +150,8 @@
                     ORDER BY s.lastfirst, sca.contactpriorityorder
                     ) GROUP BY dcid, state_studentnumber, student_number, student_first_name, student_last_name, gender,
                     dob, PRETTY_GRADE,
-                    teacher_name, ADDRESS, school;]
+                    teacher_name, ADDRESS, school
+                    ORDER BY GRADE_LEVEL, LASTFIRST;]
                     <tr data-StudentID="~(dcid)">
                         <td>~(state)</td>
                         <td>~(stunumb)</td>
