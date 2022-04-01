@@ -285,86 +285,20 @@
                     students.enroll_status in (-1,0)
                     ~[if.is.a.school] AND students.next_school=~(curschoolid) [/if]
                     )
-                    ,maxsubmission as(
-                    SELECT
-                    to_char(max(u_fb_form_response.whencreated), 'MM/DD/YYYY HH'||CHR(58)||'MI am') lastestsub,
-                    student_id
-                    FROM
-                    U_fb_form_response
-                    WHERE U_fb_form_response.response_type in ('G','S')
-                    GROUP BY student_id
-                    )
                     SELECT
                     studentform.dcid,
                     studentform.student_number,
                     studentform.lastfirst,
                     studentform.curgrade,
                     studentform.nextgrade,
-                    CASE
-                    WHEN studentform.preschool = 'Approved' THEN '#69945d'
-                    WHEN studentform.preschool = 'Pending' THEN '#ffdfba'
-                    WHEN studentform.preschool = 'Rejected' THEN '#ffb3ba'
-                    WHEN studentform.preschool = 'Admin Submitted' THEN '#5689D6'
-                    ELSE ''
-                    END as preschool_color,
                     studentform.preschool,
-                    CASE
-                    WHEN studentform.studentinfo = 'Approved' THEN '#69945d'
-                    WHEN studentform.studentinfo = 'Pending' THEN '#d4ac0d'
-                    WHEN studentform.studentinfo = 'Rejected' THEN 'red'
-                    WHEN studentform.studentinfo = 'Admin Submitted' THEN '#5689D6'
-                    ELSE ''
-                    END as studentinfo_color,
                     studentform.studentinfo,
-                    CASE
-                    WHEN studentform.sacramental = 'Approved' THEN '#69945d'
-                    WHEN studentform.sacramental = 'Pending' THEN '#d4ac0d'
-                    WHEN studentform.sacramental = 'Rejected' THEN 'red'
-                    WHEN studentform.sacramental = 'Admin Submitted' THEN '#5689D6'
-                    ELSE ''
-                    END as sacramental_color,
                     studentform.sacramental,
-                    CASE
-                    WHEN studentform.medical = 'Approved' THEN '#69945d'
-                    WHEN studentform.medical = 'Pending' THEN '#d4ac0d'
-                    WHEN studentform.medical = 'Rejected' THEN 'red'
-                    WHEN studentform.medical = 'Admin Submitted' THEN '#5689D6'
-                    ELSE ''
-                    END as medical_color,
                     studentform.medical,
-                    CASE
-                    WHEN studentform.contacts = 'Approved' THEN '#69945d'
-                    WHEN studentform.contacts = 'Pending' THEN '#d4ac0d'
-                    WHEN studentform.contacts = 'Rejected' THEN 'red'
-                    WHEN studentform.contacts = 'Admin Submitted' THEN '#5689D6'
-                    ELSE ''
-                    END as contacts_color,
                     studentform.contacts,
-                    CASE
-                    WHEN studentform.homelanguage = 'Approved' THEN '#69945d'
-                    WHEN studentform.homelanguage = 'Pending' THEN '#d4ac0d'
-                    WHEN studentform.homelanguage = 'Rejected' THEN 'red'
-                    WHEN studentform.homelanguage = 'Admin Submitted' THEN '#5689D6'
-                    ELSE ''
-                    END as homelanguage_color,
                     studentform.homelanguage,
-                    CASE
-                    WHEN studentform.agreements = 'Approved' THEN '#69945d'
-                    WHEN studentform.agreements = 'Pending' THEN '#d4ac0d'
-                    WHEN studentform.agreements = 'Rejected' THEN 'red'
-                    WHEN studentform.agreements = 'Admin Submitted' THEN '#5689D6'
-                    ELSE ''
-                    END as agreements_color,
                     studentform.agreements,
-                    CASE
-                    WHEN studentform.additional = 'Approved' THEN '#69945d'
-                    WHEN studentform.additional = 'Pending' THEN '#d4ac0d'
-                    WHEN studentform.additional = 'Rejected' THEN 'red'
-                    WHEN studentform.additional = 'Admin Submitted' THEN '#5689D6'
-                    ELSE ''
-                    END as agreements_color,
                     studentform.additional,
-                    maxsubmission.lastestsub,
                     curschool.name curschool,
                     nextschool.name next_school
                     FROM
@@ -373,8 +307,6 @@
                     ON studentform.curschool = curschool.school_number
                     LEFT JOIN schools nextschool
                     ON studentform.nextschool = nextschool.school_number
-                    LEFT JOIN maxsubmission
-                    ON studentform.studentid = maxsubmission.student_id
                     WHERE (
                     studentform.studentinfo = 'Not Submitted'
                     AND studentform.sacramental = 'Not Submitted'
@@ -385,12 +317,12 @@
                     AND studentform.additional = 'Not Submitted'
                     )
 
-                    ORDER BY maxsubmission.lastestsub;]
+                    ORDER BY studentform.curgrade,studentform.lastfirst;]
                     <tr data-StudentID="~(dcid)">
                         <td><a
                                 href="/admin/students/forms.html?frn=001~(dcid)&sharetype=enroll&tabSel=enroll">~(stunum)</a>
                         </td>
-                        <td>~(name)</td>
+                        <td class="nowrap">~(name)</td>
                         <td>~(curgrade)</td>
                         <td>~(Sched_NextYearGrade)</td>
                         <td>~(preschool)</td>
@@ -401,8 +333,8 @@
                         <td>~(homelanguage)</td>
                         <td>~(agreements)</td>
                         <td>~(additional)</td>
-                        <td>~(curschoo)</td>
-                        <td>~(nextschoo)</td>
+                        <td class="nowrap">~(curschool)</td>
+                        <td class="nowrap">~(nextschool)</td>
                     </tr>
                     [/tlist_sql]
                 </tbody>
