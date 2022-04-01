@@ -1,7 +1,7 @@
 <table id="bottomTable" border="0" cellspacing="0" cellpadding="4" class="table grid">
 	<thead>
 		<tr>
-			<th class="left" width="400px" style="height:30px">CDOL - Student Reports</th>
+			<th class="left"style="width: 500px; height:30px;">CDOL - Student Reports</th>
 			<th class="left" style="height:30px">Description</th>
 		</tr>
 	</thead>

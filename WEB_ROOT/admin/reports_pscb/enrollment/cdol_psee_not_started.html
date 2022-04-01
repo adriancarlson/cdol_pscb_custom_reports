@@ -17,7 +17,7 @@
         ~[wc:admin_header_frame_css]
         <!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a> &gt; <a
             href="/admin/reports_pscb/pscb_home.html" target="_top">PSCB Custom Reports</a> &gt; <a
-            href="/admin/reports_pscb/pscb_studentdataverify.html" target="_top">Student </a> &gt; Students Not Started
+            href="/admin/reports_pscb/pscb_enrollment.html">Enrollment</a> &gt; Students Not Started
         <!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
         <!-- start of Options -->
         <h1>Students Not Started</h1>
@@ -74,6 +74,7 @@
                     WHEN TO_CHAR(students.Sched_NextYearGrade) = 99 then 'Graduated'
                     ELSE TO_CHAR(students.Sched_NextYearGrade)
                     END as nextgrade,
+                    students.Sched_NextYearGrade,
                     students.schoolid curschool,
                     students.next_school nextschool,
                     CASE
@@ -316,8 +317,7 @@
                     AND studentform.agreements = 'Not Submitted'
                     AND studentform.additional = 'Not Submitted'
                     )
-
-                    ORDER BY studentform.curgrade,studentform.lastfirst;]
+                    ORDER BY studentform.Sched_NextYearGrade, studentform.lastfirst;]
                     <tr data-StudentID="~(dcid)">
                         <td><a
                                 href="/admin/students/forms.html?frn=001~(dcid)&sharetype=enroll&tabSel=enroll">~(stunum)</a>
