@@ -1,17 +1,29 @@
-<table id="hiddenTable" style="display: none;">
-	<tr id="PSE">
-		<td><a href="/admin/reports_pscb/enrollment/CDOL_PSE_Delivery_Search.html">PowerSchool Enrollment - Delivery Search</a></td>
-		<td>Lists Active and Pre-Registered students delivered from PowerSchool Enrollment after a selected date.</td>
+<table id="bottomTable" border="0" cellspacing="0" cellpadding="4" class="table grid">
+	<thead>
+		<tr>
+			<th class="left" width="280px" style="height:30px">CDOL - PowerSchool Enrollment Express Reports</th>
+			<th class="left" style="height:30px">Description</th>
+		</tr>
+	</thead>
+	<tr>
+		<td><a href="/admin/reports_pscb/enrollment/cdol_psee_not_started.html">Students Not Started</a></td>
+		<td>List students who have not even started the enrollment process</td>
 	</tr>
+	<tr>
+		<td><a href="/admin/reports_pscb/enrollment/ages.html">Students Started but Not finished</a></td>
+		<td>List students who have started the enrollment process but not finished</td>
+	</tr>
+	<tr>
+		<td><a href="/admin/reports_pscb/enrollment/birthdaylist.html">Students Completed and Approved</a></td>
+		<td>List students who have completed the enrollment process and have been approved by the administrator</td>
+	</tr>
+	
+
 </table>
 
 <script>
 	/*checks to make sure page is loaded */
 	$j(document).ready(function () {
-		/* insert custom CDOL fields onto the page. */
-		var PSE = $j('#PSE').closest('tr');
-		$j("td:contains('Special Program Enrollments - Current Year')").closest('tr').after(PSE);
-		/* remove the hidden tables  and divs */
-		$j("#hiddenTable").remove();
-	});
+		$j('.box-round').append($j('#bottomTable'));
+			});
 </script>

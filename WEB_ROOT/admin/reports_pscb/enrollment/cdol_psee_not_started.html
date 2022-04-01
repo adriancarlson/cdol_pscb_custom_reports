@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html>
+    <!-- non framed -->
+
+    <head>
+        <title>Students Not Started</title>
+        ~[wc:commonscripts]
+        <link href="/images/css/screen.css" rel="stylesheet" media="screen">
+        <link href="/images/css/print.css" rel="stylesheet" media="print">
+        ~[wc:pscb_init]
+        <script>
+            pscbToolButtons = { "copyData": "Yes", "csvFile": "Yes", "pdfFile": "Yes", "curSel": "Yes" };
+        </script>
+    </head>
+
+    <body>
+        ~[wc:admin_header_frame_css]
+        <!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a> &gt; <a
+            href="/admin/reports_pscb/pscb_home.html" target="_top">PSCB Custom Reports</a> &gt; <a
+            href="/admin/reports_pscb/pscb_studentdataverify.html" target="_top">Student </a> &gt; Students Not Started
+        <!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
+        <!-- start of Options -->
+        <h1>Students Not Started</h1>
+
+        <!-- Start of Results -->
+
+        <div class="box-round">
+            <h2>Students Not Started</h2>
+            <table border="0" cellspacing="0" cellpadding="4" align="center" class="tablesorter grid" id="results">
+                <thead>
+                    <tr>
+                        <th class="left">Stu #</th>
+                        <th class="left">Stu Name</th>
+                        <th class="left filter-select">Cur Grade</th>
+                        <th class="left filter-select">Next Grade</th>
+                        <th class="left">A1. Preschool</th>
+                        <th class="left">A. Student Info</th>
+                        <th class="left">B. Sacraments</th>
+                        <th class="left">C. Medical</th>
+                        <th class="left">D. Contacts</th>
+                        <th class="left">E. Home Language</th>
+                        <th class="left">F. Agreements</th>
+                        <th class="left">G. Additional Docs</th>
+                        <th class="left">Cur School</th>
+                        <th class="left">Next School</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ~[tlist_sql;
+                    WITH studentform as (
+                    SELECT students.id studentid,
+                    students.dcid,
+                    students.student_number,
+                    students.lastfirst,
+                    students.first_name,
+                    students.last_name,
+                    CASE
+                    WHEN UPPER(students.gender) = 'F' then 'Female'
+                    WHEN UPPER(students.gender) = 'M' then 'Male'
+                    ELSE students.gender
+                    END gender,
+                    students.dob,
+                    CASE
+                    WHEN TO_CHAR(students.grade_level) = -2 then 'PK3'
+                    WHEN TO_CHAR(students.grade_level) = -1 then 'PK4'
+                    WHEN TO_CHAR(students.grade_level) = 0 then 'K'
+                    WHEN TO_CHAR(students.grade_level) = 99 then 'Graduated'
+                    ELSE TO_CHAR(students.grade_level)
+                    END as curgrade,
+                    CASE
+                    WHEN TO_CHAR(students.Sched_NextYearGrade) = -2 then 'PK3'
+                    WHEN TO_CHAR(students.Sched_NextYearGrade) = -1 then 'PK4'
+                    WHEN TO_CHAR(students.Sched_NextYearGrade) = 0 then 'K'
+                    WHEN TO_CHAR(students.Sched_NextYearGrade) = 99 then 'Graduated'
+                    ELSE TO_CHAR(students.Sched_NextYearGrade)
+                    END as nextgrade,
+                    students.schoolid curschool,
+                    students.next_school nextschool,
+                    CASE
+                    WHEN students.Sched_NextYearGrade IN (-2,-1) THEN
+                    CASE
+                    WHEN preschool.approval = 0 THEN 'Pending'
+                    WHEN preschool.approval = 1 THEN 'Approved'
+                    WHEN preschool.approval = 2 THEN 'Rejected'
+                    WHEN preschool.response_type = 'A' THEN 'Approved'
+                    END
+                    ELSE 'N/A'
+                    END preschool,
+                    CASE
+                    WHEN studentinfo.approval = 0 THEN 'Pending'
+                    WHEN studentinfo.approval = 1 THEN 'Approved'
+                    WHEN studentinfo.approval = 2 THEN 'Rejected'
+                    WHEN studentinfo.response_type = 'A' THEN 'Approved'
+                    ELSE 'Not Submitted'
+                    END studentinfo, -- 0 = pending, 1 = approved, 2 = rejected
+                    CASE
+                    WHEN sacramental.approval = 0 THEN 'Pending'
+                    WHEN sacramental.approval = 1 THEN 'Approved'
+                    WHEN sacramental.approval = 2 THEN 'Rejected'
+                    WHEN sacramental.response_type = 'A' THEN 'Approved'
+                    ELSE 'Not Submitted'
+                    END sacramental,
+                    CASE
+                    WHEN medical.approval = 0 THEN 'Pending'
+                    WHEN medical.approval = 1 THEN 'Approved'
+                    WHEN medical.approval = 2 THEN 'Rejected'
+                    WHEN medical.response_type = 'A' THEN 'Approved'
+                    ELSE 'Not Submitted'
+                    END medical,
+                    CASE
+                    WHEN contacts.approval = 0 THEN 'Pending'
+                    WHEN contacts.approval = 1 THEN 'Approved'
+                    WHEN contacts.approval = 2 THEN 'Rejected'
+                    WHEN contacts.response_type = 'A' THEN 'Approved'
+                    ELSE 'Not Submitted'
+                    END contacts,
+                    CASE
+                    WHEN homelanguage.approval = 0 THEN 'Pending'
+                    WHEN homelanguage.approval = 1 THEN 'Approved'
+                    WHEN homelanguage.approval = 2 THEN 'Rejected'
+                    WHEN homelanguage.response_type = 'A' THEN 'Approved'
+                    ELSE 'Not Submitted'
+                    END homelanguage,
+                    CASE
+                    WHEN agreements.approval = 0 THEN 'Pending'
+                    WHEN agreements.approval = 1 THEN 'Approved'
+                    WHEN agreements.approval = 2 THEN 'Rejected'
+                    WHEN agreements.response_type = 'A' THEN 'Approved'
+                    ELSE 'Not Submitted'
+                    END agreements,
+                    CASE
+                    WHEN additional.approval = 0 THEN 'Pending'
+                    WHEN additional.approval = 1 THEN 'Approved'
+                    WHEN additional.approval = 2 THEN 'Rejected'
+                    WHEN additional.response_type = 'A' THEN 'Approved'
+                    ELSE 'Not Submitted'
+                    END additional
+                    FROM
+                    students
+                    LEFT JOIN (
+                    SELECT rank() OVER (PARTITION BY student_id order by superrank DESC, whencreated DESC) as rank,
+                    superrank,
+                    response_type,
+                    student_id, approval,whencreated
+                    FROM
+                    (SELECT CASE WHEN u_fb_form_response.response_type = 'G' and u_fb_form_response.approval = 1 THEN 1
+                    ELSE 0 END as
+                    superrank, u_fb_form_response.response_type,
+                    u_fb_form_response.student_id, u_fb_form_response.approval,u_fb_form_response.whencreated
+                    FROM
+                    U_fb_form_response
+                    WHERE
+                    U_fb_form_response.U_fb_form_id = 184243
+                    )
+                    ) preschool
+                    ON students.id = preschool.student_id
+                    AND preschool.rank = 1
+                    LEFT JOIN (
+                    SELECT rank() OVER (PARTITION BY student_id order by superrank DESC, whencreated DESC) as rank,
+                    superrank,
+                    response_type,
+                    student_id, approval,whencreated
+                    FROM
+                    (SELECT CASE WHEN u_fb_form_response.response_type = 'G' and u_fb_form_response.approval = 1 THEN 1
+                    ELSE 0 END as
+                    superrank, u_fb_form_response.response_type,
+                    u_fb_form_response.student_id, u_fb_form_response.approval,u_fb_form_response.whencreated
+                    FROM
+                    U_fb_form_response
+                    WHERE
+                    U_fb_form_response.U_fb_form_id = 190639
+                    )
+                    ) studentinfo
+                    ON students.id = studentinfo.student_id
+                    AND studentinfo.rank = 1
+                    LEFT JOIN (
+                    SELECT rank() OVER (PARTITION BY student_id order by superrank DESC, whencreated DESC) as rank,
+                    superrank,
+                    response_type,
+                    student_id, approval,whencreated
+                    FROM
+                    (SELECT CASE WHEN u_fb_form_response.response_type = 'G' and u_fb_form_response.approval = 1 THEN 1
+                    ELSE 0 END as
+                    superrank, u_fb_form_response.response_type,
+                    u_fb_form_response.student_id, u_fb_form_response.approval,u_fb_form_response.whencreated
+                    FROM
+                    U_fb_form_response
+                    WHERE
+                    U_fb_form_response.U_fb_form_id = 185677
+                    )
+                    ) sacramental
+                    ON students.id = sacramental.student_id
+                    AND sacramental.rank = 1
+                    LEFT JOIN (
+                    SELECT rank() OVER (PARTITION BY student_id order by superrank DESC, whencreated DESC) as rank,
+                    superrank,
+                    response_type,
+                    student_id, approval,whencreated
+                    FROM
+                    (SELECT CASE WHEN u_fb_form_response.response_type = 'G' and u_fb_form_response.approval = 1 THEN 1
+                    ELSE 0 END as
+                    superrank, u_fb_form_response.response_type,
+                    u_fb_form_response.student_id, u_fb_form_response.approval,u_fb_form_response.whencreated
+                    FROM
+                    U_fb_form_response
+                    WHERE
+                    U_fb_form_response.U_fb_form_id = 190689
+                    )
+                    ) medical
+                    ON students.id = medical.student_id
+                    AND medical.rank = 1
+                    LEFT JOIN (
+                    SELECT rank() OVER (PARTITION BY student_id order by superrank DESC, whencreated DESC) as rank,
+                    superrank,
+                    response_type,
+                    student_id, approval,whencreated
+                    FROM
+                    (SELECT CASE WHEN u_fb_form_response.response_type = 'G' and u_fb_form_response.approval = 1 THEN 1
+                    ELSE 0 END as
+                    superrank, u_fb_form_response.response_type,
+                    u_fb_form_response.student_id, u_fb_form_response.approval,u_fb_form_response.whencreated
+                    FROM
+                    U_fb_form_response
+                    WHERE
+                    U_fb_form_response.U_fb_form_id = 184225
+                    )
+                    ) contacts
+                    ON students.id = contacts.student_id
+                    AND contacts.rank = 1
+                    LEFT JOIN (
+                    SELECT rank() OVER (PARTITION BY student_id order by superrank DESC, whencreated DESC) as rank,
+                    superrank,
+                    response_type,
+                    student_id, approval,whencreated
+                    FROM
+                    (SELECT CASE WHEN u_fb_form_response.response_type = 'G' and u_fb_form_response.approval = 1 THEN 1
+                    ELSE 0 END as
+                    superrank, u_fb_form_response.response_type,
+                    u_fb_form_response.student_id, u_fb_form_response.approval,u_fb_form_response.whencreated
+                    FROM
+                    U_fb_form_response
+                    WHERE
+                    U_fb_form_response.U_fb_form_id = 189686
+                    )
+                    ) homelanguage
+                    ON students.id = homelanguage.student_id
+                    AND homelanguage.rank = 1
+                    LEFT JOIN (
+                    SELECT rank() OVER (PARTITION BY student_id order by superrank DESC, whencreated DESC) as rank,
+                    superrank,
+                    response_type,
+                    student_id, approval,whencreated
+                    FROM
+                    (SELECT CASE WHEN u_fb_form_response.response_type = 'G' and u_fb_form_response.approval = 1 THEN 1
+                    ELSE 0 END as
+                    superrank, u_fb_form_response.response_type,
+                    u_fb_form_response.student_id, u_fb_form_response.approval,u_fb_form_response.whencreated
+                    FROM
+                    U_fb_form_response
+                    WHERE
+                    U_fb_form_response.U_fb_form_id = 190316
+                    )
+                    ) agreements
+                    ON students.id = agreements.student_id
+                    AND agreements.rank = 1
+                    LEFT JOIN (
+                    SELECT rank() OVER (PARTITION BY student_id order by superrank DESC, whencreated DESC) as rank,
+                    superrank,
+                    response_type,
+                    student_id, approval,whencreated
+                    FROM
+                    (SELECT CASE WHEN u_fb_form_response.response_type = 'G' and u_fb_form_response.approval = 1 THEN 1
+                    ELSE 0 END as
+                    superrank, u_fb_form_response.response_type,
+                    u_fb_form_response.student_id, u_fb_form_response.approval,u_fb_form_response.whencreated
+                    FROM
+                    U_fb_form_response
+                    WHERE
+                    U_fb_form_response.U_fb_form_id = 185633
+                    )
+                    ) additional
+                    ON students.id = additional.student_id
+                    AND additional.rank = 1
+                    WHERE
+                    students.enroll_status in (-1,0)
+                    ~[if.is.a.school] AND students.next_school=~(curschoolid) [/if]
+                    )
+                    ,maxsubmission as(
+                    SELECT
+                    to_char(max(u_fb_form_response.whencreated), 'MM/DD/YYYY HH'||CHR(58)||'MI am') lastestsub,
+                    student_id
+                    FROM
+                    U_fb_form_response
+                    WHERE U_fb_form_response.response_type in ('G','S')
+                    GROUP BY student_id
+                    )
+                    SELECT
+                    studentform.dcid,
+                    studentform.student_number,
+                    studentform.lastfirst,
+                    studentform.curgrade,
+                    studentform.nextgrade,
+                    CASE
+                    WHEN studentform.preschool = 'Approved' THEN '#69945d'
+                    WHEN studentform.preschool = 'Pending' THEN '#ffdfba'
+                    WHEN studentform.preschool = 'Rejected' THEN '#ffb3ba'
+                    WHEN studentform.preschool = 'Admin Submitted' THEN '#5689D6'
+                    ELSE ''
+                    END as preschool_color,
+                    studentform.preschool,
+                    CASE
+                    WHEN studentform.studentinfo = 'Approved' THEN '#69945d'
+                    WHEN studentform.studentinfo = 'Pending' THEN '#d4ac0d'
+                    WHEN studentform.studentinfo = 'Rejected' THEN 'red'
+                    WHEN studentform.studentinfo = 'Admin Submitted' THEN '#5689D6'
+                    ELSE ''
+                    END as studentinfo_color,
+                    studentform.studentinfo,
+                    CASE
+                    WHEN studentform.sacramental = 'Approved' THEN '#69945d'
+                    WHEN studentform.sacramental = 'Pending' THEN '#d4ac0d'
+                    WHEN studentform.sacramental = 'Rejected' THEN 'red'
+                    WHEN studentform.sacramental = 'Admin Submitted' THEN '#5689D6'
+                    ELSE ''
+                    END as sacramental_color,
+                    studentform.sacramental,
+                    CASE
+                    WHEN studentform.medical = 'Approved' THEN '#69945d'
+                    WHEN studentform.medical = 'Pending' THEN '#d4ac0d'
+                    WHEN studentform.medical = 'Rejected' THEN 'red'
+                    WHEN studentform.medical = 'Admin Submitted' THEN '#5689D6'
+                    ELSE ''
+                    END as medical_color,
+                    studentform.medical,
+                    CASE
+                    WHEN studentform.contacts = 'Approved' THEN '#69945d'
+                    WHEN studentform.contacts = 'Pending' THEN '#d4ac0d'
+                    WHEN studentform.contacts = 'Rejected' THEN 'red'
+                    WHEN studentform.contacts = 'Admin Submitted' THEN '#5689D6'
+                    ELSE ''
+                    END as contacts_color,
+                    studentform.contacts,
+                    CASE
+                    WHEN studentform.homelanguage = 'Approved' THEN '#69945d'
+                    WHEN studentform.homelanguage = 'Pending' THEN '#d4ac0d'
+                    WHEN studentform.homelanguage = 'Rejected' THEN 'red'
+                    WHEN studentform.homelanguage = 'Admin Submitted' THEN '#5689D6'
+                    ELSE ''
+                    END as homelanguage_color,
+                    studentform.homelanguage,
+                    CASE
+                    WHEN studentform.agreements = 'Approved' THEN '#69945d'
+                    WHEN studentform.agreements = 'Pending' THEN '#d4ac0d'
+                    WHEN studentform.agreements = 'Rejected' THEN 'red'
+                    WHEN studentform.agreements = 'Admin Submitted' THEN '#5689D6'
+                    ELSE ''
+                    END as agreements_color,
+                    studentform.agreements,
+                    CASE
+                    WHEN studentform.additional = 'Approved' THEN '#69945d'
+                    WHEN studentform.additional = 'Pending' THEN '#d4ac0d'
+                    WHEN studentform.additional = 'Rejected' THEN 'red'
+                    WHEN studentform.additional = 'Admin Submitted' THEN '#5689D6'
+                    ELSE ''
+                    END as agreements_color,
+                    studentform.additional,
+                    maxsubmission.lastestsub,
+                    curschool.name curschool,
+                    nextschool.name next_school
+                    FROM
+                    studentform
+                    LEFT JOIN schools curschool
+                    ON studentform.curschool = curschool.school_number
+                    LEFT JOIN schools nextschool
+                    ON studentform.nextschool = nextschool.school_number
+                    LEFT JOIN maxsubmission
+                    ON studentform.studentid = maxsubmission.student_id
+                    WHERE (
+                    studentform.studentinfo = 'Not Submitted'
+                    AND studentform.sacramental = 'Not Submitted'
+                    AND studentform.medical = 'Not Submitted'
+                    AND studentform.contacts = 'Not Submitted'
+                    AND studentform.homelanguage = 'Not Submitted'
+                    AND studentform.agreements = 'Not Submitted'
+                    AND studentform.additional = 'Not Submitted'
+                    )
+
+                    ORDER BY maxsubmission.lastestsub;]
+                    <tr data-StudentID="~(dcid)">
+                        <td><a
+                                href="/admin/students/forms.html?frn=001~(dcid)&sharetype=enroll&tabSel=enroll">~(stunum)</a>
+                        </td>
+                        <td>~(name)</td>
+                        <td>~(curgrade)</td>
+                        <td>~(Sched_NextYearGrade)</td>
+                        <td>~(preschool)</td>
+                        <td>~(studentinfo)</td>
+                        <td>~(sacramental)</td>
+                        <td>~(medical)</td>
+                        <td>~(contacts)</td>
+                        <td>~(homelanguage)</td>
+                        <td>~(agreements)</td>
+                        <td>~(additional)</td>
+                        <td>~(curschoo)</td>
+                        <td>~(nextschoo)</td>
+                    </tr>
+                    [/tlist_sql]
+                </tbody>
+            </table>
+        </div>
+        <!-- end of content of bounding box -->
+        ~[wc:admin_footer_frame_css]
+    </body>
+
+</html><!-- end right frame -->

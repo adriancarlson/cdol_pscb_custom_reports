@@ -74,7 +74,7 @@
         <!-- Start of Results -->
         ~[if#showData.~(gpv.showData;sqlText)=1]
         <div class="box-round">
-            <h2>LPS Student Report</h2>
+            <h2>Health Screening Report</h2>
             <table border="0" cellspacing="0" cellpadding="4" align="center" class="tablesorter grid" id="results">
                 <thead>
                     <tr>
@@ -95,7 +95,8 @@
                     ~[tlist_sql;
                     SELECT dcid, state_studentnumber, student_number, student_first_name, student_last_name, gender,
                     dob, PRETTY_GRADE,
-                    teacher_name, ADDRESS, LISTAGG(Contact, ' | ') WITHIN GROUP(ORDER BY DCID,contactpriorityorder) as
+                    HOMEROOM_TEACHER, ADDRESS, LISTAGG(Contact, ' | ') WITHIN GROUP(ORDER BY DCID,contactpriorityorder)
+                    as
                     Adults_students_live_with, school, grade_level
                     FROM (
                     SELECT
@@ -118,21 +119,22 @@
                     WHEN TO_CHAR(s.grade_level) = 99 then 'Graduated'
                     ELSE TO_CHAR(s.grade_level)
                     END as PRETTY_GRADE,
-                    t.title ||' ' || t.first_name || ' ' || t.last_name as teacher_name,
+
+                    U_STUDENT_ADDITIONAL_INFO.HOMEROOM_TEACHER,
                     s.street || ' ' || s.city || ' ' || s.state || ' ' || s.zip as ADDRESS,
                     CASE WHEN p.firstname IS NULL AND p.lastname IS NULL THEN '-No Name-' ELSE p.firstname||'
                     '||p.lastname ||' - '|| cs.code
                     END as Contact,
                     sca.contactpriorityorder contactpriorityorder,
                     sch.name as school
-                    from cc
-                    inner join STUDENTS s
-                    on cc.STUDENTID = s.ID
+                    FROM STUDENTS s
+
+                    LEFT JOIN U_STUDENT_ADDITIONAL_INFO
+                    ON s.dcid = U_STUDENT_ADDITIONAL_INFO.studentsdcid
                     ~[if#ss.~(gpv.ss;sqlText)=cur] INNER JOIN ~[temp.table.current.selection:students] temp ON (s.dcid =
                     temp.dcid)
                     [/if#ss]
-                    inner join TEACHERS t
-                    on cc.TEACHERID = t.ID
+
                     JOIN schools sch ON (s.schoolid = sch.school_number)
                     LEFT JOIN studentcontactassoc sca ON (s.dcid = sca.studentdcid)
                     LEFT JOIN studentcontactdetail scd ON (sca.studentcontactassocid = scd.studentcontactassocid)
@@ -141,8 +143,7 @@
                     LEFT JOIN guardianpersonassoc gp ON (p.id = gp.personid)
                     LEFT JOIN guardianstudent gs ON (s.dcid = gs.studentsdcid AND gp.guardianid = gs.guardianid)
                     WHERE s.enroll_status = 0
-                    and cc.COURSE_NUMBER IN ('541001','541K01')
-                    and cc.TERMID BETWEEN ~(curyearid)00 AND ~(curyearid)99
+
                     AND scd.liveswithflg = 1
                     AND cs.code NOT IN ('Brother','Friend','Neighbor','Other','Sister','Resource Teacher')
                     ~[if.is.a.school] AND s.schoolid = ~(curschoolid) [/if.is.a.school]
@@ -150,7 +151,7 @@
                     ORDER BY s.lastfirst, sca.contactpriorityorder
                     ) GROUP BY dcid, state_studentnumber, student_number, student_first_name, student_last_name, gender,
                     dob, PRETTY_GRADE,
-                    teacher_name, ADDRESS, school, grade_level
+                    HOMEROOM_TEACHER, ADDRESS, school, grade_level
                     ORDER BY grade_level DESC, student_last_name, student_first_name;]
                     <tr data-StudentID="~(dcid)">
                         <td>~(state)</td>
