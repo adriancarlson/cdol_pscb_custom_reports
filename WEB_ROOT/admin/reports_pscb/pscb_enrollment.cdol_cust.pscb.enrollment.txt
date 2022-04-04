@@ -10,7 +10,7 @@
 		<td>List students who have not even started the enrollment process</td>
 	</tr>
 	<tr>
-		<td><a href="/admin/reports_pscb/enrollment/cdol_psee_started_not_started.html">Students Started but Not Finished</a></td>
+		<td><a href="/admin/reports_pscb/enrollment/cdol_psee_started_not_finished.html">Students Started but Not Finished</a></td>
 		<td>List students who have started the enrollment process but not finished</td>
 	</tr>
 	<tr>
