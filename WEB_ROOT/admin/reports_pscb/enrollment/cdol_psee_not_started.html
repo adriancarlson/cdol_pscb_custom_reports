@@ -85,9 +85,10 @@
                                                 WHEN preschool.approval = 1 THEN 'Approved'
                                                 WHEN preschool.approval = 2 THEN 'Rejected'
                                                 WHEN preschool.response_type = 'A' THEN 'Approved'
-                                                END
-                                            ELSE 'N/A'
-                                        END AS preschool,
+                                                ELSE 'Not Submitted'
+                                            END
+                                        ELSE 'N/A'
+                                    END AS preschool,
                                     CASE
                                         WHEN studentinfo.approval = 0 THEN 'Pending'
                                         WHEN studentinfo.approval = 1 THEN 'Approved'
