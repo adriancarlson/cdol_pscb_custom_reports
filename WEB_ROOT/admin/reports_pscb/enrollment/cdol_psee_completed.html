@@ -474,16 +474,20 @@
                                         ON student_form.next_school = school_from_total.school_id
                                 )
                                 , student_percent_done AS (
-                                    SELECT 
-                                        student_form.studentid,
-                                        ROUND((((student_form_total.student_form_total - (count_not_submitted.count_not_submitted + count_rejected.count_rejected)) / student_form_total.student_form_total)*100),0) AS student_percent_done
+                                    SELECT
+                                    student_form.studentid,
+                                    ROUND((((student_form_total.student_form_total - (count_not_submitted.count_not_submitted +
+                                    count_rejected.count_rejected + count_pending.count_pending)) / student_form_total.student_form_total)*100),0) AS
+                                    student_percent_done
                                     FROM student_form
                                     LEFT JOIN student_form_total
-                                        ON student_form.studentid = student_form_total.studentid
+                                    ON student_form.studentid = student_form_total.studentid
                                     LEFT JOIN count_not_submitted
-                                        ON student_form.studentid = count_not_submitted.studentid
+                                    ON student_form.studentid = count_not_submitted.studentid
+                                    LEFT JOIN count_pending
+                                    ON student_form.studentid = count_pending.studentid
                                     LEFT JOIN count_rejected
-                                        ON student_form.studentid = count_rejected.studentid
+                                    ON student_form.studentid = count_rejected.studentid
                                 )
                                 SELECT
                                     student_form.dcid,
