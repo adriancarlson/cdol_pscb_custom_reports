@@ -29,21 +29,21 @@
             <table border="0" cellspacing="0" cellpadding="4" align="center" class="tablesorter grid" id="results">
                 <thead>
                     <tr>
-                        <th class="right">Stu #</th>
-                        <th class="left">Stu Name</th>
-                        <th class="right filter-select">Cur Grade</th>
-                        <th class="right filter-select">Next Grade</th>
-                        <th class="right">Percent Complete</th>
-                        <th class="right">A1. Preschool</th>
-                        <th class="right">A. Student Info</th>
-                        <th class="right">B. Sacraments</th>
-                        <th class="right">C. Medical</th>
-                        <th class="right">D. Contacts</th>
-                        <th class="right">E. Home Language</th>
-                        <th class="right">F. Agreements</th>
-                        <th class="right">G. Additional Docs</th>
-                        <th class="right">Cur School</th>
-                        <th class="right">Next School</th>
+                        <th>Stu #</th>
+                        <th>Stu Name</th>
+                        <th class="filter-select">Cur Grade</th>
+                        <th class="filter-select">Next Grade</th>
+                        <th>Percent Complete</th>
+                        <th>A1. Preschool</th>
+                        <th>A. Student Info</th>
+                        <th>B. Sacraments</th>
+                        <th>C. Medical</th>
+                        <th>D. Contacts</th>
+                        <th>E. Home Language</th>
+                        <th>F. Agreements</th>
+                        <th>G. Additional Docs</th>
+                        <th>Cur School</th>
+                        <th>Next School</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -527,21 +527,21 @@
                                 ORDER BY student_form.lastfirst            
                     ;]
                     <tr data-StudentID="~(dcid)">
-                        <td><a href="/admin/students/forms.html?frn=001~(dcid)&sharetype=enroll&tabSel=enroll" target="_blank">~(stunum)</a></td>
+                        <td class="right"><a href="/admin/students/forms.html?frn=001~(dcid)&sharetype=enroll&tabSel=enroll" target="_blank">~(stunum)</a></td>
                         <td class="nowrap">~(name)</td>
-                        <td>~(curgrade)</td>
-                        <td>~(Sched_NextYearGrade)</td>
-                        <td>~(percent_complete)</td>
-                        <td>~(preschool)</td>
-                        <td>~(studentinfo)</td>
-                        <td>~(sacramental)</td>
-                        <td>~(medical)</td>
-                        <td>~(contacts)</td>
-                        <td>~(homelanguage)</td>
-                        <td>~(agreements)</td>
-                        <td>~(additional)</td>
-                        <td class="nowrap">~(curschool)</td>
-                        <td class="nowrap">~(nextschool)</td>
+                        <td class="right">~(curgrade)</td>
+                        <td class="right">~(Sched_NextYearGrade)</td>
+                        <td class="right">~(percent_complete)</td>
+                        <td class="right">~(preschool)</td>
+                        <td class="right">~(studentinfo)</td>
+                        <td class="right">~(sacramental)</td>
+                        <td class="right">~(medical)</td>
+                        <td class="right">~(contacts)</td>
+                        <td class="right">~(homelanguage)</td>
+                        <td class="right">~(agreements)</td>
+                        <td class="right">~(additional)</td>
+                        <td class="right nowrap">~(curschool)</td>
+                        <td class="right nowrap">~(nextschool)</td>
                     </tr>
                     [/tlist_sql]
                 </tbody>
