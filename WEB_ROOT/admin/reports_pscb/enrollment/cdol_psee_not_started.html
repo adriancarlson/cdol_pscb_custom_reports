@@ -29,21 +29,21 @@
             <table border="0" cellspacing="0" cellpadding="4" align="center" class="tablesorter grid" id="results">
                 <thead>
                     <tr>
-                        <th class="left">Stu #</th>
+                        <th class="right">Stu #</th>
                         <th class="left">Stu Name</th>
-                        <th class="left filter-select">Cur Grade</th>
-                        <th class="left filter-select">Next Grade</th>
-                        <th class="left">Percent Complete</th>
-                        <th class="left">A1. Preschool</th>
-                        <th class="left">A. Student Info</th>
-                        <th class="left">B. Sacraments</th>
-                        <th class="left">C. Medical</th>
-                        <th class="left">D. Contacts</th>
-                        <th class="left">E. Home Language</th>
-                        <th class="left">F. Agreements</th>
-                        <th class="left">G. Additional Docs</th>
-                        <th class="left">Cur School</th>
-                        <th class="left">Next School</th>
+                        <th class="right filter-select">Cur Grade</th>
+                        <th class="right filter-select">Next Grade</th>
+                        <th class="right">Percent Complete</th>
+                        <th class="right">A1. Preschool</th>
+                        <th class="right">A. Student Info</th>
+                        <th class="right">B. Sacraments</th>
+                        <th class="right">C. Medical</th>
+                        <th class="right">D. Contacts</th>
+                        <th class="right">E. Home Language</th>
+                        <th class="right">F. Agreements</th>
+                        <th class="right">G. Additional Docs</th>
+                        <th class="right">Cur School</th>
+                        <th class="right">Next School</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -522,16 +522,9 @@
                                     ON student_form.studentid = student_form_total.studentid
                                 LEFT JOIN student_percent_done
                                     ON student_form.studentid = student_percent_done.studentid
-                                WHERE (
-                                    student_form.studentinfo = 'Not Submitted'
-                                    AND student_form.sacramental = 'Not Submitted'
-                                    AND student_form.medical = 'Not Submitted'
-                                    AND student_form.contacts = 'Not Submitted'
-                                    AND student_form.homelanguage = 'Not Submitted'
-                                    AND student_form.agreements = 'Not Submitted'
-                                    AND student_form.additional = 'Not Submitted'
-                                )
-                                ORDER BY max_submission.lastest_submission            
+                                WHERE 
+                                    student_percent_done.student_percent_done = 0
+                                ORDER BY student_form.lastfirst            
                     ;]
                     <tr data-StudentID="~(dcid)">
                         <td><a href="/admin/students/forms.html?frn=001~(dcid)&sharetype=enroll&tabSel=enroll" target="_blank">~(stunum)</a></td>
