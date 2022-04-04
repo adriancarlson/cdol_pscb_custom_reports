@@ -14,6 +14,10 @@
 		<td>List students who have started the enrollment process but not finished</td>
 	</tr>
 	<tr>
+		<td><a href="/admin/reports_pscb/enrollment/cdol_psee_pending.html">Students with Pending Enrollments</a></td>
+		<td>List students with pending enrollments (same as pending dashboard)</td>
+	</tr>
+	<tr>
 		<td><a href="/admin/reports_pscb/enrollment/cdol_psee_completed.html">Students Completed and Approved</a></td>
 		<td>List students who have completed the enrollment process and have been approved by the administrator</td>
 	</tr>
