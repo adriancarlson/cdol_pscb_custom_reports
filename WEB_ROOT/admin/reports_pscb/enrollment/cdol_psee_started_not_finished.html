@@ -3,7 +3,7 @@
     <!-- non framed -->
 
     <head>
-        <title>Students Not Started</title>
+        <title>Students Started Not Finished</title>
         ~[wc:commonscripts]
         <link href="/images/css/screen.css" rel="stylesheet" media="screen">
         <link href="/images/css/print.css" rel="stylesheet" media="print">
@@ -17,15 +17,15 @@
         ~[wc:admin_header_frame_css]
         <!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a> &gt; <a
             href="/admin/reports_pscb/pscb_home.html" target="_top">PSCB Custom Reports</a> &gt; <a
-            href="/admin/reports_pscb/pscb_enrollment.html">Enrollment</a> &gt; Students Not Started
+            href="/admin/reports_pscb/pscb_enrollment.html">Enrollment</a> &gt; Students Started Not Finished
         <!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
         <!-- start of Options -->
-        <h1>Students Not Started</h1>
+        <h1>Students Started Not Finished</h1>
 
         <!-- Start of Results -->
 
         <div class="box-round">
-            <h2>Students Not Started</h2>
+            <h2>Students Started Not Finished</h2>
             <table border="0" cellspacing="0" cellpadding="4" align="center" class="tablesorter grid" id="results">
                 <thead>
                     <tr>
@@ -310,17 +310,17 @@
                     ON studentform.nextschool = nextschool.school_number
                     WHERE (
                     studentform.studentinfo = 'Not Submitted'
-                    AND studentform.sacramental = 'Not Submitted'
-                    AND studentform.medical = 'Not Submitted'
-                    AND studentform.contacts = 'Not Submitted'
-                    AND studentform.homelanguage = 'Not Submitted'
-                    AND studentform.agreements = 'Not Submitted'
-                    AND studentform.additional = 'Not Submitted'
+                    OR studentform.sacramental = 'Not Submitted'
+                    OR studentform.medical = 'Not Submitted'
+                    OR studentform.contacts = 'Not Submitted'
+                    OR studentform.homelanguage = 'Not Submitted'
+                    OR studentform.agreements = 'Not Submitted'
+                    OR studentform.additional = 'Not Submitted'
                     )
                     ORDER BY studentform.Sched_NextYearGrade, studentform.lastfirst;]
                     <tr data-StudentID="~(dcid)">
-                        <td><a
-                                href="/admin/students/forms.html?frn=001~(dcid)&sharetype=enroll&tabSel=enroll" target="_blank">~(stunum)</a>
+                        <td><a href="/admin/students/forms.html?frn=001~(dcid)&sharetype=enroll&tabSel=enroll"
+                                target="_blank">~(stunum)</a>
                         </td>
                         <td class="nowrap">~(name)</td>
                         <td>~(curgrade)</td>

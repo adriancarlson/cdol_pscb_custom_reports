@@ -1,7 +1,7 @@
 <table id="bottomTable" border="0" cellspacing="0" cellpadding="4" class="table grid">
 	<thead>
 		<tr>
-			<th class="left" width="280px" style="height:30px">CDOL - PowerSchool Enrollment Express Reports</th>
+			<th class="left" width="350px" style="height:30px">CDOL - PowerSchool Enrollment Express Reports</th>
 			<th class="left" style="height:30px">Description</th>
 		</tr>
 	</thead>
@@ -10,11 +10,11 @@
 		<td>List students who have not even started the enrollment process</td>
 	</tr>
 	<tr>
-		<td><a href="/admin/reports_pscb/enrollment/ages.html">Students Started but Not finished</a></td>
+		<td><a href="/admin/reports_pscb/enrollment/cdol_psee_started_not_started.html">Students Started but Not finished</a></td>
 		<td>List students who have started the enrollment process but not finished</td>
 	</tr>
 	<tr>
-		<td><a href="/admin/reports_pscb/enrollment/birthdaylist.html">Students Completed and Approved</a></td>
+		<td><a href="/admin/reports_pscb/enrollment/cdol_psee_completed.html">Students Completed and Approved</a></td>
 		<td>List students who have completed the enrollment process and have been approved by the administrator</td>
 	</tr>
 	
