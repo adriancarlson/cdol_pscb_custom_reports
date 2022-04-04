@@ -453,7 +453,7 @@
                                         ON u_fb_form_sharing.form_id = u_fb_form.id
                                     WHERE 
                                         u_fb_form_sharing.share_type = 'school'
-                                        ~[if.is.a.school] AND students.next_school=~(curschoolid) [/if]
+                                        ~[if.is.a.school] AND u_fb_form_sharing.share_value=~(curschoolid) [/if]
                                     GROUP BY  
                                         u_fb_form_sharing.share_value
                                     ORDER BY 
