@@ -15,7 +15,11 @@
 	</tr>
 	<tr>
 		<td><a href="/admin/reports_pscb/enrollment/cdol_psee_pending.html">Students with Pending Enrollments</a></td>
-		<td>List students with pending enrollments (same as pending dashboard)</td>
+		<td>List students with pending enrollments forms (same as pending dashboard)</td>
+	</tr>
+	<tr>
+		<td><a href="/admin/reports_pscb/enrollment/cdol_psee_rejected.html">Students with Form Rejections</a></td>
+		<td>List students with rejected enrollment forms (same as pending dashboard)</td>
 	</tr>
 	<tr>
 		<td><a href="/admin/reports_pscb/enrollment/cdol_psee_completed.html">Students Completed and Approved</a></td>
