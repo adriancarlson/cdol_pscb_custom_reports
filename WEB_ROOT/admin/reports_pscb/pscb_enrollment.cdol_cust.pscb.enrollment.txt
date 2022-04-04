@@ -1,3 +1,24 @@
+<script>
+	~[tlist_sql;
+	SELECT
+            CASE 
+                WHEN LISTAGG(u_fb_form_sharing.form_id, ',') WITHIN GROUP (ORDER BY u_fb_form_sharing.share_value) LIKE '%184243%' THEN 1
+                ELSE 0 
+            END AS has_preschool_form
+        FROM 
+            u_fb_form_sharing  
+        LEFT JOIN u_fb_form 
+            ON u_fb_form_sharing.form_id = u_fb_form.id
+        WHERE 
+            u_fb_form_sharing.share_type = 'school'
+           ~[if.is.a.school] AND u_fb_form_sharing.share_value=~(curschoolid) [/if]
+	;]
+			let has_preschool_form = ~(has_preschool_form);
+		[/tlist_sql]
+
+		console.log('has_preschool_form', has_preschool_form);
+</script>
+
 <table id="bottomTable" border="0" cellspacing="0" cellpadding="4" class="table grid">
 	<thead>
 		<tr>
@@ -19,19 +40,27 @@
 	</tr>
 	<tr>
 		<td><a href="/admin/reports_pscb/enrollment/cdol_psee_rejected.html">Students with Form Rejections</a></td>
-		<td>List students with rejected enrollment forms (same as pending dashboard)</td>
+		<td>List students with rejected enrollment forms</td>
 	</tr>
 	<tr>
 		<td><a href="/admin/reports_pscb/enrollment/cdol_psee_completed.html">Students Completed and Approved</a></td>
 		<td>List students who have completed the enrollment process and have been approved by the administrator</td>
 	</tr>
+	<tr class="pk-report" hidden="true">
+		<td><a href="/admin/reports_pscb/enrollment/cdol_psee_completed.html">Preschool Enrollments</a></td>
+		<td>List Preschool Enrollments</td>
+	</tr>
 	
-
 </table>
+
 
 <script>
 	/*checks to make sure page is loaded */
 	$j(document).ready(function () {
 		$j('.box-round').append($j('#bottomTable'));
 			});
+		if(has_preschool_form == 1){
+		    $j('.pk-report').removeAttr('hidden');
+		}
+		
 </script>
