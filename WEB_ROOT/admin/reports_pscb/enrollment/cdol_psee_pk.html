@@ -17,41 +17,11 @@
         ~[wc:admin_header_frame_css]
         <!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a> &gt; <a
             href="/admin/reports_pscb/pscb_home.html" target="_top">PSCB Custom Reports</a> &gt; <a
-            href="/admin/reports_pscb/pscb_studentdataverify.html" target="_top">Student </a> &gt; Preschool Enrollments
+            href="/admin/reports_pscb/pscb_enrollment.html">Enrollment</a> &gt; Preschool Enrollments
         <!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
         <!-- start of Options -->
         <h1>Preschool Enrollments</h1>
-        <form name="searchform" action="#" method="POST">
-            <div class="box-round" style="overflow: hidden;">
-                <h2>Report Filters</h2>
-                <table border="0" cellspacing="0" cellpadding="0" class="linkDescList">
-                    <thead>
-                        <tr>
-                            <th style="white-space: nowrap;">Preschool Form Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>
-                                <select name="status" id="status">
-                                    <option value="all" ~[if.~[gpv:status]=all]selected[/if]>All Statues</option>
-                                    <option value="approved" ~[if.~[gpv:status]=approved]selected[/if]>Approved</option>
-                                    <option value="pending" ~[if.~[gpv:status]=pending]selected[/if]>Pending</option>
-                                    <option value="rejected" ~[if.~[gpv:status]=rejected]selected[/if]>Rejected</option>
-                                </select>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                <div class="button-row" style="float: left;">
-                    <input type="hidden" name="showData" value="1">
-                    <span class="red">&nbsp;&nbsp;Select parameters and click submit</span>
-                    <input type="hidden" name="ac" value="prim">~[submitbutton]
-                </div>
-            </div>
-        </form>
         <!-- Start of Results -->
-        ~[if#showData.~(gpv.showData;sqlText)=1]
         <div class="box-round">
             <h2>Preschool Enrollments</h2>
             <table border="0" cellspacing="0" cellpadding="4" align="center" class="tablesorter grid" id="results">
@@ -62,9 +32,8 @@
                         <th>Stu Name</th>
                         <th class="filter-select">Cur Grade</th>
                         <th class="filter-select">Next Grade</th>
-                        <th>PK Program</th>
-                        <th>Program Value</th>
-                        <th>Form Status</th>
+                        <th class="filter-select">PK Program</th>
+                        <th class="filter-select">Form Status</th>
                         <th>Last Submission</th>
                         <th>Cur School</th>
                         <th>Next School</th>
@@ -169,9 +138,7 @@
                     student_form.lastfirst,
                     student_form.current_grade,
                     student_form.next_grade,
-                    SUBSTR(u_fb_form_element_choice.label, 1 , INSTR(u_fb_form_element_choice.label,'|')-1) as
-                    pk_program,
-                    u_student_additional_info.pk_program,
+                    u_fb_form_element_choice.label as pk_program,
                     CASE
                     WHEN student_form.preschool = 'Approved' THEN '#198754'
                     WHEN student_form.preschool = 'Pending' THEN '#ffc107'
@@ -196,19 +163,18 @@
                     ON student_form.studentid = max_submission.student_id
                     LEFT JOIN u_fb_form_response
                     ON student_form.studentid = u_fb_form_response.student_id
+                    AND u_fb_form_response.u_fb_form_id = 184243
                     LEFT JOIN u_fb_form_response_detail
                     ON u_fb_form_response.id = u_fb_form_response_detail.u_fb_form_response_id
+                    AND u_fb_form_response_detail.response_value = u_student_additional_info.pk_program
                     LEFT JOIN u_fb_form_response_element
                     ON u_fb_form_response_detail.u_fb_form_response_element_id = u_fb_form_response_element.id
                     LEFT JOIN u_fb_form_element_choice
                     ON u_fb_form_response_element.U_FB_FORM_ELEMENT_ID = u_fb_form_element_choice.u_fb_form_element_id
                     AND u_fb_form_response_detail.response_value = u_fb_form_element_choice.value
                     WHERE u_fb_form_response_detail.u_fb_form_response_id = student_form.preschool_form_id
-                    AND (u_fb_form_response_detail.response_value = u_student_additional_info.pk_program) OR
-                    u_student_additional_info.pk_program IS NULL
-                    ~[if#approved.~(gpv.status;sqlText)=approved]AND student_form.preschool = 'Approved'[/if#approved]
-                    ~[if#pending.~(gpv.status;sqlText)=pending]AND student_form.preschool = 'Pending'[/if#pending]
-                    ~[if#rejected.~(gpv.status;sqlText)=rejected]AND student_form.preschool = 'Rejected'[/if#rejected]
+                    AND (u_fb_form_response_detail.response_value = u_student_additional_info.pk_program)
+                    OR u_student_additional_info.pk_program IS NULL
                     ORDER BY student_form.lastfirst;
                     ;]
                     <tr data-StudentID="~(dcid)">
@@ -219,7 +185,6 @@
                         <td class="center">~(curgrade)</td>
                         <td class="center">~(Sched_NextYearGrade)</td>
                         <td class="center">~(pk_program)</td>
-                        <td class="center">~(program_val)</td>
                         <td class="center" style="color:~(pkcolor)">~(status)</td>
                         <td class="right">~(lastest_submission)</td>
                         <td class="right nowrap">~(curschool)</td>
@@ -229,7 +194,6 @@
                 </tbody>
             </table>
         </div>
-        [/if#showData]
         <!-- end of content of bounding box -->
         ~[wc:admin_footer_frame_css]
     </body>
