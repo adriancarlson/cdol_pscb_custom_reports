@@ -47,7 +47,7 @@
 		<td>List students who have completed the enrollment process and have been approved by the administrator</td>
 	</tr>
 	<tr class="pk-report" hidden="true">
-		<td><a href="/admin/reports_pscb/enrollment/cdol_psee_pk.html"></a></td>
+		<td><a href="/admin/reports_pscb/enrollment/cdol_psee_pk.html">Preschool Enrollments</a></td>
 		<td>List Preschool Enrollments</td>
 	</tr>
 	

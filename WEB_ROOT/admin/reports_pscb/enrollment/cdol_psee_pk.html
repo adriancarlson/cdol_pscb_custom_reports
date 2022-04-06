@@ -64,6 +64,7 @@
                         <th class="filter-select">Cur Grade</th>
                         <th class="filter-select">Next Grade</th>
                         <th>PK Program</th>
+                        <th>Program Value</th>
                         <th>Form Status</th>
                         <th>Last Submission</th>
                         <th>Cur School</th>
@@ -169,7 +170,9 @@
                     student_form.lastfirst,
                     student_form.current_grade,
                     student_form.next_grade,
-                    REGEXP_SUBSTR(u_fb_form_element_choice.label, '[^|]+') as pk_program,
+                    SUBSTR(u_fb_form_element_choice.label, 1 , INSTR(u_fb_form_element_choice.label,'|')-1) as
+                    pk_program,
+                    u_student_additional_info.pk_program
                     CASE
                     WHEN student_form.preschool = 'Approved' THEN '#198754'
                     WHEN student_form.preschool = 'Pending' THEN '#ffc107'
@@ -214,6 +217,7 @@
                         <td class="center">~(curgrade)</td>
                         <td class="center">~(Sched_NextYearGrade)</td>
                         <td class="center">~(pk_program)</td>
+                        <td class="center">~(program_val)</td>
                         <td class="center" style="color:~(pkcolor)">~(status)</td>
                         <td class="right">~(lastest_submission)</td>
                         <td class="right nowrap">~(curschool)</td>
