@@ -27,8 +27,7 @@
                 <table border="0" cellspacing="0" cellpadding="0" class="linkDescList">
                     <thead>
                         <tr>
-                            <th style="white-space: nowrap;" width="180px">Student Selection</th>
-                            <th style="white-space: nowrap;">Grade Selection</th>
+                            <th style="white-space: nowrap;">Preschool Form Status</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -207,6 +206,9 @@
                     WHERE u_fb_form_response_detail.u_fb_form_response_id = student_form.preschool_form_id
                     AND (u_fb_form_response_detail.response_value = u_student_additional_info.pk_program) OR
                     u_student_additional_info.pk_program IS NULL
+                    ~[if#approved.~(gpv.status;sqlText)=approved]AND student_form.preschool = 'Approved'[/if#approved]
+                    ~[if#pending.~(gpv.status;sqlText)=pending]AND student_form.preschool = 'Pending'[/if#pending]
+                    ~[if#rejected.~(gpv.status;sqlText)=rejected]AND student_form.preschool = 'Rejected'[/if#rejected]
                     ORDER BY student_form.lastfirst;
                     ;]
                     <tr data-StudentID="~(dcid)">
