@@ -172,7 +172,7 @@
                     student_form.next_grade,
                     SUBSTR(u_fb_form_element_choice.label, 1 , INSTR(u_fb_form_element_choice.label,'|')-1) as
                     pk_program,
-                    u_student_additional_info.pk_program
+                    u_student_additional_info.pk_program,
                     CASE
                     WHEN student_form.preschool = 'Approved' THEN '#198754'
                     WHEN student_form.preschool = 'Pending' THEN '#ffc107'
