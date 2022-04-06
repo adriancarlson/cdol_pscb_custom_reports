@@ -33,6 +33,7 @@
                         <th class="filter-select">Cur Grade</th>
                         <th class="filter-select">Next Grade</th>
                         <th class="filter-select">PK Program</th>
+                        <th class="filter-select">Program Value</th>
                         <th class="filter-select">Form Status</th>
                         <th>Last Submission</th>
                         <th>Cur School</th>
@@ -72,7 +73,6 @@
                     END AS next_grade,
                     students.schoolid AS current_school,
                     students.next_school AS next_school,
-
                     CASE
                     WHEN students.Sched_NextYearGrade IN (-2,-1) THEN
                     CASE
@@ -139,6 +139,7 @@
                     student_form.current_grade,
                     student_form.next_grade,
                     u_fb_form_element_choice.label as pk_program,
+                    u_student_additional_info.pk_program,
                     CASE
                     WHEN student_form.preschool = 'Approved' THEN '#198754'
                     WHEN student_form.preschool = 'Pending' THEN '#ffc107'
@@ -185,6 +186,7 @@
                         <td class="center">~(curgrade)</td>
                         <td class="center">~(Sched_NextYearGrade)</td>
                         <td class="center">~(pk_program)</td>
+                        <td class="center">~(pk_program_value)</td>
                         <td class="center" style="color:~(pkcolor)">~(status)</td>
                         <td class="right">~(lastest_submission)</td>
                         <td class="right nowrap">~(curschool)</td>
@@ -193,6 +195,7 @@
                     [/tlist_sql]
                 </tbody>
             </table>
+            <div class="feedback-info">* Note: if the <strong>PK Program</strong> column is blank, but the student's <strong>Form Status</strong> is approved,  this means the <strong>PK Program</strong> options on the <strong>A1. Preschool </strong> enrollment form were changed after the parent submitted the form. Please refer to the <strong>Progam Value</strong> column instead, which will be accurate.</div>
         </div>
         <!-- end of content of bounding box -->
         ~[wc:admin_footer_frame_css]
