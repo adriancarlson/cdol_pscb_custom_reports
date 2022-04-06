@@ -8,7 +8,10 @@
 		<td><a href="/admin/reports_pscb/contacts/CDOL_Mother_Father_Email.html">Students - Mother/Father Email</a></td>
 		<td>List Student with Mother and Father Email</td>
 	</tr>
-
+	<tr id="motherFatherStudentEmail">
+		<td><a href="/admin/reports_pscb/contacts/CDOL_Mother_Father_Student_Email.html">Students - Mother/Father/Student Email</a></td>
+		<td>List Student with their email and Mother and Father Email</td>
+	</tr>
 	<tr id="motherFatherEmailPhone">
 		<td><a href="/admin/reports_pscb/contacts/CDOL_Mother_Father_Email_phone.html">Students - Mother/Father Email &
 				Phone</a></td>
@@ -95,9 +98,12 @@
 
 		var motherFatherEmail = $j('#motherFatherEmail').closest('tr');
 		$j("td:contains('Students - Contacts List')").closest('tr').after(motherFatherEmail);
+		
+		var motherFatherStudentEmail = $j('#motherFatherStudentEmail').closest('tr');
+		$j(motherFatherEmail).closest('tr').after(motherFatherStudentEmail);
 
 		var motherFatherEmailPhone = $j('#motherFatherEmailPhone').closest('tr');
-		$j(motherFatherEmail).closest('tr').after(motherFatherEmailPhone);
+		$j(motherFatherStudentEmail).closest('tr').after(motherFatherEmailPhone);
 
 		var receiveMailEmail = $j('#receiveMailEmail').closest('tr');
 		$j(motherFatherEmail).after(receiveMailEmail);

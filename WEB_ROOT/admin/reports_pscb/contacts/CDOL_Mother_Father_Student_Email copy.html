@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+    <!-- non framed -->
+
+    <head>
+        <title>Students - Mother/Father/Student Email</title>
+        ~[wc:commonscripts]
+        <link href="/images/css/screen.css" rel="stylesheet" media="screen">
+        <link href="/images/css/print.css" rel="stylesheet" media="print">
+        ~[wc:pscb_init]
+        <script>
+            pscbToolButtons = { "copyData": "Yes", "csvFile": "Yes", "pdfFile": "No", "curSel": "Yes" };
+        </script>
+    </head>
+
+    <body>
+        ~[wc:admin_header_frame_css]
+        <!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a> &gt; <a
+            href="/admin/reports_pscb/pscb_home.html" target="_top">PSCB Custom Reports</a> &gt; <a
+            href="/admin/reports_pscb/pscb_contacts.html" target="_top">Contacts</a> &gt; Mother/Father/Student Email
+        <!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
+        <!-- start of Options -->
+        <h1>Mother/Father/Student Email</h1>
+        <form name="searchform" action="#" method="POST">
+            <div class="box-round" style="overflow: hidden;">
+                <h2>Report Filters</h2>
+                <table border="0" cellspacing="0" cellpadding="0" class="linkDescList">
+                    <thead>
+                        <tr>
+                            <th style="white-space: nowrap;">Student Selection</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <select name="ss" id="ss">
+                                    <option value='' ~[if.~[gpv:ss]=]selected[/if]>All Students
+                                    <option value="cur" ~[if.~[gpv:ss]=cur]selected[/if]>Current Selection
+                                        (~[x:studsinset])
+                                </select>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="button-row" style="float: left;">
+                    <input type="hidden" name="showData" value="1">
+                    <span class="red">&nbsp;&nbsp;Select parameters and click submit</span>
+                    <input type="hidden" name="ac" value="prim">~[submitbutton]
+                </div>
+            </div>
+        </form>
+        <!-- Start of Results -->
+        ~[if#showData.~(gpv.showData;sqlText)=1]
+        <div class="box-round">
+            <h2>Students - Contacts Address List</h2>
+            <table border="0" cellspacing="0" cellpadding="4" align="center" class="tablesorter grid" id="results">
+                <thead>
+                    <tr>
+                        <th class="left">Std Num</th>
+                        <th class="left">Student Name</th>
+                        <th class="left filter-select">Grade Level</th>
+                        <th class="left ">Student Email</th>
+                        <th class="left">Mother</th>
+                        <th class="left">Mother Email</th>
+                        <th class="left">Father</th>
+                        <th class="left">Father Email</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ~[tlist_sql;
+                    WITH pcontact AS (
+                    SELECT DISTINCT
+                    s.dcid,
+                    sch.abbreviation school,
+                    s.student_number,
+                    s.lastfirst,
+                    s.grade_level,
+                    s.home_room,
+                    p.id contactid,
+                    sca.contactpriorityorder AS pcontactorder,
+                    CASE
+                    WHEN p.firstname IS NULL
+                    AND p.lastname IS NULL THEN '-No Name-'
+                    ELSE p.firstname || ' ' || p.lastname
+                    END contactname,
+                    sca.contactpriorityorder,
+                    cs.code relationship,
+                    decode(
+                    p.isactive, 1, 'Active', 'Inactive'
+                    ) isactive,
+                    (
+                    SELECT
+                    LISTAGG(nvl(
+                    ppa.phonenumberasentered, ''
+                    ) || ' ' || nvl(
+                    cs.code, ''
+                    ), ' ') WITHIN GROUP(
+                    ORDER BY
+                    po.phoneorder
+                    )
+                    FROM
+                    (
+                    SELECT
+                    level AS phoneorder
+                    FROM
+                    dual
+                    CONNECT BY
+                    level <= 3 ) po LEFT JOIN personphonenumberassoc ppa ON ( po.phoneorder=ppa.phonenumberpriorityorder
+                        AND ppa.personid=p.id ) LEFT JOIN codeset cs ON ( ppa.phonetypecodesetid=cs.codesetid ) ) AS
+                        contact_phone_numbers, ( SELECT LISTAGG(emailaddress, ' | ' ) WITHIN GROUP( ORDER BY
+                        emailaddresspriorityorder ) email_addresses FROM personemailaddressassoc pea INNER JOIN
+                        emailaddress ea ON ( pea.emailaddressid=ea.emailaddressid ) WHERE pea.personid=p.id GROUP BY
+                        personid ) AS email_addresses FROM students s JOIN schools sch ON ( s.schoolid=sch.school_number
+                        ) LEFT JOIN studentcontactassoc sca ON ( s.dcid=sca.studentdcid ) LEFT JOIN studentcontactdetail
+                        scd ON ( sca.studentcontactassocid=scd.studentcontactassocid ) LEFT JOIN person p ON (
+                        sca.personid=p.id ) LEFT JOIN codeset cs ON ( cs.codesetid=scd.relationshiptypecodesetid ) LEFT
+                        JOIN guardianpersonassoc gp ON ( p.id=gp.personid ) LEFT JOIN guardianstudent gs ON (
+                        s.dcid=gs.studentsdcid AND gp.guardianid=gs.guardianid ) WHERE s.enroll_status=0 ORDER BY
+                        s.lastfirst, sca.contactpriorityorder ) SELECT a.dcid, a.student_number, a.lastfirst AS
+                        lastfirst, a.grade_level, psc.email AS student_email, m.contactname AS mother, m.email_addresses
+                        AS mother_email_adresses, f.contactname AS father, f.email_addresses AS father__email_adresses
+                        FROM students a ~[if#ss.~(gpv.ss;sqlText)=cur] INNER JOIN
+                        ~[temp.table.current.selection:students] temp ON (A.dcid=temp.dcid) [/if#ss] INNER JOIN schools
+                        b ON b.school_number=a.schoolid LEFT JOIN pcontact m ON ( m.dcid=a.dcid AND
+                        m.relationship='Mother' ) LEFT JOIN pcontact f ON ( f.dcid=a.dcid AND f.relationship='Father' )
+                        LEFT JOIN sync_studentmap ssm ON a.dcid=ssm.studentsdcid LEFT JOIN psm_studentcontact psc ON
+                        ssm.studentid=psc.studentid LEFT JOIN psm_studentcontacttype psct ON
+                        psc.studentcontacttypeid=psct.id AND psct.name='Self' WHERE a.enroll_status=0 ~[if.is.a.school]
+                        AND A.schoolid=~(curschoolid) [ / if.is.a.school] ORDER BY a.lastfirst; ;] <tr
+                        data-StudentID="~(dcid)">
+                        <td>~(student_number;t)</td>
+                        <td class="nowrap">~(lastfirst;t)</td>
+                        <td>~(grade_level;t)</td>
+                        <td>~(student_email;t)</td>
+                        <td>~(mother;t)</td>
+                        <td class="nowrap">~(mother_email;t)</td>
+                        <td>~(father;t)</td>
+                        <td class="nowrap">~(father_email;t)</td>
+                        </tr>
+                        [/tlist_sql]
+                </tbody>
+            </table>
+        </div>
+        [/if#showData]
+        <!-- end of content of bounding box -->
+        ~[wc:admin_footer_frame_css]
+    </body>
+
+</html><!-- end right frame -->
