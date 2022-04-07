@@ -9,8 +9,8 @@
 		<td>List Student with Mother and Father Email</td>
 	</tr>
 	<tr id="motherFatherStudentEmail">
-		<td><a href="/admin/reports_pscb/contacts/CDOL_Mother_Father_Student_Email.html">Students - Mother/Father/Student Email</a></td>
-		<td>List Student with their email and Mother and Father Email</td>
+		<td><a href="/admin/reports_pscb/contacts/CDOL_Mother_Father_Student_Email.html">Students - Student/Mother/Father Email List</a></td>
+		<td>List Student with their email and their Mother and Father Email</td>
 	</tr>
 	<tr id="motherFatherEmailPhone">
 		<td><a href="/admin/reports_pscb/contacts/CDOL_Mother_Father_Email_phone.html">Students - Mother/Father Email &
@@ -98,12 +98,9 @@
 
 		var motherFatherEmail = $j('#motherFatherEmail').closest('tr');
 		$j("td:contains('Students - Contacts List')").closest('tr').after(motherFatherEmail);
-		
-		var motherFatherStudentEmail = $j('#motherFatherStudentEmail').closest('tr');
-		$j(motherFatherEmail).closest('tr').after(motherFatherStudentEmail);
 
 		var motherFatherEmailPhone = $j('#motherFatherEmailPhone').closest('tr');
-		$j(motherFatherStudentEmail).closest('tr').after(motherFatherEmailPhone);
+		$j(motherFatherEmail).closest('tr').after(motherFatherEmailPhone);
 
 		var receiveMailEmail = $j('#receiveMailEmail').closest('tr');
 		$j(motherFatherEmail).after(receiveMailEmail);
@@ -113,6 +110,9 @@
 
 		var contactPrimaryEmailPhone = $j('#contactPrimaryEmailPhone').closest('tr');
 		$j(motherFatherEmailPhone).closest('tr').after(contactPrimaryEmailPhone);
+		
+		var motherFatherStudentEmail = $j('#motherFatherStudentEmail').closest('tr');
+		$j(motherFatherEmail).closest('tr').after(motherFatherStudentEmail);
 
 		var bottomTable = $j('#bottomTable');
 		$j("td:contains('Students - Contacts List')").closest('tr').parent().parent().after(bottomTable);
