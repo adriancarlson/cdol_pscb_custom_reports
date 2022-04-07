@@ -111,14 +111,14 @@
                     students.lastfirst,
                     students.grade_level,
                     psm_email.email,
-                    mother.relationship,
                     mother.contact_name,
                     mother.email_addresses,
-                    father.relationship,
                     father.contact_name,
                     father.email_addresses
                     FROM
                     students
+                    ~[if#ss.~(gpv.ss;sqlText)=cur] INNER JOIN ~[temp.table.current.selection:students] temp ON
+                    (students.dcid=temp.dcid) [/if#ss]
                     LEFT JOIN (
                     SELECT
                     psm_student.studentidentifier studentidentifier,
@@ -138,17 +138,18 @@
                     AND father.relationship = 'Father'
                     WHERE
                     students.enroll_status = 0
+                    ~[if.is.a.school] AND students.schoolid=~(curschoolid) [/if.is.a.school]
                     ORDER BY
                     students.lastfirst
                     ;] <tr data-StudentID="~(dcid)">
                         <td>~(student_number;t)</td>
                         <td class="nowrap">~(lastfirst;t)</td>
-                        <td>~(grade_level;t)</td>
-                        <td>~(student_email;t)</td>
-                        <td>~(mother;t)</td>
-                        <td class="nowrap">~(mother_email;t)</td>
-                        <td>~(father;t)</td>
-                        <td class="nowrap">~(father_email;t)</td>
+                        <td class="center">~(grade_level;t)</td>
+                        <td class="right">~(student_email;t)</td>
+                        <td class="right">~(mother;t)</td>
+                        <td class="nowrap right">~(mother_email;t)</td>
+                        <td class="right">~(father;t)</td>
+                        <td class="nowrap right">~(father_email;t)</td>
                     </tr>
                     [/tlist_sql]
                 </tbody>
