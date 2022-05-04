@@ -41,6 +41,10 @@
 		<td><a href="/admin/reports_pscb/enrollment/cdol_psee_completed.html">Students Completed and Approved</a></td>
 		<td>List students who have completed the enrollment process and have been approved by the administrator</td>
 	</tr>
+	<tr>
+		<td><a href="/admin/reports_pscb/enrollment/cdol_psee_all.html">Students All Form Statuses</a></td>
+		<td>List all students in all stages of the enrollment process</td>
+	</tr>
 	<tr class="pk-report" hidden="true">
 		<td><a href="/admin/reports_pscb/enrollment/cdol_psee_pk.html">Preschool Enrollments</a></td>
 		<td>List Preschool Enrollments</td>
