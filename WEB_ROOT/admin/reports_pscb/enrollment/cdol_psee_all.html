@@ -69,6 +69,7 @@
                     WHEN TO_CHAR(students.grade_level) = 99 THEN 'Graduated'
                     ELSE TO_CHAR(students.grade_level)
                     END AS current_grade,
+                    students.Sched_NextYearGrade,
                     CASE
                     WHEN TO_CHAR(students.Sched_NextYearGrade) = -2 THEN 'PK3'
                     WHEN TO_CHAR(students.Sched_NextYearGrade) = -1 THEN 'PK4'
@@ -596,7 +597,7 @@
                     ON student_form.studentid = student_form_total.studentid
                     LEFT JOIN student_percent_done
                     ON student_form.studentid = student_percent_done.studentid
-                    ORDER BY student_form.next_grade, student_form.lastfirst
+                    ORDER BY student_form.Sched_NextYearGrade, student_form.lastfirst
                     ;]
                     <tr data-StudentID="~(dcid)">
                         <td class="right"><a
