@@ -596,7 +596,7 @@
                     ON student_form.studentid = student_form_total.studentid
                     LEFT JOIN student_percent_done
                     ON student_form.studentid = student_percent_done.studentid
-                    ORDER BY student_form.lastfirst
+                    ORDER BY student_form.next_grade, student_form.lastfirst
                     ;]
                     <tr data-StudentID="~(dcid)">
                         <td class="right"><a
