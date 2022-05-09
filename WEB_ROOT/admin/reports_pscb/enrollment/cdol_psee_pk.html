@@ -57,6 +57,8 @@
                     ELSE students.gender
                     END AS gender,
                     students.dob,
+                    students.enroll_status,
+                    students.grade_level,
                     CASE
                     WHEN TO_CHAR(students.grade_level) = -2 THEN 'PK3'
                     WHEN TO_CHAR(students.grade_level) = -1 THEN 'PK4'
@@ -64,6 +66,7 @@
                     WHEN TO_CHAR(students.grade_level) = 99 THEN 'Graduated'
                     ELSE TO_CHAR(students.grade_level)
                     END AS current_grade,
+                    students.Sched_NextYearGrade,
                     CASE
                     WHEN TO_CHAR(students.Sched_NextYearGrade) = -2 THEN 'PK3'
                     WHEN TO_CHAR(students.Sched_NextYearGrade) = -1 THEN 'PK4'
@@ -136,9 +139,25 @@
                     student_form.dcid,
                     student_form.student_number,
                     student_form.lastfirst,
-                    student_form.current_grade,
+                    CASE
+                    WHEN TO_CHAR(student_form.enroll_status) = '-1' THEN 'Pre-enrolled'
+                    WHEN TO_CHAR(student_form.enroll_status) = '0' THEN 'Active'
+                    ELSE TO_CHAR(student_form.enroll_status)
+                    END AS enroll_status,
+                    CASE
+                    WHEN student_form.enroll_status = -1 THEN '-'
+                    ELSE student_form.current_grade
+                    END AS curent_grade,
                     student_form.next_grade,
-                    u_fb_form_element_choice.label as pk_program,
+                    u_fb_form_response_element.U_FB_FORM_ELEMENT_ID,
+                    u_fb_form_element_choice.u_fb_form_element_id,
+                    u_fb_form_response_detail.response_value,
+                    u_fb_form_element_choice.value,
+                    u_fb_form_element_choice.label,
+                    CASE
+                    WHEN u_fb_form_element_choice.label IS NULL THEN 'PK program not yet chosen'
+                    ELSE u_fb_form_element_choice.label
+                    END AS pk_program,
                     u_student_additional_info.pk_program,
                     CASE
                     WHEN student_form.preschool = 'Approved' THEN '#198754'
@@ -195,7 +214,10 @@
                     [/tlist_sql]
                 </tbody>
             </table>
-            <div class="feedback-info">* Note: if the <strong>PK Program</strong> column is blank, but the student's <strong>Form Status</strong> is approved,  this means the <strong>PK Program</strong> options on the <strong>A1. Preschool </strong> enrollment form were changed after the parent submitted the form. Please refer to the <strong>Progam Value</strong> column instead, which will be accurate.</div>
+            <div class="feedback-info">* Note: if the <strong>PK Program</strong> column is blank, but the student's
+                <strong>Form Status</strong> is approved, this means the <strong>PK Program</strong> options on the
+                <strong>A1. Preschool </strong> enrollment form were changed after the parent submitted the form. Please
+                refer to the <strong>Progam Value</strong> column instead, which will be accurate.</div>
         </div>
         <!-- end of content of bounding box -->
         ~[wc:admin_footer_frame_css]
