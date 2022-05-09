@@ -24,6 +24,13 @@
         <!-- Start of Results -->
         <div class="box-round">
             <h2>Preschool Enrollments</h2>
+            <div class="feedback-info">* Note: All PK students will have the grade level of PK4 until the parent chooses
+                a PK
+                Program. <br> Also, if the <strong>PK Program</strong> column is blank, but the student's
+                <strong>Form Status</strong> is approved, this means the <strong>PK Program</strong> options on the
+                <strong>A1. Preschool </strong> enrollment form were changed after the parent submitted the form. Please
+                refer to the <strong>Program Value</strong> column instead, which will be accurate.
+            </div>
             <table border="0" cellspacing="0" cellpadding="4" align="center" class="tablesorter grid" id="results">
                 <thead>
                     <tr>
@@ -32,6 +39,7 @@
                         <th>Stu Name</th>
                         <th class="filter-select">Cur Grade</th>
                         <th class="filter-select">Next Grade</th>
+                        <th class="filter-select">Enroll Status</th>
                         <th class="filter-select">PK Program</th>
                         <th class="filter-select">Program Value</th>
                         <th class="filter-select">Form Status</th>
@@ -210,11 +218,7 @@
                     [/tlist_sql]
                 </tbody>
             </table>
-            <div class="feedback-info">* Note: if the <strong>PK Program</strong> column is blank, but the student's
-                <strong>Form Status</strong> is approved, this means the <strong>PK Program</strong> options on the
-                <strong>A1. Preschool </strong> enrollment form were changed after the parent submitted the form. Please
-                refer to the <strong>Progam Value</strong> column instead, which will be accurate.
-            </div>
+
         </div>
         <!-- end of content of bounding box -->
         ~[wc:admin_footer_frame_css]
