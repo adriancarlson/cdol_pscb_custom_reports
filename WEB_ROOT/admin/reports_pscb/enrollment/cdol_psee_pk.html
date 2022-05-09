@@ -149,11 +149,6 @@
                     ELSE student_form.current_grade
                     END AS curent_grade,
                     student_form.next_grade,
-                    u_fb_form_response_element.U_FB_FORM_ELEMENT_ID,
-                    u_fb_form_element_choice.u_fb_form_element_id,
-                    u_fb_form_response_detail.response_value,
-                    u_fb_form_element_choice.value,
-                    u_fb_form_element_choice.label,
                     CASE
                     WHEN u_fb_form_element_choice.label IS NULL THEN 'PK program not yet chosen'
                     ELSE u_fb_form_element_choice.label
@@ -202,6 +197,7 @@
                                 href="/admin/students/forms.html?frn=001~(dcid)&sharetype=enroll&tabSel=enroll"
                                 target="_blank">~(stunum)</a></td>
                         <td class="nowrap">~(name)</td>
+                        <td class="nowrap">~(enroll_status)</td>
                         <td class="center">~(curgrade)</td>
                         <td class="center">~(Sched_NextYearGrade)</td>
                         <td class="center">~(pk_program)</td>
@@ -217,7 +213,8 @@
             <div class="feedback-info">* Note: if the <strong>PK Program</strong> column is blank, but the student's
                 <strong>Form Status</strong> is approved, this means the <strong>PK Program</strong> options on the
                 <strong>A1. Preschool </strong> enrollment form were changed after the parent submitted the form. Please
-                refer to the <strong>Progam Value</strong> column instead, which will be accurate.</div>
+                refer to the <strong>Progam Value</strong> column instead, which will be accurate.
+            </div>
         </div>
         <!-- end of content of bounding box -->
         ~[wc:admin_footer_frame_css]
