@@ -142,12 +142,12 @@
                     LISTAGG(studentrace.racecd,', ') WITHIN GROUP (ORDER BY studentrace.racecd) OVER (PARTITION BY
                     students.dcid) racecodes,
                     students.mailing_street,
-                    students.mailing_state,
                     students.mailing_city,
+                    students.mailing_state,
                     students.mailing_zip,
                     students.street,
-                    students.state,
                     students.city,
+                    students.state,
                     students.zip,
                     students.home_phone,
                     father.contact_name as Father,
@@ -177,8 +177,8 @@
                         <td class="nowrap">~(first)</td>
                         <td>~(gender)</td>
                         <td>~(dob;d)</td>
-                        <td>~(grade_level)</td>
-                        <td>~(ethnicity)</td>
+                        <td class="center">~(grade_level)</td>
+                        <td class="nowrap">~(ethnicity)</td>
                         <td>~(race)</td>
                         <td class="nowrap">~(mailing_street)</td>
                         <td class="nowrap">~(mailing_city)</td>
