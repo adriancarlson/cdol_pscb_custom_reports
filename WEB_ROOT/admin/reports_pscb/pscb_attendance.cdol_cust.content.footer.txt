@@ -10,6 +10,10 @@
 				Totals</a></td>
 		<td>Lists attendance totals</td>
 	</tr>
+	<tr id="perfect-attendance">
+		<td><a href="/admin/reports_pscb/attendance/cdol_perfect_attendance.html">Perfect Attendance</a></td>
+		<td>Lists students with perfect attendance</td>
+	</tr>
 </table>
 
 <script>
