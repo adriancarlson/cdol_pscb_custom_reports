@@ -155,6 +155,7 @@
                                     ON students.id=tardyCnt.studentid 
                             ) 
                             SELECT 
+                                AttTotal.dcid,
                                 AttTotal.student_number, 
                                 AttTotal.lastFirst,
                                 AttTotal.grade_level, 
@@ -175,7 +176,8 @@
                         ;alternatecolor;nonemessage=<tr nodata>
                                     <td colspan="100%">No Records Found.</td>
                                     </tr>]
-                                    <tr class="Record">
+                                    <tr data-StudentID="~(dcid)" class="Record">
+                                        <td><a href="/admin/students/att_daily.html?frn=001~(dcid)" target="_blank">~(stunum)</a></td>
                                         <td>~(stdNum;t)</td>
                                         <td class="nowrap">~(student;t)</td>
                                         <td>~(grlvl;t)</td>
