@@ -151,7 +151,7 @@
                         students.zip,
                         students.home_phone,
                         father.contact_name as Father,
-                        mother.contact_name as Mother,
+                        mother.contact_name as Mother
                     FROM 
                         students
                     ~[if#ss.~(gpv.ss;sqlText)=cur] 
