@@ -39,9 +39,9 @@
                             <tr class="headerrow" valign="top">
                                 
                                 <td class=""><input type="text" id="abscnt" name="abscnt" value="~(gpv.abscnt)"
-                                        size="2"> or more
+                                        size="2"> or fewer
                                 </td>
-                                <td class=""><input type="text" id="tarcnt" name="tarcnt" value="~(gpv.tarcnt)" size="2"> or more
+                                <td class=""><input type="text" id="tarcnt" name="tarcnt" value="~(gpv.tarcnt)" size="2"> or fewer
                                 </td>
                                 <td>
                                     <select id="includepk" name="includepk">
@@ -165,8 +165,13 @@
                             WHERE
                                 AttTotal.enroll_status=0 
                                 ~[if.is.a.school] AND AttTotal.schoolid = ~(curschoolid) [/if.is.a.school]
-                                AND AttTotal.abs= TO_NUMBER(~(gpv.abscnt))
+                                ~[if#includepk.~(gpv.includepk;sqlText)=n] AND AttTotal.grade_level NOT IN (-2,-1) [/if#includepk]
+                                AND AttTotal.abs <= TO_NUMBER(~(gpv.abscnt))
                                 AND AttTotal.tars <=TO_NUMBER(~(gpv.tarcnt))
+                            ORDER BY
+                                AttTotal.grade_level DESC, 
+                                AttTotal.abs, 
+                                AttTotal.tars
                         ;alternatecolor;nonemessage=<tr nodata>
                                     <td colspan="100%">No Records Found.</td>
                                     </tr>]
