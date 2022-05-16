@@ -96,7 +96,6 @@
                         <th class="left">Phone</th>
                         <th class="left">Father Name</th>
                         <th class="left">Mother Name</th>
-                        <th class="left">School</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -152,7 +151,7 @@
                         students.zip,
                         students.home_phone,
                         father.contact_name as Father,
-                        mother.contact_name as Mother
+                        mother.contact_name as Mother,
                     FROM 
                         students
                     ~[if#ss.~(gpv.ss;sqlText)=cur] 
@@ -174,24 +173,24 @@
                         students.last_name
                     ;]
                     <tr data-StudentID="~(dcid)">
-                        <td class="nowrap">~(last;t)</td>
-                        <td class="nowrap">~(first;t)</td>
-                        <td>~(gender;t)</td>
-                        <td>~(dob;d)</td>
-                        <td>~(grade_level;t)</td>
+                        <td class="nowrap">~(last)</td>
+                        <td class="nowrap">~(first)</td>
+                        <td>~(gender)</td>
+                        <td>~(dob)</td>
+                        <td>~(grade_level)</td>
                         <td>~(ethnicity)</td>
                         <td>~(race)</td>
-                        <td class="nowrap">~(mailing_street;t)</td>
-                        <td>~(mailing_city;t)</td>
-                        <td>~(mailing_state;t)</td>
-                        <td>~(mailing_zip;t)</td>
-                        <td class="nowrap">~(street;t)</td>
-                        <td>~(city;t)</td>
-                        <td>~(state;t)</td>
-                        <td>~(zip;t)</td>
+                        <td class="nowrap">~(mailing_street)</td>
+                        <td>~(mailing_city)</td>
+                        <td>~(mailing_state)</td>
+                        <td>~(mailing_zip)</td>
+                        <td class="nowrap">~(street)</td>
+                        <td>~(city)</td>
+                        <td>~(state)</td>
+                        <td>~(zip)</td>
                         <td>~(phone)</td>
-                        <td>~(father)</td>
-                        <td>~(mother)</td>                        
+                        <td class="nowrap">~(father)</td>
+                        <td class="nowrap">~(mother)</td>                        
                     </tr>
                     [/tlist_sql]
                 </tbody>
