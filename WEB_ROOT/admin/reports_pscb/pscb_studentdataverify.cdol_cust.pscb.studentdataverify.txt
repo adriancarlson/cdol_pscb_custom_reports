@@ -46,6 +46,11 @@
 		<td>List Name, DOB, Grade Level, Gender, Address, Phone Number, Adults Students Live With for LPS
 		</td>
 	</tr>
+	<tr id="census">
+		<td><a href="/admin/reports_pscb/studentdataverify/cdol_census.html">Census Report</a></td>
+		<td>List Last name, First Name,Gender,DOB,Grade Level,Fed Ethnic Cat,Mailing Street,Mailing City,Mailing State,Mailing Zip,Physical Street,Physical City,Physical State,Physical Zip,Phone,Father Name,Mother Name
+		</td>
+	</tr>
 	<tr id="MAPS">
 		<td><a href="/admin/reports_pscb/studentdataverify/cdol_maps.html">MAPS Report</a></td>
 		<td>List fields for MAPS report</td>

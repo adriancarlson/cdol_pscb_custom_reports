@@ -133,7 +133,6 @@
                             ELSE students.gender
                             END as gender,
                         students.dob,
-                        students.grade_level,
                         CASE
                             WHEN TO_CHAR(students.grade_level) = -2 then 'PK3'
                             WHEN TO_CHAR(students.grade_level) = -1 then 'PK4'
