@@ -10,10 +10,12 @@
 				Totals</a></td>
 		<td>Lists attendance totals</td>
 	</tr>
+	~[if.~[f.in;value=~(curschoolid);in=150,264,109,102,211,131,111,184,263,104,262,282,260,105,261,437,120,107,310,110,108,272,140]=0]
 	<tr id="perfect-attendance">
 		<td><a href="/admin/reports_pscb/attendance/cdol_perfect_attendance.html">Perfect Attendance</a></td>
 		<td>Lists students with perfect attendance</td>
 	</tr>
+	[/if]
 </table>
 
 <script>

@@ -126,7 +126,7 @@
                                 AND attendance.schoolid=terms.schoolid 
                                 AND terms.isyearrec=1 
                             WHERE 
-                                attendance.att_mode_code='ATT_ModeMeeting' 
+                                attendance.att_mode_code='ATT_ModeDaily' 
                                 AND attendance_code.ATT_CODE='T' 
                                 AND students.exitdate>= terms.firstday
                                 AND students.entrydate <= terms.lastday 
