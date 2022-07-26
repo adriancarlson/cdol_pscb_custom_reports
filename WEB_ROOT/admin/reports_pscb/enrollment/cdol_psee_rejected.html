@@ -350,7 +350,14 @@
                     AND additional.rank = 1
                     WHERE
                     students.enroll_status in (-1,0)
-                    ~[if.is.a.school] AND students.next_school=~(curschoolid) [/if]
+                    ~[if.is.a.school]
+                    AND ~(curschoolid) =
+                    (CASE WHEN to_number(to_char(sysdate, 'DDD')) > to_number(to_char(to_date ('07/01/'
+                    ||to_char(sysdate, 'YYYY') , 'MM/DD/YYYY'), 'DDD')) THEN
+                    students.schoolid
+                    ELSE students.next_school
+                    END)
+                    [/if]
                     )
                     , max_submission AS (
                     SELECT
@@ -482,7 +489,8 @@
                     SELECT
                     student_form.studentid,
                     ROUND((((student_form_total.student_form_total - (count_not_submitted.count_not_submitted +
-                    count_rejected.count_rejected + count_pending.count_pending)) / student_form_total.student_form_total)*100),0) AS
+                    count_rejected.count_rejected + count_pending.count_pending)) /
+                    student_form_total.student_form_total)*100),0) AS
                     student_percent_done
                     FROM student_form
                     LEFT JOIN student_form_total
