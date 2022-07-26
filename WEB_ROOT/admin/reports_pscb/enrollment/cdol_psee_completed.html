@@ -482,8 +482,11 @@
                     ELSE school_from_total.school_from_total
                     END AS student_form_total
                     FROM student_form
-                    LEFT JOIN school_from_total
-                    ON student_form.next_school = school_from_total.school_id
+                    LEFT JOIN school_from_total ON school_from_total.school_id =(CASE WHEN to_number(to_char(sysdate, 'DDD')) > to_number(to_char(to_date ('07/01/'
+                    ||to_char(sysdate, 'YYYY') , 'MM/DD/YYYY'), 'DDD')) THEN
+                    student_form.current_school
+                    ELSE student_form.next_school
+                    END) 
                     )
                     , student_percent_done AS (
                     SELECT
