@@ -112,6 +112,8 @@
                         <th class="left">Student Number</th>
                         <th class="left">Name</th>
                         <th class="left filter-select">Grade Level</th>
+                        <th class="left filter-select">Homeroom</th>
+                        <th class="left">Email</th>
                         <th class="left">User Name</th>
                         <th class="left ">Password</th>
                         <th class="left hidden">Password</th>
@@ -142,6 +144,7 @@
                     utl_raw.cast_to_varchar2(UTL_ENCODE.BASE64_DECODE(utl_raw.cast_to_raw(NVL(ad.student_code, ' ')))),
                     sch.abbreviation
                     FROM students s
+                    LEFT OUTER JOIN stuemail se ON (S.DCID = se.StudentsDCID)
                     LEFT JOIN u_student_additional_info ad
                     ON s.dcid = ad.studentsdcid
                     ~[if#ss.~(gpv.ss;sqlText)=cur] INNER JOIN ~[temp.table.current.selection:students] temp ON (s.dcid =
