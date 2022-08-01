@@ -120,6 +120,11 @@
                 </thead>
                 <tbody>
                     ~[tlist_sql;
+                    WITH StuEmail AS (
+                    SELECT ssm.studentsdcid, psc.email
+                    FROM sync_studentmap ssm
+                    INNER JOIN PSM_StudentContact psc ON (ssm.studentid = psc.studentid)
+                    INNER JOIN PSM_StudentContactType psct ON (psc.studentcontacttypeid = psct.id AND psct.name='Self'))
                     SELECT
                     s.dcid,
                     s.student_number,
@@ -131,6 +136,8 @@
                     WHEN TO_CHAR(s.grade_level) = 99 then 'Graduated'
                     ELSE TO_CHAR(s.grade_level)
                     END as prettygrade,
+                    s.home_room,
+                    se.email,
                     s.Student_Web_ID,
                     utl_raw.cast_to_varchar2(UTL_ENCODE.BASE64_DECODE(utl_raw.cast_to_raw(NVL(ad.student_code, ' ')))),
                     sch.abbreviation
@@ -151,6 +158,8 @@
                         <td class="nowrap">~(studentnumb)</td>
                         <td>~(stuname;t)</td>
                         <td class="center">~(grade_level)</td>
+                        <td class="center">~(home_room)</td>
+                        <td>~(email)</td>
                         <td>~(username;t)</td>
                         <td class="nowrap hidden">~(decode;t)</td>
                         <td class="nowrap"><a class="dialogM button" title="~(stuname;t)"
