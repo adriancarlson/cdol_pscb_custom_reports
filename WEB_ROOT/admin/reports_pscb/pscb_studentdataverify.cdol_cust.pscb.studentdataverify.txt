@@ -14,7 +14,7 @@
 		<td>View age/birthday list for selected parameters.</td>
 	</tr>
 	<tr>
-		<td><a href="/admin/reports_pscb/misc/birthdaylist.html">Birthday List - By Month</a></td>
+		<td><a href="/admin/reports_pscb/studentdataverify/cdol_birthday_by_month.html">Birthday List - By Month</a></td>
 		<td>View birthday list for a selected month.</td>
 	</tr>
 	<tr id="bithdatListAll">
