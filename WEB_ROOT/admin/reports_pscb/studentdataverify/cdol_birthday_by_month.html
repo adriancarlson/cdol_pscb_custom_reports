@@ -26,7 +26,7 @@
                 <table border="0" cellspacing="0" cellpadding="0" class="linkDescList">
                     <thead>
                         <tr>
-                            <th>&nbsp;Month:&nbsp;&nbsp;
+                            <th style="white-space: nowrap;" width="180px">&nbsp;Month:&nbsp;&nbsp;
                                 <select name="m">
                                     <option value="" ~[if.~[gpv:m]=]selected="selected" [/if]></option>
                                     <option value="01" ~[if.~[gpv:m]=01]selected="selected" [/if]>January</option>
@@ -43,7 +43,7 @@
                                     <option value="12" ~[if.~[gpv:m]=12]selected="selected" [/if]>December</option>
                                 </select>
                             </th>
-                            <th>
+                            <th style="white-space: nowrap;">&nbsp;Student Selection:&nbsp;&nbsp;
                                 <select name="ss" id="ss">
                                     <option value='' ~[if.~[gpv:ss]=]selected[/if]>All Students</option>
                                     <option value="cur" ~[if.~[gpv:ss]=cur]selected[/if]>Current Selection
