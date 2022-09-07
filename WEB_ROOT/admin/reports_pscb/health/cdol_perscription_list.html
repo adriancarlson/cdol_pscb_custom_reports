@@ -28,7 +28,7 @@
                     <thead>
                         <tr>
                             <th style="white-space: nowrap;" width="180px">Student Selection</th>
-                            <th style="white-space: nowrap;">Grade Selection</th>
+                            <th style="white-space: nowrap;">Medications</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -65,13 +65,12 @@
                 <thead>
                     <tr>
                         <th class="left">Std Num</th>
-                        <th class="left">Student Name</th>
+                        <th class="left filter-select">Student Name</th>
                         <th class="left filter-select">Gender</th>
                         <th class="left filter-select">Grade Level</th>
                         <th class="left">Medication</th>
-                        <th class="left">Dosage</th>
-                        <th class="left">Units</th>
-                        <th class="left filter-select">Frequency</th>
+                        <th class="left">Dosage/Units</th>
+                        <th class="left">Frequency</th>
                         <th class="left filter-select">Perscription Required</th>
                     </tr>
                 </thead>
@@ -94,8 +93,7 @@
                     ELSE TO_CHAR(students.grade_level)
                     END as PRETTY_GRADE,
                     u_fb_medications.name,
-                    u_fb_medications.dosage,
-                    u_fb_medications.dosage_units,
+                    u_fb_medications.dosage|| ' ' || u_fb_medications.dosage_units,
                     u_fb_medications.frequency_taken,
                     u_fb_medications.prescribed
                     FROM students
@@ -106,7 +104,7 @@
                     WHERE 0=0
                     ~[if.is.a.school] AND students.schoolid = ~(curschoolid) [/if.is.a.school]
                     ~[if#perscribed.~(gpv.perscribed;sqlText)=1]
-                    AND _fb_medications.name IS NOT NULL
+                    AND u_fb_medications.name IS NOT NULL
                     [/if#perscribed]
                     ORDER BY students.lastfirst ;] <tr class="Record" data-StudentID="~(DCID)">
                         <td class="nowrap">~(Student_Number;t)</td>
@@ -115,7 +113,6 @@
                         <td>~(grade_level;t)</td>
                         <td class="nowrap">~(medication;t)</td>
                         <td>~(dosage;t)</td>
-                        <td>~(units;t)</td>
                         <td>~(frequency;t)</td>
                         <td>~(perscribed;t)</td>
                     </tr>
