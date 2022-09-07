@@ -6,13 +6,13 @@
         </tr>
     </thead>
     <tr>
-        <td><a href="/admin/reports_pscb/health/cdol_perscription_list.html">Perscribed Medications List</a></td>
-        <td>List students who have perscribed medications (one row per medication)</td>
+        <td><a href="/admin/reports_pscb/health/cdol_perscription_list.html">Prescribed Medications List</a></td>
+        <td>List students who have prescribed medications (one row per medication)</td>
     </tr>
     <tr>
-        <td><a href="/admin/reports_pscb/health/cdol_perscriptions_by_student.html">Perscribed Medications by
+        <td><a href="/admin/reports_pscb/health/cdol_perscriptions_by_student.html">Prescribed Medications by
                 Student</a></td>
-        <td>List students who have perscribed medications (one row per student)</td>
+        <td>List students who have prescribed medications (one row per student)</td>
     </tr>
 
 </table>

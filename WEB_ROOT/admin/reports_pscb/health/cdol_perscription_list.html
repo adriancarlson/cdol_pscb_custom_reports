@@ -3,7 +3,7 @@
     <!-- non framed -->
 
     <head>
-        <title>Perscribed Medications List</title>
+        <title>Prescribed Medications List</title>
         ~[wc:commonscripts]
         <link href="/images/css/screen.css" rel="stylesheet" media="screen">
         <link href="/images/css/print.css" rel="stylesheet" media="print">
@@ -17,10 +17,10 @@
         ~[wc:admin_header_frame_css]
         <!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a> &gt; <a
             href="/admin/reports_pscb/pscb_home.html" target="_top">PSCB Custom Reports</a> &gt; <a
-            href="/admin/reports_pscb/pscb_health.html">Health Office</a> &gt; Perscribed Medications List
+            href="/admin/reports_pscb/pscb_health.html">Health Office</a> &gt; Prescribed Medications List
         <!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
         <!-- start of Options -->
-        <h1>Perscribed Medications List</h1>
+        <h1>Prescribed Medications List</h1>
         <form name="searchform" action="#" method="POST">
             <div class="box-round" style="overflow: hidden;">
                 <h2>Report Filters</h2>
@@ -41,10 +41,10 @@
                                 </select>
                             </td>
                             <td>
-                                <select name="perscribed">
-                                    <option value="1" ~[if.~[gpv:perscribed]=1]selected[/if]>Students with Perscriptions
+                                <select name="prescribed">
+                                    <option value="1" ~[if.~[gpv:prescribed]=1]selected[/if]>Students with Perscriptions
                                     </option>
-                                    <option value="0" ~[if.~[gpv:perscribed]=0]selected[/if]>All Students</option>
+                                    <option value="0" ~[if.~[gpv:prescribed]=0]selected[/if]>All Students</option>
                                 </select>
                             </td>
                         </tr>
@@ -60,7 +60,7 @@
         <!-- Start of Results -->
         ~[if#showData.~(gpv.showData;sqlText)=1]
         <div class="box-round">
-            <h2>Perscribed Medications List</h2>
+            <h2>Prescribed Medications List</h2>
             <table border="0" cellspacing="0" cellpadding="4" align="center" class="tablesorter grid" id="results">
                 <thead>
                     <tr>
@@ -103,9 +103,9 @@
                     ON students.dcid = u_fb_medications.studentsdcid
                     WHERE 0=0
                     ~[if.is.a.school] AND students.schoolid = ~(curschoolid) [/if.is.a.school]
-                    ~[if#perscribed.~(gpv.perscribed;sqlText)=1]
+                    ~[if#prescribed.~(gpv.prescribed;sqlText)=1]
                     AND u_fb_medications.name IS NOT NULL
-                    [/if#perscribed]
+                    [/if#prescribed]
                     ORDER BY students.lastfirst ;] <tr class="Record" data-StudentID="~(DCID)">
                         <td class="nowrap">~(Student_Number;t)</td>
                         <td class="nowrap">~(lastfirst;t)</td>
@@ -114,7 +114,7 @@
                         <td class="nowrap">~(medication;t)</td>
                         <td>~(dosage;t)</td>
                         <td>~(frequency;t)</td>
-                        <td>~(perscribed;t)</td>
+                        <td>~(prescribed;t)</td>
                     </tr>
                     [/tlist_sql]
                 </tbody>
