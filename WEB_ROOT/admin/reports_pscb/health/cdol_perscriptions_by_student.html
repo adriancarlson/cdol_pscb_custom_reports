@@ -61,14 +61,17 @@
         ~[if#showData.~(gpv.showData;sqlText)=1]
         <div class="box-round">
             <h2>Perscribed Medications by Student</h2>
-            <p class="red">* indicates Medication Requires a Perscription </p>
+            <div class="button-row" style="float: left;">
+                <span class="red">&nbsp;&nbsp;* indicates Medication Requires a Perscription </span>
+            </div>
             <table border="0" cellspacing="0" cellpadding="4" align="center" class="tablesorter grid" id="results">
                 <thead>
                     <tr>
                         <th class="left">Std Num</th>
                         <th class="left filter-select">Student Name</th>
                         <th class="left filter-select">Gender</th>
-                        <th class="left filter-select">Grade Level</th>
+                        <th class="center filter-select">Grade Level</th>
+                        <th class="center">Med. Count</th>
                         <th class="left">Medications</th>
                     </tr>
                 </thead>
@@ -118,6 +121,7 @@
                         <td class="nowrap">~(lastfirst;t)</td>
                         <td>~(gender;t)</td>
                         <td>~(grade_level;t)</td>
+                        <td >~(medcount;t)</td>
                         <td class="nowrap">~(medication;t)</td>
                     </tr>
                     [/tlist_sql]
