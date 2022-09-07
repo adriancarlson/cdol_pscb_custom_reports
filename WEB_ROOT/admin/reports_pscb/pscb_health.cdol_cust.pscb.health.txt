@@ -10,7 +10,7 @@
         <td>List students who have prescribed medications (one row per medication)</td>
     </tr>
     <tr>
-        <td><a href="/admin/reports_pscb/health/cdol_prescriptions_by_student.html">Prescribed Medications by
+        <td><a href="/admin/reports_pscb/health/cdol_perscriptions_by_student.html">Prescribed Medications by
                 Student</a></td>
         <td>List students who have prescribed medications (one row per student)</td>
     </tr>
