@@ -69,7 +69,7 @@
                         <th class="left filter-select">Student Name</th>
                         <th class="left filter-select">Gender</th>
                         <th class="center filter-select">Grade Level</th>
-                        <th class="center">Med. Count</th>
+                        <th class="center filter-select">Med. Count</th>
                         <th class="left">Medications</th>
                     </tr>
                 </thead>
@@ -81,7 +81,7 @@
                     Count(u_fb_medications.name) cnt,
                     '<ul>' || listagg('<li>' || u_fb_medications.name || CASE WHEN u_fb_medications.prescribed = 'Yes'
                             THEN '*' ELSE '' END || ' - ' || u_fb_medications.dosage || ' ' ||
-                            u_fb_medications.dosage_units || '| ' || u_fb_medications.frequency_taken || '</li>', '')
+                            u_fb_medications.dosage_units || ' | ' || u_fb_medications.frequency_taken || '</li>', '')
                         WITHIN GROUP (ORDER BY u_fb_medications.name desc) || '</ul>' Rxs
                     FROM u_fb_medications
                     GROUP BY u_fb_medications.studentsdcid
