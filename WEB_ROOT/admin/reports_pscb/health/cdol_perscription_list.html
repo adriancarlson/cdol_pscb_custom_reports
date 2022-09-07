@@ -56,84 +56,57 @@
             <table border="0" cellspacing="0" cellpadding="4" align="center" class="tablesorter grid" id="results">
                 <thead>
                     <tr>
-                        <th class="left filter-select">School</th>
                         <th class="left">Std Num</th>
                         <th class="left">Student Name</th>
+                        <th class="left filter-select">Gender</th>
                         <th class="left filter-select">Grade Level</th>
-                        <th class="left filter-select">Homeroom</th>
-                        <th class="left">Contact ID</th>
-                        <th class="left">Contact Name</th>
-                        <th class="left filter-select">Priority Order</th>
-                        <th class="left filter-select">Relationship</th>
-                        <th class="left filter-select">Original Contact Type</th>
-                        <th class="left filter-select">Status</th>
-                        <th class="left nowrap">Contact Phone Number 1</th>
-                        <th class="left filter-select">Contact Phone Type 1</th>
-                        <th class="left nowrap">Contact Phone Number 2</th>
-                        <th class="left filter-select">Contact Phone Type 2</th>
-                        <th class="left nowrap">Contact Phone Number 3</th>
-                        <th class="left filter-select">Contact Phone Type 3</th>
-                        <th class="left">Email Addresses</th>
-                        <th class="left filter-select">Has Data Access</th>
-                        <th class="left filter-select">Has Custody</th>
-                        <th class="left filter-select">Lives With</th>
-                        <th class="left filter-select">Receives Mail</th>
-                        <th class="left filter-select">Emerg Contact</th>
-                        <th class="left filter-select">School Pickup</th>
+                        <th class="left">Medication</th>
+                        <th class="left">Dosage</th>
+                        <th class="left">Units</th>
+                        <th class="left filter-select">Frequency</th>
+                        <th class="left filter-select">Perscription Required</th>
                     </tr>
                 </thead>
                 <tbody>
                     ~[tlist_sql;
-                    SELECT s.dcid ,sch.abbreviation school ,s.student_number ,s.lastfirst ,s.grade_level ,s.home_room,
-                    p.id contactid
-                    ,CASE WHEN p.firstname IS NULL AND p.lastname IS NULL THEN '-No Name-' ELSE p.firstname||'
-                    '||p.lastname END ContactName
-                    ,sca.contactpriorityorder, cs.code Relationship, ocm.OriginalContactType, Decode(p.isActive, 1,
-                    'Active', 'Inactive') isactive
-                    ,(SELECT LISTAGG(Nvl(ppa.phonenumberasentered,'-') || '
-                    </td>
-                    <td>' || Nvl(cs.code,'Not Set'), '</td>
-                    <td class="nowrap">') WITHIN GROUP (ORDER BY po.phoneorder)
-                        FROM (SELECT LEVEL AS phoneorder FROM DUAL CONNECT BY LEVEL <= 3) po LEFT JOIN
-                            personphonenumberassoc ppa ON (po.phoneorder=ppa.phonenumberpriorityorder AND
-                            ppa.personid=p.id) LEFT JOIN codeset cs ON (ppa.PhoneTypeCodeSetID=cs.CodeSetID) ) AS
-                            Contact_Phone_Numbers ,(SELECT LISTAGG(emailaddress, ' | ' ) WITHIN GROUP(ORDER BY
-                            emailaddresspriorityorder) Email_Addresses FROM PersonEmailAddressAssoc pea INNER JOIN
-                            EmailAddress ea ON (pea.EmailAddressID=ea.EmailAddressID) WHERE pea.personid=p.id GROUP BY
-                            personid) AS Email_Addresses , Decode(gs.studentsdcid, NULL, 'No' , 'Yes' ) dataaccess ,
-                            DECODE(scd.iscustodial, 1, 'Yes' ,'No') iscustodial , DECODE(scd.liveswithflg, 1, 'Yes'
-                            ,'No') liveswithflg , DECODE(scd.receivesmailflg, 1, 'Yes' ,'No') receivesmailflg ,
-                            DECODE(scd.isemergency, 1, 'Yes' ,'No') isemergency , DECODE(scd.schoolpickupflg, 1, 'Yes'
-                            ,'No') schoolpickupflg FROM Students s ~[if#ss.~(gpv.ss;sqlText)=cur] INNER JOIN
-                            ~[temp.table.current.selection:students] temp ON (s.dcid=temp.dcid) [/if#ss] JOIN schools
-                            sch ON (s.schoolid=sch.school_number) LEFT JOIN studentcontactassoc sca ON
-                            (s.dcid=sca.studentdcid) LEFT JOIN studentcontactdetail scd ON
-                            (sca.studentcontactassocid=scd.studentcontactassocid) LEFT JOIN OriginalContactMap ocm ON
-                            (sca.studentcontactassocid=ocm.studentcontactassocid) LEFT JOIN person p ON
-                            (sca.personid=p.ID) LEFT JOIN codeset cs ON (cs.codesetid=scd.relationshiptypecodesetid)
-                            LEFT JOIN guardianpersonassoc gp ON (p.id=gp.personid) LEFT JOIN guardianstudent gs ON
-                            (s.dcid=gs.studentsdcid AND gp.guardianid=gs.guardianid) WHERE s.enroll_status=0
-                            ~[if.is.a.school] AND s.schoolid=~(curschoolid) [/if.is.a.school] ORDER BY s.lastfirst,
-                            sca.contactpriorityorder ; ;] <tr data-StudentID="~(dcid)">
-                    <td>~(school;t)</td>
-                    <td>~(student_number;t)</td>
-                    <td class="nowrap">~(lastfirst;t)</td>
-                    <td>~(grade_level;t)</td>
-                    <td class="nowrap">~(home_room;t)</td>
-                    <td>~(contactid;t)</td>
-                    <td class="nowrap">~(ContactName;t)</td>
-                    <td>~(contactpriorityorder;t)</td>
-                    <td>~(Relationship;t)</td>
-                    <td>~(OriginalContactType;t)</td>
-                    <td>~(isactive;t)</td>
-                    <td class="nowrap">~(Contact_Phone_Numbers;t)</td>
-                    <td class="nowrap">~(Email_Addresses;t)</td>
-                    <td>~(dataaccess;t)</td>
-                    <td>~(iscustodial;t)</td>
-                    <td>~(liveswithflg;t)</td>
-                    <td>~(receivesmailflg;t)</td>
-                    <td>~(isemergency;t)</td>
-                    <td>~(schoolpickupflg;t)</td>
+                    SELECT
+                    students.dcid,
+                    students.student_number,
+                    students.lastfirst,
+                    CASE
+                    WHEN UPPER(students.gender) = 'F' THEN 'Female'
+                    WHEN UPPER(students.gender) = 'M' THEN 'Male'
+                    ELSE students.gender
+                    END as gender,
+                    CASE
+                    WHEN TO_CHAR(students.grade_level) = -2 then 'PK3'
+                    WHEN TO_CHAR(students.grade_level) = -1 then 'PK4'
+                    WHEN TO_CHAR(students.grade_level) = 0 then 'K'
+                    WHEN TO_CHAR(students.grade_level) = 99 then 'Graduated'
+                    ELSE TO_CHAR(students.grade_level)
+                    END as PRETTY_GRADE,
+                    u_fb_medications.name,
+                    u_fb_medications.dosage,
+                    u_fb_medications.dosage_units,
+                    u_fb_medications.frequency_taken,
+                    u_fb_medications.prescribed
+                    FROM students
+                    ~[if#ss.~(gpv.ss;sqlText)=cur] INNER JOIN ~[temp.table.current.selection:students] temp ON
+                    (students.dcid = temp.dcid) [/if#ss]
+                    LEFT JOIN u_fb_medications
+                    ON students.dcid = u_fb_medications.studentsdcid
+                    WHERE 0=0
+                    ~[if.is.a.school] AND students.schoolid = ~(curschoolid) [/if.is.a.school]
+                    ORDER BY students.lastfirst ;] <tr class="Record" data-StudentID="~(DCID)">
+                        <td class="nowrap">~(Student_Number;t)</td>
+                        <td class="nowrap">~(lastfirst;t)</td>
+                        <td>~(gender;t)</td>
+                        <td>~(grade_level;t)</td>
+                        <td class="nowrap">~(medication;t)</td>
+                        <td>~(dosage;t)</td>
+                        <td>~(units;t)</td>
+                        <td>~(frequency;t)</td>
+                        <td>~(perscribed;t)</td>
                     </tr>
                     [/tlist_sql]
                 </tbody>
