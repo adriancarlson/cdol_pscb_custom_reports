@@ -27,16 +27,24 @@
                 <table border="0" cellspacing="0" cellpadding="0" class="linkDescList">
                     <thead>
                         <tr>
-                            <th style="white-space: nowrap;">Student Selection</th>
+                            <th style="white-space: nowrap;" width="180px">Student Selection</th>
+                            <th style="white-space: nowrap;">Grade Selection</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
                             <td>
                                 <select name="ss" id="ss">
-                                    <option value='' ~[if.~[gpv:ss]=]selected[/if]>All Students
+                                    <option value='' ~[if.~[gpv:ss]=]selected[/if]>All Students</option>
                                     <option value="cur" ~[if.~[gpv:ss]=cur]selected[/if]>Current Selection
-                                        (~[x:studsinset])
+                                        (~[x:studsinset])</option>
+                                </select>
+                            </td>
+                            <td>
+                                <select name="perscribed">
+                                    <option value="1" ~[if.~[gpv:perscribed]=1]selected[/if]>Students with Perscriptions
+                                    </option>
+                                    <option value="0" ~[if.~[gpv:perscribed]=0]selected[/if]>All Students</option>
                                 </select>
                             </td>
                         </tr>
@@ -97,6 +105,9 @@
                     ON students.dcid = u_fb_medications.studentsdcid
                     WHERE 0=0
                     ~[if.is.a.school] AND students.schoolid = ~(curschoolid) [/if.is.a.school]
+                    ~[if#perscribed.~(gpv.perscribed;sqlText)=1]
+                    AND _fb_medications.name IS NOT NULL
+                    [/if#perscribed]
                     ORDER BY students.lastfirst ;] <tr class="Record" data-StudentID="~(DCID)">
                         <td class="nowrap">~(Student_Number;t)</td>
                         <td class="nowrap">~(lastfirst;t)</td>
