@@ -1,0 +1,7 @@
+~[if.~(f.in;value=~(curschoolid);in=101,115,131,160,189,210)=0]
+<script>
+	$j(function () {
+		// $j("ul#pscbDevLinks").append('<li>Hello</li>');
+	}
+	);
+</script>
