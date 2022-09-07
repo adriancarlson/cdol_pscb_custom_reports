@@ -61,9 +61,7 @@
         ~[if#showData.~(gpv.showData;sqlText)=1]
         <div class="box-round">
             <h2>Perscribed Medications by Student</h2>
-            <div class="button-row" style="float: left;">
-                <span class="red">&nbsp;&nbsp;* indicates Medication Requires a Perscription </span>
-            </div>
+
             <table border="0" cellspacing="0" cellpadding="4" align="center" class="tablesorter grid" id="results">
                 <thead>
                     <tr>
@@ -128,6 +126,14 @@
                 </tbody>
             </table>
         </div>
+        <script>
+            $j(document).ready(function () {
+                setTimeout(
+                    function () {
+                        $j('#btnTools').parent().after(`<div style="float: right; margin-right:20px"><span class="red">&nbsp;&nbsp;* Indicates Medication Requires a Perscription </span></div>`);
+                    }, 750);
+            });
+        </script>
         [/if#showData]
         <!-- end of content of bounding box -->
         ~[wc:admin_footer_frame_css]
