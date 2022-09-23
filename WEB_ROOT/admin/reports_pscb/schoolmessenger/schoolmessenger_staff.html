@@ -32,28 +32,28 @@
                 </thead>
                 <tbody>
                     ~[tlist_sql;
-                    SELECT  DISTINCT
-                        Users.Last_Name, 
-                        Users.First_Name,
-                        CASE
-                            WHEN UPPER(gender) = 'F' THEN 'Female'
-                            WHEN UPPER(gender) = 'M' THEN 'Male'
-                            ELSE gender
-                        END AS gender,
-                        HOME_PHONE, 
-                        Addtl_User.MOBILE_PHONE, 
-                        Users.EMAIL_ADDR
+                    SELECT DISTINCT
+                    Users.Last_Name,
+                    Users.First_Name,
+                    CASE
+                    WHEN UPPER(gender) = 'F' THEN 'Female'
+                    WHEN UPPER(gender) = 'M' THEN 'Male'
+                    ELSE gender
+                    END AS gender,
+                    HOME_PHONE,
+                    Addtl_User.MOBILE_PHONE,
+                    Users.EMAIL_ADDR
                     FROM SchoolStaff
                     INNER JOIN Users
-                        ON SchoolStaff.USERS_DCID = USERS.DCID
+                    ON SchoolStaff.USERS_DCID = USERS.DCID
                     LEFT JOIN U_STAFF_ADDITIONAL_INFO Addtl_Staff
-                        ON Addtl_Staff.SCHOOLSTAFFDCID = SchoolStaff.DCID
+                    ON Addtl_Staff.SCHOOLSTAFFDCID = SchoolStaff.DCID
                     LEFT JOIN U_USERS_ADDITIONAL_INFO Addtl_User
-                        ON Users.DCID = Addtl_User.USERSDCID
+                    ON Users.DCID = Addtl_User.USERSDCID
                     INNER JOIN USERSCOREFIELDS
-                        ON USERSCOREFIELDS.USERSDCID = USERS.DCID
+                    ON USERSCOREFIELDS.USERSDCID = USERS.DCID
                     INNER JOIN SCHOOLS
-                        ON SchoolStaff.SchoolID = SCHOOLS.SCHOOL_NUMBER
+                    ON SchoolStaff.SchoolID = SCHOOLS.SCHOOL_NUMBER
                     WHERE SchoolStaff.Status = 1
                     ~[if.is.a.school] AND SchoolStaff.schoolid = ~(curschoolid) [/if.is.a.school]
                     ORDER BY
@@ -68,7 +68,6 @@
                         <td>~(gender)</td>
                         <td>~(HOME_PHONE)</td>
                         <td>~(MOBILE_PHONE)</td>
-                        <td>~(HOME_PHONE)</td>
                         <td>~(EMAIL_ADDR)</td>
                     </tr>
                     [/tlist_sql]
