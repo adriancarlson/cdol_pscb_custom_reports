@@ -27,10 +27,11 @@
                     <tr>
                         <th class="left">Last Name</th>
                         <th class="left">First Name</th>
-                        <th class="left">Gender</th>
+                        <th class="left filter-select">Gender</th>
                         <th class="center">Home Phone</th>
                         <th class="center">Mobile Phone</th>
                         <th class="center">Email Address</th>
+                        <th class="center">Personal Email</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -45,7 +46,8 @@
                     END AS gender,
                     HOME_PHONE,
                     Addtl_User.MOBILE_PHONE,
-                    Users.EMAIL_ADDR
+                    Users.EMAIL_ADDR,
+                    Addtl_User.PERSONAL_EMAIL
                     FROM SchoolStaff
                     INNER JOIN Users
                     ON SchoolStaff.USERS_DCID = USERS.DCID
@@ -72,6 +74,7 @@
                         <td>~(HOME_PHONE)</td>
                         <td>~(MOBILE_PHONE)</td>
                         <td>~(EMAIL_ADDR)</td>
+                        <td>~(PERSONAL_EMAIL)</td>
                     </tr>
                     [/tlist_sql]
                 </tbody>

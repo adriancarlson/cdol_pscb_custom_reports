@@ -74,7 +74,7 @@
         <!-- Start of Results -->
         ~[if#showData.~(gpv.showData;sqlText)=1]
         <div class="box-round">
-            <h2>Student Agreements</h2>
+            <h2>SchoolMessenger - Student</h2>
             <table border="0" cellspacing="0" cellpadding="4" align="center" class="tablesorter grid" id="results">
                 <thead>
                     <tr>
@@ -252,25 +252,25 @@
                     ORDER BY students.lastfirst
                     ;]
                     <tr data-StudentID="~(dcid)">
-                        <td class="nowrap"><a href="/admin/students/studentpages/agreements.html?frn=001~(dcid)"
+                        <td class="nowrap"><a href="/admin/students/contacts.html?frn=001~(dcid)"
                                 target="_blank">~(studentnumb)</a>
                         </td>
-                        <td>~(name;t)</td>
+                        <td class="nowrap">~(name;t)</td>
                         <td>~(gender;t)</td>
                         <td class="center">~(grade_level)</td>
                         <td>~(language;t)</td>
                         <td class="nowrap center">~(c1homephone;t)</td>
                         <td class="nowrap center">~(c1mobliephone;t)</td>
-                        <td class="nowrap">~(c1email;t)</td>
+                        <td class="nowrap center">~(c1email;t)</td>
                         <td class="nowrap center">~(c2homephone;t)</td>
                         <td class="nowrap center">~(c2mobliephone;t)</td>
-                        <td class="nowrap">~(c2email;t)</td>
+                        <td class="nowrap center">~(c2email;t)</td>
                         <td class="nowrap center">~(c3homephone;t)</td>
                         <td class="nowrap center">~(c3mobliephone;t)</td>
-                        <td class="nowrap">~(c3email;t)</td>
+                        <td class="nowrap center">~(c3email;t)</td>
                         <td class="nowrap center">~(c4homephone;t)</td>
                         <td class="nowrap center">~(c4mobliephone;t)</td>
-                        <td class="nowrap">~(c4email;t)</td>
+                        <td class="nowrap center">~(c4email;t)</td>
                     </tr>
                     [/tlist_sql]
                 </tbody>
