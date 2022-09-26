@@ -7,6 +7,9 @@
         <link href="/images/css/screen.css" rel="stylesheet" media="screen">
         <link href="/images/css/print.css" rel="stylesheet" media="print">
         ~[wc:pscb_init]
+        <script>
+            pscbToolButtons = { "copyData": "Yes", "csvFile": "Yes", "pdfFile": "Yes", "curSel": "Yes" };
+        </script>
     </head>
 
     <body>
@@ -18,57 +21,255 @@
 
         <!-- Start of Results -->
         <h1>SchoolMessenger - Student</h1>
+        <form name="searchform" action="#" method="POST">
+            <div class="box-round" style="overflow: hidden;">
+                <h2>Report Filters</h2>
+                <table border="0" cellspacing="0" cellpadding="0" class="linkDescList">
+                    <thead>
+                        <tr>
+                            <th style="white-space: nowrap;" width="180px">Student Selection</th>
+                            <th style="white-space: nowrap;">Grade Selection</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <select name="ss" id="ss">
+                                    <option value='' ~[if.~[gpv:ss]=]selected[/if]>All Students</option>
+                                    <option value="cur" ~[if.~[gpv:ss]=cur]selected[/if]>Current Selection
+                                        (~[x:studsinset])</option>
+                                </select>
+                            </td>
+                            <td>
+                                <select name="gr" name="gr">
+                                    <option value='' ~[if.~[gpv:gr]=]selected[/if]>All Grades</option>
+                                    ~[tlist_sql;
+                                    SELECT DISTINCT GRADE_LEVEL,
+                                    CASE
+                                    WHEN TO_CHAR(grade_level) = -2 then 'PK3'
+                                    WHEN TO_CHAR(grade_level) = -1 then 'PK4'
+                                    WHEN TO_CHAR(grade_level) = 0 then 'K'
+                                    WHEN TO_CHAR(grade_level) = 99 then 'Graduated'
+                                    ELSE TO_CHAR(grade_level)
+                                    END as prettygrade
+                                    FROM STUDENTS
+                                    WHERE TO_CHAR(SCHOOLID) LIKE CASE WHEN TO_CHAR(~(curschoolid)) = '0'
+                                    THEN '%' ELSE TO_CHAR(~(curschoolid)) END
+                                    AND ENROLL_STATUS = 0
+                                    ORDER BY GRADE_LEVEL]
+                                    <option value="'~(gr)'">~(prettygrade)</option>
+                                    [/tlist_sql]
+                                </select>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="button-row" style="float: left;">
+                    <input type="hidden" name="showData" value="1">
+                    <span class="red">&nbsp;&nbsp;Select parameters and click submit</span>
+                    <input type="hidden" name="ac" value="prim">~[submitbutton]
+                </div>
+            </div>
+        </form>
+        <!-- Start of Results -->
+        ~[if#showData.~(gpv.showData;sqlText)=1]
         <div class="box-round">
-            <table class="tablesorter grid" id="results">
+            <h2>Student Agreements</h2>
+            <table border="0" cellspacing="0" cellpadding="4" align="center" class="tablesorter grid" id="results">
                 <thead>
                     <tr>
-                        <th class="left">Last Name</th>
-                        <th class="left">First Name</th>
-                        <th class="left">Gender</th>
-                        <th class="center">Home Phone</th>
-                        <th class="center">Mobile Phone</th>
-                        <th class="center">Email Address</th>
+                        <th class="left">Std Number</th>
+                        <th class="left">Std Name</th>
+                        <th class="left filter-select">Gender</th>
+                        <th class="left filter-select">Grade</th>
+                        <th class="left filter-select">Language</th>
+                        <th class="center">Contact 1 Home Phone</th>
+                        <th class="center">Contact 1 Mobile Phone</th>
+                        <th class="Left">Contact 1 Email Address</th>
+                        <th class="center">Contact 2 Home Phone</th>
+                        <th class="center">Contact 2 Mobile Phone</th>
+                        <th class="Left">Contact 2 Email Address</th>
+                        <th class="center">Contact 3 Home Phone</th>
+                        <th class="center">Contact 3 Mobile Phone</th>
+                        <th class="Left">Contact 3 Email Address</th>
+                        <th class="center">Contact 4 Home Phone</th>
+                        <th class="center">Contact 4 Mobile Phone</th>
+                        <th class="Left">Contact 4 Email Address</th>
+
                     </tr>
                 </thead>
                 <tbody>
                     ~[tlist_sql;
-                    SELECT  DISTINCT
-                        Users.Last_Name, 
-                        Users.First_Name,
-                        CASE
-                            WHEN UPPER(gender) = 'F' THEN 'Female'
-                            WHEN UPPER(gender) = 'M' THEN 'Male'
-                            ELSE gender
-                        END AS gender,
-                        HOME_PHONE, 
-                        Addtl_User.MOBILE_PHONE, 
-                        Users.EMAIL_ADDR
-                    FROM SchoolStaff
-                    INNER JOIN Users
-                        ON SchoolStaff.USERS_DCID = USERS.DCID
-                    LEFT JOIN U_STAFF_ADDITIONAL_INFO Addtl_Staff
-                        ON Addtl_Staff.SCHOOLSTAFFDCID = SchoolStaff.DCID
-                    LEFT JOIN U_USERS_ADDITIONAL_INFO Addtl_User
-                        ON Users.DCID = Addtl_User.USERSDCID
-                    INNER JOIN USERSCOREFIELDS
-                        ON USERSCOREFIELDS.USERSDCID = USERS.DCID
+                    WITH CNT AS (
+                    SELECT STD_CONTACT_ASSOC.STUDENTDCID, CONTACT_1.PERSONDCID, CONTACT_1.HOME_PHONE,
+                    CONTACT_1.MOBILE_PHONE, CONTACT_1.EMAILADDRESS, STD_CONTACT_ASSOC.STU_CNT_INDEX
+                    FROM
+                    (
+                    SELECT STUDENTCONTACTASSOC.STUDENTDCID, PERSON.DCID PERSONDCID, ROW_NUMBER() OVER(PARTITION BY
+                    STUDENTDCID ORDER BY STUDENTDCID) as STU_CNT_INDEX
+                    FROM PERSON
+                    INNER JOIN STUDENTCONTACTASSOC
+                    ON PERSON.ID = STUDENTCONTACTASSOC.PERSONID
+                    INNER JOIN STUDENTCONTACTDETAIL
+                    ON STUDENTCONTACTASSOC.STUDENTCONTACTASSOCID = STUDENTCONTACTDETAIL.STUDENTCONTACTASSOCID
+                    LEFT JOIN u_studentcontactdetail_cdol
+                    ON studentcontactdetail.studentcontactdetailid =
+                    u_studentcontactdetail_cdol.studentcstudentcontactdetailid
+                    WHERE u_studentcontactdetail_cdol.schoolmessengerflg = 1
+                    ORDER BY STUDENTCONTACTASSOC.STUDENTDCID,STUDENTCONTACTASSOC.CONTACTPRIORITYORDER
+                    ) STD_CONTACT_ASSOC
+                    INNER JOIN
+                    (
+                    SELECT PERSON.DCID PERSONDCID, PERSON.ID PERSONID, HOME_PHONE.PhoneNumber as HOME_PHONE,
+                    MOBILE_PHONE.PhoneNumber as MOBILE_PHONE, SINGLE_EMAIL.EMAILADDRESS
+                    FROM PERSON
+                    LEFT JOIN
+                    (
+                    SELECT PERSON.DCID, PERSON.ID, PhoneNumber.PhoneNumber
+                    FROM PERSON
+                    INNER JOIN PersonPhoneNumberAssoc
+                    ON PERSON.ID = PersonPhoneNumberAssoc.PersonID
+                    INNER JOIN PhoneNumber
+                    ON PersonPhoneNumberAssoc.PhoneNumberID = PhoneNumber.PhoneNumberID
+                    INNER JOIN (
+                    SELECT PERSON.DCID, PERSONID,
+                    min(PersonPhoneNumberAssoc.PhoneNumberPriorityOrder) minPhoneNumberPriorityOrder
+                    FROM PERSON
+                    INNER JOIN PersonPhoneNumberAssoc
+                    ON PERSON.ID = PersonPhoneNumberAssoc.PersonID
+                    INNER JOIN PhoneNumber
+                    ON PersonPhoneNumberAssoc.PhoneNumberID = PhoneNumber.PhoneNumberID
+                    WHERE PersonPhoneNumberAssoc.PhoneTypeCodeSetID = 13
+                    GROUP BY PERSON.DCID, PERSONID
+                    ) SINGLE_MOBILE_NUMBER
+                    ON PERSON.DCID = SINGLE_MOBILE_NUMBER.DCID
+                    AND SINGLE_MOBILE_NUMBER.minPhoneNumberPriorityOrder =
+                    PersonPhoneNumberAssoc.PhoneNumberPriorityOrder
+                    AND PersonPhoneNumberAssoc.PhoneTypeCodeSetID = 13
+                    ) MOBILE_PHONE
+                    ON PERSON.DCID = MOBILE_PHONE.DCID
+                    LEFT JOIN
+                    (
+                    SELECT PERSON.DCID, PERSON.ID, PhoneNumber.PhoneNumber
+                    FROM PERSON
+                    INNER JOIN PersonPhoneNumberAssoc
+                    ON PERSON.ID = PersonPhoneNumberAssoc.PersonID
+                    INNER JOIN PhoneNumber
+                    ON PersonPhoneNumberAssoc.PhoneNumberID = PhoneNumber.PhoneNumberID
+                    INNER JOIN (
+                    SELECT PERSON.DCID, PERSONID,
+                    min(PersonPhoneNumberAssoc.PhoneNumberPriorityOrder) minPhoneNumberPriorityOrder
+                    FROM PERSON
+                    INNER JOIN PersonPhoneNumberAssoc
+                    ON PERSON.ID = PersonPhoneNumberAssoc.PersonID
+                    INNER JOIN PhoneNumber
+                    ON PersonPhoneNumberAssoc.PhoneNumberID = PhoneNumber.PhoneNumberID
+                    WHERE PersonPhoneNumberAssoc.PhoneTypeCodeSetID = 12
+                    GROUP BY PERSON.DCID, PERSONID
+                    ) SINGLE_HOME_NUMBER
+                    ON PERSON.DCID = SINGLE_HOME_NUMBER.DCID
+                    AND SINGLE_HOME_NUMBER.minPhoneNumberPriorityOrder = PersonPhoneNumberAssoc.PhoneNumberPriorityOrder
+                    AND PersonPhoneNumberAssoc.PhoneTypeCodeSetID = 12
+                    ) HOME_PHONE
+                    ON PERSON.DCID = HOME_PHONE.DCID
+                    LEFT JOIN
+                    ( SELECT PERSON.DCID, PERSON.ID, EMAILADDRESS.EMAILADDRESS
+                    FROM PERSON
+                    INNER JOIN PERSONEMAILADDRESSASSOC
+                    ON PERSON.ID = PERSONEMAILADDRESSASSOC.PERSONID
+                    INNER JOIN EMAILADDRESS
+                    ON PERSONEMAILADDRESSASSOC.EMAILADDRESSID = EMAILADDRESS.EMAILADDRESSID
+                    INNER JOIN (SELECT PERSON.DCID, PERSONID, min(PERSONEMAILADDRESSASSOC.EMAILADDRESSPRIORITYORDER)
+                    EMAILPRIORITYORDER
+                    FROM PERSON
+                    INNER JOIN PERSONEMAILADDRESSASSOC
+                    ON PERSON.ID = PERSONEMAILADDRESSASSOC.PERSONID
+                    INNER JOIN EMAILADDRESS
+                    ON PERSONEMAILADDRESSASSOC.EMAILADDRESSID = EMAILADDRESS.EMAILADDRESSID
+                    GROUP BY PERSON.DCID, PERSONID) EMAIL
+                    ON PERSON.DCID = EMAIL.DCID
+                    AND EMAIL.EMAILPRIORITYORDER = PERSONEMAILADDRESSASSOC.EMAILADDRESSPRIORITYORDER) SINGLE_EMAIL
+                    ON PERSON.DCID = SINGLE_EMAIL.DCID
+                    ) CONTACT_1
+                    ON STD_CONTACT_ASSOC.PERSONDCID = CONTACT_1.PERSONDCID
+                    )
+                    SELECT
+                    students.dcid
+                    STUDENTS.student_number,
+                    students.lastfirst,
+                    CASE
+                    WHEN UPPER(gender) = 'F' THEN 'Female'
+                    WHEN UPPER(gender) = 'M' THEN 'Male'
+                    ELSE gender
+                    END AS gender,
+                    CASE
+                    WHEN STUDENTS.GRADE_LEVEL = 0 THEN 'K'
+                    WHEN STUDENTS.GRADE_LEVEL = -1 THEN 'PK'
+                    WHEN STUDENTS.GRADE_LEVEL = -2 THEN 'PK'
+                    ELSE TO_CHAR(STUDENTS.GRADE_LEVEL)
+                    END AS Grade_Level,
+                    CASE
+                    WHEN U_STUDENT_ADDITIONAL_INFO.HOME_LANGUAGE = 'Arabic' THEN 'Arabic'
+                    WHEN U_STUDENT_ADDITIONAL_INFO.HOME_LANGUAGE = 'Chinese' THEN 'Chinese'
+                    WHEN U_STUDENT_ADDITIONAL_INFO.HOME_LANGUAGE = 'French' THEN 'French'
+                    WHEN U_STUDENT_ADDITIONAL_INFO.HOME_LANGUAGE = 'Portuguese' THEN 'Portuguese'
+                    WHEN U_STUDENT_ADDITIONAL_INFO.HOME_LANGUAGE = 'Spanish' THEN 'Spanish'
+                    WHEN U_STUDENT_ADDITIONAL_INFO.HOME_LANGUAGE = 'Vietnamese' THEN 'Vietnamese'
+                    ELSE 'English'
+                    END AS LANGUAGE,
+                    replace(to_CHAR(CNT_1.HOME_PHONE,'999,999,9999'),',','-'),
+                    replace(to_CHAR(CNT_1.MOBILE_PHONE,'999,999,9999'),',','-'),
+                    CNT_1.EMAILADDRESS CNT_1_EMAILADDRESS,
+                    replace(to_CHAR(CNT_2.HOME_PHONE,'999,999,9999'),',','-'),
+                    replace(to_CHAR(CNT_2.MOBILE_PHONE,'999,999,9999'),',','-'),
+                    CNT_2.EMAILADDRESS CNT_2_EMAILADDRESS,
+                    replace(to_CHAR(CNT_3.HOME_PHONE,'999,999,9999'),',','-'),
+                    replace(to_CHAR(CNT_3.MOBILE_PHONE,'999,999,9999'),',','-'),
+                    CNT_3.EMAILADDRESS CNT_3_EMAILADDRESS,
+                    replace(to_CHAR(CNT_4.HOME_PHONE,'999,999,9999'),',','-'),
+                    replace(to_CHAR(CNT_4.MOBILE_PHONE,'999,999,9999'),',','-'),
+                    CNT_4.EMAILADDRESS CNT_4_EMAILADDRESS
+                    FROM STUDENTS
+                    ~[if#ss.~(gpv.ss;sqlText)=cur] INNER JOIN ~[temp.table.current.selection:students] temp ON (students.dcid =
+                    temp.dcid)
+                    [/if#ss]
                     INNER JOIN SCHOOLS
-                        ON SchoolStaff.SchoolID = SCHOOLS.SCHOOL_NUMBER
-                    WHERE SchoolStaff.Status = 1
-                    ~[if.is.a.school] AND SchoolStaff.schoolid = ~(curschoolid) [/if.is.a.school]
-                    ORDER BY
-                    Users.Last_Name
-                    ;alternatecolor;nonemessage=
-                    <tr nodata>
-                        <td colspan="100%">No Records Found.</td>
-                    </tr>]
-                    <tr class="Record" d>
-                        <td>~(Last_Name)</td>
-                        <td>~(First_Name)</td>
-                        <td>~(gender)</td>
-                        <td>~(HOME_PHONE)</td>
-                        <td>~(MOBILE_PHONE)</td>
-                        <td>~(EMAIL_ADDR)</td>
+                    ON STUDENTS.SCHOOLID = SCHOOLS.SCHOOL_NUMBER
+                    LEFT JOIN CNT CNT_1
+                    ON (CNT_1.STUDENTDCID = STUDENTS.DCID AND CNT_1.STU_CNT_INDEX =1)
+                    LEFT JOIN CNT CNT_2
+                    ON (CNT_2.STUDENTDCID = STUDENTS.DCID AND CNT_2.STU_CNT_INDEX =2)
+                    LEFT JOIN CNT CNT_3
+                    ON (CNT_3.STUDENTDCID = STUDENTS.DCID AND CNT_3.STU_CNT_INDEX =3)
+                    LEFT JOIN CNT CNT_4
+                    ON (CNT_4.STUDENTDCID = STUDENTS.DCID AND CNT_4.STU_CNT_INDEX =4)
+                    LEFT JOIN U_STUDENT_ADDITIONAL_INFO
+                    ON U_STUDENT_ADDITIONAL_INFO.STUDENTSDCID = STUDENTS.DCID
+                    WHERE STUDENTS.ENROLL_STATUS IN (0,-1)
+                    ~[if.is.a.school] AND STUDENTS.schoolid = ~(curschoolid) [/if.is.a.school]
+                    ~[if#gr.~(gpv.gr;sqlText)#] AND students.grade_level = ~(gpv.gr) [/if#gr]
+                    ORDER BY students.lastfirst
+                    ;]
+                    <tr data-StudentID="~(dcid)">
+                        <td class="nowrap"><a href="/admin/students/studentpages/agreements.html?frn=001~(dcid)"
+                                target="_blank">~(studentnumb)</a>
+                        </td>
+                        <td>~(name;t)</td>
+                        <td>~(gender;t)</td>
+                        <td class="center">~(grade_level)</td>
+                        <td>~(language;t)</td>
+                        <td class="nowrap center">~(c1homephone;t)</td>
+                        <td class="nowrap center">~(c1mobliephone;t)</td>
+                        <td class="nowrap">~(c1email;t)</td>
+                        <td class="nowrap center">~(c2homephone;t)</td>
+                        <td class="nowrap center">~(c2mobliephone;t)</td>
+                        <td class="nowrap">~(c2email;t)</td>
+                        <td class="nowrap center">~(c3homephone;t)</td>
+                        <td class="nowrap center">~(c3mobliephone;t)</td>
+                        <td class="nowrap">~(c3email;t)</td>
+                        <td class="nowrap center">~(c4homephone;t)</td>
+                        <td class="nowrap center">~(c4mobliephone;t)</td>
+                        <td class="nowrap">~(c4email;t)</td>
                     </tr>
                     [/tlist_sql]
                 </tbody>
