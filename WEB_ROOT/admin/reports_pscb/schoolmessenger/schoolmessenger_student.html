@@ -194,7 +194,7 @@
                     ON STD_CONTACT_ASSOC.PERSONDCID = CONTACT_1.PERSONDCID
                     )
                     SELECT
-                    students.dcid
+                    students.dcid,
                     STUDENTS.student_number,
                     students.lastfirst,
                     CASE
@@ -230,7 +230,8 @@
                     replace(to_CHAR(CNT_4.MOBILE_PHONE,'999,999,9999'),',','-'),
                     CNT_4.EMAILADDRESS CNT_4_EMAILADDRESS
                     FROM STUDENTS
-                    ~[if#ss.~(gpv.ss;sqlText)=cur] INNER JOIN ~[temp.table.current.selection:students] temp ON (students.dcid =
+                    ~[if#ss.~(gpv.ss;sqlText)=cur] INNER JOIN ~[temp.table.current.selection:students] temp ON
+                    (students.dcid =
                     temp.dcid)
                     [/if#ss]
                     INNER JOIN SCHOOLS
