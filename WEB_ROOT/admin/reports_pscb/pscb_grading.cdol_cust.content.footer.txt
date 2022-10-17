@@ -11,6 +11,10 @@
 		<td><a href="/admin/reports_pscb/grading/cdol_gradebook_last_updated.html">Gradebook - Last Updated</a></td>
 		<td>Report shows the last date that teachers updated Their PowerTeacher Gradebooks</td>
 	</tr>
+	<tr id="noGrade">
+		<td><a href="/admin/reports_pscb/grading/cdol_gradebook_no_grade.html">Gradebook - Blank/No Grades</a></td>
+		<td>Report shows the students with blanks or no grades in a course for a selected term</td>
+	</tr>
 </table>
 
 <script>
@@ -22,6 +26,8 @@
 		$j(prcntCng).after(tchrPercentAvg);
 		var lastUpdate = $j('#lastUpdate').closest('tr');
 		$j("td:contains('Gradebook - Update Status')").closest('tr').before(lastUpdate);
+		var noGrade = $j('#noGrade').closest('tr');
+		$j(noGrade).closest('tr').after(lastUpdate);
 		/* remove the hidden tables  and divs */
 		$j("#hiddenTable").remove();
 	});
