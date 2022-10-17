@@ -7,21 +7,6 @@
         <link href="/images/css/screen.css" rel="stylesheet" media="screen">
         <link href="/images/css/print.css" rel="stylesheet" media="print">
         ~[wc:pscb_init]
-        <script>
-            pscbToolButtons = { "copyData": "Yes", "csvFile": "Yes", "pdfFile": "Yes", "curSel": "No" };
-            $j(function () {
-                $j("div#data h2:first").append(": " + $j("select#sc option:selected").text() + " - " + $j("select#t option:selected").text());
-            })
-        </script>
-        <style>
-            table.grid tr:nth-child(odd)>td.assignmentflag {
-                color: transparent;
-            }
-
-            table.grid tr:nth-child(even)>td.assignmentflag {
-                color: transparent;
-            }
-        </style>
     </head>
 
     <body>
@@ -31,64 +16,40 @@
             href="/admin/reports_pscb/pscb_grading.html" target="_top">Grading</a> &gt; Gradebook - Blank/No Grades
         <!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
 
-
         <!-- Begin report filters-->
         <form name="searchform" action="#" method="POST">
             <h1>Gradebook - Blank/No Grades</h1>
             <div class="box-round" style="overflow: hidden;">
                 <h2>Report Filters</h2>
-                <table border="0" cellspacing="0" cellpadding="4" class="linkDescList">
+                <table border="0" cellspacing="0" cellpadding="0" class="linkDescList">
                     <thead>
                         <tr>
-                            <th width="220px">Grade Reporting Term</th>
-                            <th width="120px">Teacher</th>
+                            <th width="100px">Term</th>
+                            <th>Students</th>
+
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
                             <td>
-                                <select name="gradeBin" id="gradeBin">
-                                    <option value="" ~[if.~(gpv.gradebin)=]selected[/if]>All Terms
-                                    </option>
-                                    ~[tlist_sql;SELECT DISTINCT termbins.StoreCode AS Value, CASE WHEN
-                                    termbins.StoreCode = '~(gpv.gradeBin;sqlText)' THEN 'selected' ELSE '' END
-                                    isselected, termbins.StoreCode FROM termbins WHERE termbins.schoolid =
-                                    ~(curschoolid) AND termbins.yearid = ~(curyearid) ORDER BY termbins.StoreCode]
-                                    <option value="~(Value)" ~(isselected)>~(termbins.StoreCode)</option>
+                                <select name="term">
+                                    <option value="">All Terms</option>
+                                    ~[tlist_sql;
+                                    SELECT DISTINCT storecode, CASE WHEN storecode = '~(gpv.term;sqlText)' THEN
+                                    'selected' ELSE '' END selectedterm
+                                    FROM termbins
+                                    WHERE yearid = ~(curyearid) AND schoolid = ~(curschoolid)
+                                    ORDER BY storecode]
+                                    <option value="~(storecode;t)" ~(selectedterm,t)>~(storecode;t)</option>
                                     [/tlist_sql]
                                 </select>
                             </td>
+
                             <td>
-                                <select name="t" id="t">
-                                    <option value='0' ~[if.~(gpv.t)=0]selected[/if]>All Teachers</option>
-                                    ~[tlist_sql;
-                                    SELECT DISTINCT
-                                    t.ID,
-                                    CASE
-                                    WHEN t.ID = CASE
-                                    WHEN to_char('~(gpv.t;sqlText)') is null THEN 0
-                                    ELSE to_number('~(gpv.t;sqlText)')
-                                    END THEN 'selected'
-                                    ELSE ''
-                                    END AS isselected,
-                                    t.LastFirst AS Teacher
-                                    FROM Teachers t
-                                    INNER JOIN Sections sec ON t.ID = sec.Teacher
-                                    AND t.SchoolID = sec.SchoolID
-                                    AND sec.ExcludeFromStoredGrades != 1
-                                    INNER JOIN Terms ON sec.TermID = Terms.ID
-                                    AND sec.SchoolID = Terms.SchoolID
-                                    WHERE
-                                    t.SchoolID = ~(curschoolid)
-                                    AND t.status = 1
-                                    AND t.StaffStatus = 1
-                                    AND Terms.FirstDay
-                                    <= (SELECT LastDay FROM Terms WHERE SchoolID=~(curschoolid) AND ID=~(curtermid)) AND
-                                        Terms.LastDay>= (SELECT FirstDay FROM Terms WHERE SchoolID = ~(curschoolid) AND
-                                        ID = ~(curtermid))
-                                        ORDER BY t.LastFirst]
-                                        <option value="~(ID;l)" ~(isselected;t)>~(Teacher;t)</option>
-                                        [/tlist_sql]
+                                <select name="ss">
+                                    <option value="">All Students</option>
+                                    <option ~[if.~(gpv.ss)=cur]selected[/if] value="cur">Current Selection
+                                        (~[x:studsinset])</option>
                                 </select>
                             </td>
                         </tr>
@@ -96,19 +57,20 @@
                 </table>
                 <div class="button-row" style="float: left;">
                     <input type="hidden" name="showData" value="1">
+                    <input type="hidden" name="gdList" id="gdList" value="~(gpv.gdList)">
                     <span class="red">&nbsp;&nbsp;Select parameters and click submit</span>
                     <input type="hidden" name="ac" value="prim">~[submitbutton]
                 </div>
             </div>
         </form>
-        <!-- end report parameters -->
+        <!-- End report filters-->
         ~[if#showData.~(gpv.showData;num)=1]
-        <!-- begin content -->
+        <!-- Start of Results -->
         <div class="box-round">
-            <h2>Grades and Comments</h2>
-            <table border="0" cellspacing="0" cellpadding="4" class="tablesorter grid" id="results" groupRowsByCol="6">
+            <h2>No Grades List: ~(gpv.gdList)</h2>
+            <table border="0" cellspacing="0" cellpadding="4" class="tablesorter grid" id="results">
                 <thead>
-                    <tr>
+                    <tr class="headerRow">
                         <th class="left filter-select">Teacher</th>
                         <th class="left filter-select">Crs Name</th>
                         <th class="left">Crs Num</th>
@@ -119,11 +81,6 @@
                         <th align="right">Percent</th>
                     </tr>
                 </thead>
-                ~[if#t.~(gpv.t;sqlText)=]
-                <tr>
-                    <td colspan="100%"></td>
-                </tr>
-                [else#t]
                 <tbody>
                     ~[tlist_sql;
                     SELECT
@@ -139,19 +96,25 @@
                     FROM
                     CC
                     INNER JOIN Sections Sec
+                    ON abs(CC.SectionID) = Sec.ID
                     INNER JOIN Courses Crs
                     ON Sec.Course_Number = Crs.Course_Number
                     INNER JOIN Teachers Tch
                     ON Sec.Teacher = Tch.ID
-                    AND Tch.id >= CASE WHEN To_Char('~(gpv.t;sqlText)') IS null THEN -1 ELSE
-                    To_Number('~(gpv.t;sqlText)') END
-                    AND Tch.id
-                    <= CASE WHEN To_Char('~(gpv.t;sqlText)') IS null THEN -1 WHEN To_Char('~(gpv.t;sqlText)')='0' THEN
-                        999999999 ELSE To_Number('~(gpv.t;sqlText)') END INNER JOIN Terms Trm ON Sec.TermID=Trm.ID AND
-                        Sec.SchoolID=Trm.SchoolID INNER JOIN Students St ON CC.StudentID=St.ID LEFT OUTER JOIN
-                        PGFinalGrades PGFG ON Sec.ID=PGFG.SectionID AND St.ID=PGFG.StudentID
-                        ~[if#1.~(gpv.gradebin;sqlText)#] AND PGFG.Grade='~(gpv.gradeBin;sqlText)' [/if#1] WHERE
-                        CC.DateEnrolled <=sysdate AND CC.DateLeft> sysdate
+                    INNER JOIN Terms Trm
+                    ON Sec.TermID = Trm.ID
+                    AND Sec.SchoolID = Trm.SchoolID
+                    INNER JOIN Students St
+                    ON CC.StudentID = St.ID
+                    ~[if#ss.~(gpv.ss)=cur] INNER JOIN ~[temp.table.current.selection:students] temp ON (st.dcid =
+                    temp.dcid) [/if#ss]
+                    LEFT OUTER JOIN PGFinalGrades PGFG
+                    ON Sec.ID = PGFG.SectionID
+                    AND St.ID = PGFG.StudentID
+                    ~[if#1.~(gpv.term;sqlText)#] AND PGFG.finalgradename = '~(gpv.term;sqlText)' [/if#1]
+                    WHERE
+                    CC.DateEnrolled <= sysdate AND CC.DateLeft> sysdate
+                        AND sec.termid BETWEEN ~(curyearid)00 AND ~(curyearid)99
                         AND CC.SchoolID = ~(curschoolid)
                         AND (
                         PGFG.Grade || '' LIKE ''
@@ -171,7 +134,7 @@
                             <td class="nowrap">~(Teacher;t)</td>
                             <td class="nowrap">~(Course_Name;t)</td>
                             <td>~(Course_Number;t).~(Section_Number;t)</td>
-                            <td class="nowrap">~(expression;t)</td>
+                            <td>~(expression;t;externalExpression)</td>
                             <td>~(student_number;t)</td>
                             <td class="nowrap">~(LastFirst;t)</td>
                             <td>~(grade;t)</td>
@@ -179,7 +142,6 @@
                         </tr>
                         [/tlist_sql]
                 </tbody>
-                [/if#t]
             </table>
         </div>
         <!-- End of results -->
