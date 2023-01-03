@@ -69,17 +69,16 @@
         ~[if#showData.~(gpv.showData)=1]
         <!-- Start of Results -->
         <div class="box-round">
-            <h2>Gradebook - Failing Grades&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(~(gpv.lp;sqlText) to ~(gpv.hp;sqlText))</h2>
-            <p class="bold">OR = Override &nbsp;&nbsp; EX = Exempt &nbsp;&nbsp; INC = Incomplete</p>
+            <h2>Gradebook - Failing Grades</h2>
             <table cellspacing="0" cellpadding="4" class="tablesorter grid" id="results">
                 <thead>
                     <tr class="headerRow">
                         <th class="left">Student Number</th>
                         <th class="left">Student</th>
-                        <th class="left filter-select">Grade Level</th>
-                        <th class="left">Reporting Term</th>
+                        <th class="filter-select">Grade Level</th>
+                        <th >Reporting Term</th>
                         <th class="right">Percent</th>
-                        <th class="left filter-select">Grade</th>
+                        <th class="right filter-select">Grade</th>
                         <th class="left">Section</th>
                         <th class="left filter-select">Course</th>
                         <th class="left filter-select">Teacher</th>
@@ -88,7 +87,7 @@
                     </tr>
                 </thead>
                 ~[tlist_sql;
-                SELECT DISTINCT
+                SELECT 
                 STUDENTS.DCID SDCID,
                 STUDENTS.STUDENT_NUMBER,
                 STUDENTS.LASTFIRST,
@@ -121,21 +120,20 @@
                 WHERE
                 STUDENTS.schoolid = ~(curschoolid)
                 ~[if#se.~(gpv.se;sqlText)#cur] AND students.enroll_status = 0 [/if#se]
-                ~[if#tm.~(gpv.tm;sqlText)#] and pgf.FinalGradeName = '~(gpv.tm;sqlText)' [/if#tm]
+                ~[if#tm.~(gpv.tm;sqlText)#] and pgfinalgrades.FinalGradeName = '~(gpv.tm;sqlText)' [/if#tm]
                 and sections.Termid BETWEEN ~(curyearid)00 AND ~(curyearid)99
                 and sections.ExcludeFromStoredGrades = 0
-                and pgfinalgrades.Percent >= ~(gpv.lp;sqlText) and pgfinalgrades.Percent
-                <= ~(gpv.hp;sqlText) and pgfinalgrades.Grade NOT LIKE '-%' ORDER BY students.lastfirst,
+                and pgfinalgrades.Grade NOT LIKE '-%' ORDER BY students.lastfirst,
                     sections.expression, pgfinalgrades.FinalGradeName ;alternatecolor;nonemessage=<tr nodata>
                     <td colspan="100%">No Records Found.</td>
                     </tr>]
                     <tr class="Record" data-StudentID="~(sdcid;t)">
                         <td>~(student_number;t)</td>
                         <td class="nowrap">~(LastFirst;t)</td>
-                        <td>~(grade_level;t)</td>
-                        <td>~(FinalGradeName;t)</td>
-                        <td class="right">~(Percent;l)</td>
-                        <td>~(Grade;t)</td>
+                        <td class="center">~(grade_level;t)</td>
+                        <td class="center">~(FinalGradeName;t)</td>
+                        <td class="right">~(Percent;l)%</td>
+                        <td class="right">~(Grade;t)</td>
                         <td>~(crssec;t)</td>
                         <td class="nowrap">~(Course_Name;t)</td>
                         <td class="nowrap">~(Teacher;t)</td>
