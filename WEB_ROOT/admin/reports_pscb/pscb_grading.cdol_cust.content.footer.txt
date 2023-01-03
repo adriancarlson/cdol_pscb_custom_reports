@@ -15,11 +15,13 @@
 		<td><a href="/admin/reports_pscb/grading/cdol_gradebook_no_grade.html">Gradebook - Blank/No Grades</a></td>
 		<td>Report shows the students with blanks or no grades in a course for a selected term</td>
 	</tr>
+	~[if.~(f.in;value=~(curschoolid);in=101,115,130,160,189,210)=1]
 	</tr>
 		<tr id="failGrade">
-		<td><a href="/admin/reports_pscb/grading/cdol_gradebook_failing_grade.html">Gradebook - Failing Grades</a></td>
+		<td><a href="/admin/reports_pscb/grading/cdol_gradebook_failing_grades.html">Gradebook - Failing Grades</a></td>
 		<td>Report shows the students with failing grades</td>
 	</tr>
+	[/if]
 </table>
 
 <script>

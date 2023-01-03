@@ -76,7 +76,7 @@
                         <th class="left">Student Number</th>
                         <th class="left">Student</th>
                         <th class="filter-select">Grade Level</th>
-                        <th >Reporting Term</th>
+                        <th>Reporting Term</th>
                         <th class="right">Percent</th>
                         <th class="right filter-select">Grade</th>
                         <th class="left">Section</th>
@@ -87,7 +87,7 @@
                     </tr>
                 </thead>
                 ~[tlist_sql;
-                SELECT 
+                SELECT
                 STUDENTS.DCID SDCID,
                 STUDENTS.STUDENT_NUMBER,
                 STUDENTS.LASTFIRST,
@@ -123,24 +123,32 @@
                 ~[if#tm.~(gpv.tm;sqlText)#] and pgfinalgrades.FinalGradeName = '~(gpv.tm;sqlText)' [/if#tm]
                 and sections.Termid BETWEEN ~(curyearid)00 AND ~(curyearid)99
                 and sections.ExcludeFromStoredGrades = 0
-                and pgfinalgrades.Grade NOT LIKE '-%' ORDER BY students.lastfirst,
-                    sections.expression, pgfinalgrades.FinalGradeName ;alternatecolor;nonemessage=<tr nodata>
+                and pgfinalgrades.Grade NOT LIKE '-%'
+                ~[if#letter.~(f.in;value=~(curschoolid);in=101,130)=1] and pgfinalgrades.grade IN
+                ('D+','D','D-','F','INC') [/if#letter]
+                ~[if#percent.~(f.in;value=~(curschoolid);in=160,189,210)=1] and pgfinalgrades.percent BETWEEN .1 AND
+                69.9 [/if#percent]
+                ~[if#bnho.~(curschoolid)=115] and pgfinalgrades.percent BETWEEN .1 AND 76.9 [/if#bnho]
+
+
+                ORDER BY students.lastfirst,
+                sections.expression, pgfinalgrades.FinalGradeName ;alternatecolor;nonemessage=<tr nodata>
                     <td colspan="100%">No Records Found.</td>
-                    </tr>]
-                    <tr class="Record" data-StudentID="~(sdcid;t)">
-                        <td>~(student_number;t)</td>
-                        <td class="nowrap">~(LastFirst;t)</td>
-                        <td class="center">~(grade_level;t)</td>
-                        <td class="center">~(FinalGradeName;t)</td>
-                        <td class="right">~(Percent;l)%</td>
-                        <td class="right">~(Grade;t)</td>
-                        <td>~(crssec;t)</td>
-                        <td class="nowrap">~(Course_Name;t)</td>
-                        <td class="nowrap">~(Teacher;t)</td>
-                        <td>~(LastGradeUpdate;d)</td>
-                        <td>~(dropdate;d)</td>
-                    </tr>
-                    [/tlist_sql]
+                </tr>]
+                <tr class="Record" data-StudentID="~(sdcid;t)">
+                    <td>~(student_number;t)</td>
+                    <td class="nowrap">~(LastFirst;t)</td>
+                    <td class="center">~(grade_level;t)</td>
+                    <td class="center">~(FinalGradeName;t)</td>
+                    <td class="right">~(Percent;l)%</td>
+                    <td class="right">~(Grade;t)</td>
+                    <td>~(crssec;t)</td>
+                    <td class="nowrap">~(Course_Name;t)</td>
+                    <td class="nowrap">~(Teacher;t)</td>
+                    <td>~(LastGradeUpdate;d)</td>
+                    <td>~(dropdate;d)</td>
+                </tr>
+                [/tlist_sql]
             </table>
         </div>
         <!-- End of results -->
