@@ -128,6 +128,14 @@
                     FROM sync_studentmap ssm
                     INNER JOIN PSM_StudentContact psc ON (ssm.studentid = psc.studentid)
                     INNER JOIN PSM_StudentContactType psct ON (psc.studentcontacttypeid = psct.id AND psct.name='Self'))
+                    , RemoteEnrollments AS (
+                    SELECT DISTINCT
+                    cc.studentid,
+                    cc.schoolid
+                    FROM CC 
+                    WHERE cc.TermID BETWEEN ~(curyearid)00 AND ~(curyearid)99
+                    AND CC.schoolid = ~(curschoolid) 
+                    )
                     SELECT
                     s.dcid,
                     s.student_number,
@@ -151,8 +159,9 @@
                     temp.dcid)
                     [/if#ss]
                     LEFT JOIN schools sch ON (s.schoolid = sch.school_number)
+                    LEFT JOIN RemoteEnrollments ON (s.id = RemoteEnrollments.studentid)
                     WHERE s.enroll_status in (-1,0)
-                    ~[if.is.a.school] AND s.schoolid = ~(curschoolid) [/if.is.a.school]
+                    ~[if.is.a.school] AND RemoteEnrollments.schoolid = ~(curschoolid) [/if.is.a.school]
                     ~[if#gr.~(gpv.gr;sqlText)#] AND s.grade_level = ~(gpv.gr) [/if#gr]
                     ~[if#hr.~(gpv.hr;sqlText)#] AND s.home_room = ~(gpv.hr) [/if#hr]
                     ORDER BY sch.abbreviation, s.grade_level desc, s.lastfirst
