@@ -1,12 +1,15 @@
 <!DOCTYPE html>
-<html>
-    <!-- non framed -->
+<html lang="en">
 
     <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Student Logins</title>
         ~[wc:commonscripts]
         <link href="/images/css/screen.css" rel="stylesheet" media="screen">
         <link href="/images/css/print.css" rel="stylesheet" media="print">
+        <link href="/images/css/cdol_pscb_custom.css" rel="stylesheet" media="screen">
         ~[wc:pscb_init]
         <script>
             $j(function () {
@@ -29,27 +32,27 @@
         <!-- start of Options -->
         <h1>Student Logins</h1>
         <form name="searchform" action="#" method="POST">
-            <div class="box-round" style="overflow: hidden;">
+            <div class="box-round oh">
                 <h2>Report Filters</h2>
-                <table border="0" cellspacing="0" cellpadding="0" class="linkDescList">
+                <table cellspacing="0" cellpadding="0" class="linkDescList">
                     <thead>
                         <tr>
-                            <th style="white-space: nowrap;">Student Selection</th>
-                            <th style="white-space: nowrap;">Grade Selection</th>
-                            <th style="white-space: nowrap;" width="100%">Homeroom</th>
+                            <th class="ws-nw">Student Selection</th>
+                            <th class="ws-nw">Grade Selection</th>
+                            <th class="ws-nw" width="100%">Homeroom</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
                             <td>
-                                <select name="ss" id="ss">
+                                <select title="ss" name="ss" id="ss">
                                     <option value='' ~[if.~[gpv:ss]=]selected[/if]>All Students</option>
                                     <option value="cur" ~[if.~[gpv:ss]=cur]selected[/if]>Current Selection
                                         (~[x:studsinset])</option>
                                 </select>
                             </td>
                             <td>
-                                <select name="gr" name="gr">
+                                <select title="gr" name="gr">
                                     <option value='' ~[if.~[gpv:gr]=]selected[/if]>All Grades</option>
                                     ~[tlist_sql;
                                     SELECT DISTINCT GRADE_LEVEL,
@@ -70,7 +73,7 @@
                                 </select>
                             </td>
                             <td>
-                                <select name="hr" name="hr">
+                                <select title="hr" name="hr">
                                     <option value='' ~[if.~[gpv:hr]=]selected[/if]>All Homerooms</option>
                                     ~[tlist_sql;
                                     SELECT DISTINCT Home_room,
@@ -92,7 +95,7 @@
                         </tr>
                     </tbody>
                 </table>
-                <div class="button-row" style="float: left;">
+                <div class="button-row fl">
                     <input type="hidden" name="showData" value="1">
                     <input type="hidden" name="pidList" id="pidList" value="~(gpv.pidList)">
                     <span class="red">&nbsp;&nbsp;Select parameters and click submit</span>
@@ -104,15 +107,14 @@
         ~[if#showData.~(gpv.showData;sqlText)=1]
         <div class="box-round">
             <h2>Student Logins</h2>
-            <table border="0" cellspacing="0" cellpadding="4" align="center" class="tablesorter grid" id="results"
-                groupRowsByCol="1" color1="#ffffff" color2="#d7edfe">
+            <table cellspacing="0" cellpadding="4" class="tablesorter grid cntr" id="results" groupRowsByCol="1"
+                color1="#ffffff" color2="#d7edfe">
                 <thead>
                     <tr>
                         <th class="left">Student Number</th>
                         <th class="left">Name</th>
                         <th class="left filter-select">Grade Level</th>
                         <th class="left filter-select">Homeroom</th>
-                        <th class="left">Email</th>
                         <th class="left">User Name</th>
                         <th class="left prnHide">Password</th>
                         <th class="left prnShow hidden">Password</th>
@@ -139,7 +141,6 @@
                     END as prettygrade,
                     s.home_room,
                     se.email,
-                    s.Student_Web_ID,
                     utl_raw.cast_to_varchar2(UTL_ENCODE.BASE64_DECODE(utl_raw.cast_to_raw(NVL(ad.student_code, ' ')))),
                     sch.abbreviation
                     FROM students s
@@ -162,7 +163,6 @@
                         <td class="center">~(grade_level)</td>
                         <td class="center">~(home_room)</td>
                         <td>~(email)</td>
-                        <td>~(username;t)</td>
                         <td class="nowrap prnShow hidden">~(decode;t)</td>
                         <td class="nowrap prnHide"><a class="dialogM button" title="~(stuname;t)"
                                 href="code_popup.html?sdcid=~(dcid)">Click to

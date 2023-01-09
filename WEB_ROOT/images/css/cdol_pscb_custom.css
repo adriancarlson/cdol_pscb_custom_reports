@@ -7,3 +7,10 @@
 .cb {
 	clear: both;
 }
+
+.ws-nw {
+	white-space: nowrap
+}
+.cntr {
+	align-items: center;
+}
