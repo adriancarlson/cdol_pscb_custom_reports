@@ -162,6 +162,7 @@
                     u_fb_form_response
                     WHERE
                     u_fb_form_response.u_fb_form_id = 184243
+                    AND U_fb_form_response.created_on >= '01/15/' || EXTRACT(YEAR FROM sysdate)
                     )
                     ) preschool
                     ON students.id = preschool.student_id
@@ -188,6 +189,7 @@
                     u_fb_form_response
                     WHERE
                     u_fb_form_response.u_fb_form_id = 190639
+                    AND U_fb_form_response.created_on >= '01/15/' || EXTRACT(YEAR FROM sysdate)
                     )
                     ) studentinfo
                     ON students.id = studentinfo.student_id
@@ -214,6 +216,7 @@
                     u_fb_form_response
                     WHERE
                     u_fb_form_response.u_fb_form_id = 185677
+                    AND U_fb_form_response.created_on >= '01/15/' || EXTRACT(YEAR FROM sysdate)
                     )
                     ) sacramental
                     ON students.id = sacramental.student_id
@@ -240,6 +243,7 @@
                     u_fb_form_response
                     WHERE
                     u_fb_form_response.u_fb_form_id = 190689
+                    AND U_fb_form_response.created_on >= '01/15/' || EXTRACT(YEAR FROM sysdate)
                     )
                     ) medical
                     ON students.id = medical.student_id
@@ -266,6 +270,7 @@
                     u_fb_form_response
                     WHERE
                     u_fb_form_response.u_fb_form_id = 184225
+                    AND U_fb_form_response.created_on >= '01/15/' || EXTRACT(YEAR FROM sysdate)
                     )
                     ) contacts
                     ON students.id = contacts.student_id
@@ -292,6 +297,7 @@
                     u_fb_form_response
                     WHERE
                     u_fb_form_response.u_fb_form_id = 189686
+                    AND U_fb_form_response.created_on >= '01/15/' || EXTRACT(YEAR FROM sysdate)
                     )
                     ) homelanguage
                     ON students.id = homelanguage.student_id
@@ -318,6 +324,7 @@
                     u_fb_form_response
                     WHERE
                     u_fb_form_response.u_fb_form_id = 190316
+                    AND U_fb_form_response.created_on >= '01/15/' || EXTRACT(YEAR FROM sysdate)
                     )
                     ) agreements
                     ON students.id = agreements.student_id
@@ -344,6 +351,7 @@
                     u_fb_form_response
                     WHERE
                     u_fb_form_response.u_fb_form_id = 185633
+                    AND U_fb_form_response.created_on >= '01/15/' || EXTRACT(YEAR FROM sysdate)
                     )
                     ) additional
                     ON students.id = additional.student_id
@@ -364,7 +372,6 @@
                     u_fb_form_response.student_id,
                     TO_CHAR(MAX(u_fb_form_response.whencreated), 'MM/DD/YYYY HH' || CHR(58) || 'MI am') AS
                     lastest_submission
-
                     FROM
                     u_fb_form_response
                     WHERE
@@ -482,11 +489,12 @@
                     ELSE school_from_total.school_from_total
                     END AS student_form_total
                     FROM student_form
-                    LEFT JOIN school_from_total ON school_from_total.school_id =(CASE WHEN to_number(to_char(sysdate, 'DDD')) > to_number(to_char(to_date ('07/01/'
+                    LEFT JOIN school_from_total ON school_from_total.school_id =(CASE WHEN to_number(to_char(sysdate,
+                    'DDD')) > to_number(to_char(to_date ('07/01/'
                     ||to_char(sysdate, 'YYYY') , 'MM/DD/YYYY'), 'DDD')) THEN
                     student_form.current_school
                     ELSE student_form.next_school
-                    END) 
+                    END)
                     )
                     , student_percent_done AS (
                     SELECT

@@ -122,6 +122,7 @@
                     u_fb_form_response
                     WHERE
                     u_fb_form_response.u_fb_form_id = 184243
+                    AND U_fb_form_response.created_on >= '01/15/' ||  EXTRACT(YEAR FROM sysdate)
                     )
                     ) preschool
                     ON students.id = preschool.student_id
