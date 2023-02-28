@@ -1,6 +1,6 @@
 <table id="hiddenTable" style="display: none;">
 <tr id="employerContacts">
-		<td><a href="/admin/reports_pscb/contacts/CDOL_Contacts_Potential_Duplicates.html">Contacts - Employer List</a></td>
+		<td><a href="/admin/reports_pscb/contacts/CDOL_contacts_employer.html">Contacts - Employer List</a></td>
 		<td>List of Contacts and their Employer</td>
 	</tr>
 	<tr id="potentialContacts">
