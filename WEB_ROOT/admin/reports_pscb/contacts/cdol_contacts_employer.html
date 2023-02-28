@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+    <!-- non framed -->
+
+    <head>
+        <title>Contacts - Student List</title>
+        ~[wc:commonscripts]
+        <link href="/images/css/screen.css" rel="stylesheet" media="screen">
+        <link href="/images/css/print.css" rel="stylesheet" media="print">
+        ~[wc:pscb_init]
+    </head>
+
+    <body>
+        ~[wc:admin_header_frame_css]<!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a>
+        &gt; <a href="/admin/reports_pscb/pscb_home.html" target="_top">Start Page</a> &gt; <a
+            href="/admin/reports_pscb/pscb_home.html" target="_top">PSCB Custom Reports</a> &gt; <a
+            href="/admin/reports_pscb/pscb_contacts.html" target="_top">Contacts</a> &gt; Contacts - Employer
+        List<!-- breadcrumb end -->~[wc:admin_navigation_frame_css] ~[if.is.a.school]
+        ~[if#sch.~(gpv.sch;sqlText)=]
+        ~[SetPostValue:sch=~(curschoolid)]
+        [/if#sch]
+        [/if.is.a.school]
+
+        <!-- Begin report filters-->
+        <form name="searchform" action="#" method="POST">
+            <h1>Contacts - Employer List</h1>
+            <div class="box-round" style="overflow: hidden;">
+                <h2>Report Filters</h2>
+                <table border="0" cellspacing="0" cellpadding="0" class="linkDescList">
+                    <thead>
+                        <tr>
+                            <th style="white-space: nowrap;">Student Selection</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <select name="ss" id="ss">
+                                    <option value='' ~[if.~[gpv:ss]=]selected[/if]>All Students
+                                    <option value="cur" ~[if.~[gpv:ss]=cur]selected[/if]>Current Selection
+                                        (~[x:studsinset])
+                                </select>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="button-row" style="float: left;">
+                    <input type="hidden" name="showData" value="1">
+                    <span>
+                        <font color="red">&nbsp;&nbsp;Select parameters and click submit</font>
+                    </span>
+                    <button type="submit" id="btnSubmit" name="btnSubmit" onClick="actionChange()">Submit</button>
+                </div>
+            </div>
+        </form>
+        <!-- End report filters-->
+
+        <!-- Start of Results -->
+        ~[if#showData.~(gpv.showData;sqlText)=1]
+        <div class="box-round">
+            <h2>Contacts - Employer List<span><label id="lblRecordCount"></label></span></h2>
+            <table border="0" cellspacing="0" cellpadding="4" class="tablesorter grid" id="results">
+                <thead>
+                    <tr>
+                        <th class="left">Contact ID</th>
+                        <th class="left">Contact Name</th>
+                        <th class="left">Primary Email Address</th>
+                        <th class="left">Employer</th>
+                        <th class="right">Count of Students</th>
+                        <th class="left">Student(s)</th>
+                    </tr>
+                </thead>
+                <!-- Report Filters have not been submited -->
+                <tbody>
+                    ~[tlist_sql;
+                    WITH stuCount AS (
+                    SELECT sca.personid, Count(s.dcid) cnt,
+                    '
+                    <ul>' || listagg('
+                        <li>' || s.lastfirst || ' (' || s.grade_level || ' - ' || sch.abbreviation || ')</li>', '')
+                        WITHIN GROUP (ORDER BY s.grade_level desc, s.lastfirst) || '
+                    </ul>' StudentList
+                    FROM Students s
+                    ~[if#ss.~(gpv.ss;sqlText)=cur] INNER JOIN ~[temp.table.current.selection:students] temp ON (s.dcid =
+                    temp.dcid) [/if#ss]
+                    INNER JOIN schools sch ON (s.schoolid = sch.school_number)
+                    INNER JOIN studentcontactassoc sca ON (s.dcid = sca.studentdcid)
+                    WHERE s.enroll_status = 0 ~[if.is.a.school] AND s.schoolid = ~(curschoolid) [/if.is.a.school]
+                    GROUP BY sca.personid)
+                    SELECT p.id, p.LastName, p.FirstName, ea.emailaddress, p.employer, sca.cnt, sca.studentList
+                    FROM stuCount sca
+                    INNER JOIN person p ON (sca.personid = p.ID)
+                    LEFT JOIN PersonEmailAddressAssoc pea ON (pea.personid = p.id)
+                    LEFT JOIN EmailAddress ea ON (pea.EmailAddressID = ea.EmailAddressID AND pea.IsPrimaryEmailAddress =
+                    1)
+                    WHERE p.LastName IS NOT NULL
+                    ORDER BY p.LastName, p.FirstName
+                    ;alternatecolor;nonemessage=
+                    <tr>
+                        <td colspan="100%">No Parent/Guardian Accounts for SSO were found.</td>
+                    </tr>]
+                    <tr class="Record">
+                        <td>~(id;t)</td>
+                        <td><a href="/admin/contacts/edit.html#?contactid=~(id;t)" target="_blank">~(LastName;t),
+                                ~(FirstName;t)</a>
+                        </td>
+                        <td>~(Email_Address;t)</td>
+                        <td>~(Employer;t)</td>
+                        <td align="right">~(Num)</td>
+                        <td>~(studentlist;t)</td>
+                    </tr>
+                    [/tlist_sql]
+                </tbody>
+            </table>
+        </div>
+        <!-- End of results -->
+        <div>
+            <p>
+                <center>Report generated at ~[time] on ~[date]</center>
+            </p>
+        </div>
+        [/if#showData]
+        ~[wc:admin_footer_frame_css]
+    </body>
+
+</html>

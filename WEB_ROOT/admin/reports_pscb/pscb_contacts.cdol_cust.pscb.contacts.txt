@@ -1,4 +1,8 @@
 <table id="hiddenTable" style="display: none;">
+<tr id="employerContacts">
+		<td><a href="/admin/reports_pscb/contacts/CDOL_Contacts_Potential_Duplicates.html">Contacts - Employer List</a></td>
+		<td>List of Contacts and their Employer</td>
+	</tr>
 	<tr id="potentialContacts">
 		<td><a href="/admin/reports_pscb/contacts/CDOL_Contacts_Potential_Duplicates.html">CDOL Contacts - Potential
 				Duplicates</a></td>
@@ -20,7 +24,7 @@
 	<tr id="contactPrimaryEmailPhone">
 		<td><a href="/admin/reports_pscb/contacts/cdol_student_contacts_primary_email_and_phone.html">Students -
 				Contacts Primary Email and Phone</a></td>
-		<td>List ctive contacts for students and the primary email address and phone number for the contact. Primary
+		<td>List Active contacts for students and the primary email address and phone number for the contact. Primary
 			phone is determined first by preferred status and then priority order</td>
 	</tr>
 	<tr id="receiveMailEmail">
@@ -93,8 +97,12 @@
 	/*checks to make sure page is loaded */
 	$j(document).ready(function () {
 		/* insert custom CDOL fields onto the page. */
-		// var potentialContacts = $j('#potentialContacts').closest('tr');
-		// $j("td:contains('Contacts - Duplicates')").closest('tr').before(potentialContacts);
+		// var employerContacts = $j('#employerContacts').closest('tr');
+		// $j("td:contains('Contacts - Students List')").closest('tr').after(employerContacts);
+
+		let motherFatherEmail = $j('#motherFatherEmail').closest('tr');
+		$j("td:contains('Students - Contacts List')").closest('tr').after(motherFatherEmail);
+
 
 		var motherFatherEmail = $j('#motherFatherEmail').closest('tr');
 		$j("td:contains('Students - Contacts List')").closest('tr').after(motherFatherEmail);
