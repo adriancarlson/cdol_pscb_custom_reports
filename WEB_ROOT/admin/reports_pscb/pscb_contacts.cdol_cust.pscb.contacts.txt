@@ -97,12 +97,8 @@
 	/*checks to make sure page is loaded */
 	$j(document).ready(function () {
 		/* insert custom CDOL fields onto the page. */
-		// var employerContacts = $j('#employerContacts').closest('tr');
-		// $j("td:contains('Contacts - Students List')").closest('tr').after(employerContacts);
-
-		let motherFatherEmail = $j('#motherFatherEmail').closest('tr');
-		$j("td:contains('Students - Contacts List')").closest('tr').after(motherFatherEmail);
-
+		let employerContacts = $j('#employerContacts').closest('tr');
+		 $j("td:contains('Contacts - Students List')").closest('tr').after(employerContacts);
 
 		var motherFatherEmail = $j('#motherFatherEmail').closest('tr');
 		$j("td:contains('Students - Contacts List')").closest('tr').after(motherFatherEmail);
