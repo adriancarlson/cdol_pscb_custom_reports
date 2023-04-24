@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <title>Teachers with No Room Assigned</title>
+        ~[wc:commonscripts]
+        <link href="/images/css/screen.css" rel="stylesheet" media="screen">
+        <link href="/images/css/print.css" rel="stylesheet" media="print">
+        ~[wc:pscb_init]
+    </head>
+
+    <body>
+        ~[wc:admin_header_frame_css]<!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a>
+        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html" target="_top">PSCB DEV Custom Reports</a>
+        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_scheduleCY_menu.html" target="_top">Scheduling
+            (Current Year)</a> &gt; Teachers with No Room
+        Assigned
+        <!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
+
+        <!-- Start of Results -->
+        <h1>Teachers with No Room Assigned</h1>
+        <div class="box-round">
+            <h2>Teachers with No Room Assigned</h2>
+            <table border="0" cellspacing="0" cellpadding="4" align="center" class="tablesorter grid" id="results">
+                <thead>
+                    <tr>
+                        <th class="left">Teacher Name</th>
+                        <th class="left">Room</th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    ~[tlist_sql;
+                    SELECT users.lastfirst, schoolstaff.sched_classroom
+                    FROM schoolstaff
+                    INNER JOIN users
+                    ON schoolstaff.users_dcid = users.dcid
+                    WHERE schoolstaff.status =1
+                    and schoolstaff.staffstatus =1
+                    AND schoolstaff.sched_classroom is null
+                    and schoolstaff.schoolid= ~(curschoolid)
+                    ;alternatecolor;
+                    <tr>
+                        <td colspan="100%">All classes are assigned a room.</td>
+                    </tr>]
+                    <tr class="Record">
+                        <td>~(teacher;t)</td>
+                        <td>~(room;t)</td>
+                    </tr>
+                    [/tlist_sql]
+                </tbody>
+            </table>
+        </div>
+        <!-- End of results -->
+        <div style="clear: both;">
+            <p>
+                <center>Report generated at ~[time] on ~[date]</center>
+            </p>
+        </div>
+        ~[wc:admin_footer_frame_css]
+    </body>
+
+</html>

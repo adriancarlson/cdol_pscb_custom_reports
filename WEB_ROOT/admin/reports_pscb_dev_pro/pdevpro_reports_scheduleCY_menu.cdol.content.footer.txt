@@ -1,0 +1,85 @@
+<table id="cdolScheduleCYTable" style="display: none;">
+	<tr id="teacherNoRoom">
+		<td><a href="/admin/reports_pscb_dev_pro/scheduleCY/cdol_teachers_no_room.html">Teachers - No Room Assigned</a>
+		</td>
+		<td>Show all teachers that have no room assigned.</td>
+	</tr>
+	<tr id="studentDoubleBooked">
+		<td><a href="/admin/reports_pscb_dev_pro/scheduleCY/cdol_students_double_booked.html">Students - Double
+				Booked</a>
+		</td>
+		<td>Lists students with two or more sections scheduled during the same period at the same term.</td>
+	</tr>
+	<tr id="sectionsSpecialty">
+		<td><a href="/admin/reports_pscb_dev_pro/scheduleCY/cdol_specialty_grading_scale.html">Sections - Specialty
+				Grading Scales</a></td>
+		<td>List all of the sections at your school that have the Specialty Grading Scale. H, DW, S, NI, E</td>
+	</tr>
+	<tr id="classByPeriod">
+		<td><a href="/admin/reports_pscb_dev_pro/scheduleCY/cdol_student_class_by_period.html">Students - Class by
+				Period</a></td>
+		<td>Lists all students in a course by a selected period.</td>
+	</tr>
+	<tr id="diffTeacher">
+		<td><a href="/admin/reports_pscb_dev_pro/scheduleCY/cdol_student_same_course_differnent_teacher.html">Students -
+				Same Course Different Teacher</a></td>
+		<td>Lists students that have the same course each semester but a different teacher for the course</td>
+	</tr>
+	<tr id="aqhdNonAcademic">
+		<td><a href="/admin/reports_pscb_dev_pro/scheduleCY/cdol_aqhd_non_academic.html">Non-Academic Sections Set
+				Incorrectly</a></td>
+		<td>Lists Non-Academic Sections that do not have Exclude from, GPA, Honor Roll, or Class Rank</td>
+	</tr>
+	<tr id="bnhoNonPercent">
+		<td><a href="/admin/reports_pscb_dev_pro/scheduleCY/cdol_bnho_100_point_scale.html">Sections Not Set to
+				Percentage Scale</a></td>
+		<td>Lists Sections not set to the 100 point scale</td>
+	</tr>
+</table>
+
+~[if#pius.~(curschoolid)=101]
+<script>
+	$j(document).ready(function () {
+		let diffTeacher = $j('#diffTeacher').closest('tr');
+		$j("td:contains('Not Enrolled in a Course')").closest('tr').after(diffTeacher);
+	});
+</script>
+[/if#pius]
+~[if#aqhd.~(curschoolid)=160]
+<script>
+	$j(document).ready(function () {
+		let aqhdNonAcademic = $j('#aqhdNonAcademic').closest('tr');
+		$j("td:contains('Sections - Dependent Sections List')").closest('tr').before(aqhdNonAcademic);
+	});
+</script>
+[/if#aqhd]
+~[if#bnho.~(curschoolid)=115]
+<script>
+	$j(document).ready(function () {
+		let aqhdNonAcademic = $j('#bnhoNonPercent').closest('tr');
+		$j("td:contains('Sections - Dependent Sections List')").closest('tr').before(bnhoNonPercent);
+	});
+</script>
+[/if#bnho]
+
+~[if.~(f.in;value=~(curschoolid);in=101,115,130,160,189,210)=1]
+<script>
+	let studentDoubleBooked = $j('#studentDoubleBooked').closest('tr');
+	$j("td:contains('Students - Schedule Conflicts')").closest('tr').after(studentDoubleBooked);
+</script>
+[/if]
+<script>
+	/*checks to make sure page is loaded */
+	$j(function () {
+		/* insert custom CDOL fields onto the page. */
+		let teacherNoRoom = $j('#teacherNoRoom').closest('tr');
+		$j("td:contains('Teacher - Sections List')").closest('tr').after(teacherNoRoom);
+		/* insert custom CDOL fields onto the page. */
+		let sectionsSpecialty = $j('#sectionsSpecialty').closest('tr');
+		$j("td:contains('Sections - No Room Assigned')").closest('tr').after(sectionsSpecialty);
+		let classByPeriod = $j('#classByPeriod').closest('tr');
+		$j("td:contains('Students - Class Roster')").closest('tr').after(classByPeriod);
+		/* remove the hidden tables  and divs */
+		$j("#cdolScheduleCYTable").remove();
+	});
+</script>

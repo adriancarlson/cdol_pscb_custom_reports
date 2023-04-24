@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <title>Student - Same Course Different Teacher at Semester</title>
+        ~[wc:commonscripts]
+        <link href="/images/css/screen.css" rel="stylesheet" media="screen">
+        <link href="/images/css/print.css" rel="stylesheet" media="print">
+        ~[wc:pscb_init]
+    </head>
+
+    <body>
+        ~[wc:admin_header_frame_css]<!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a>
+        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html" target="_top">PSCB DEV Custom Reports</a>
+        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_scheduleCY_menu.html" target="_top">Scheduling
+            (Current Year)</a> &gt; Student - Same Course
+        Different Teacher at Semester
+        <!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
+        <h1>Student - Same Course Different Teacher at Semester</h1>
+        <!-- end of Options -->
+
+        <!-- Start of Results -->
+        <div class="box-round">
+            <h2>Class Listing <span><label id="lblRecordCount"></label></span></h2>
+            <table border="0" cellspacing="0" cellpadding="0" class="tablesorter grid" id="results" groupRowsByCol="1"
+                color1="#ffffff" color2="#d7edfe">
+                <thead>
+                    <tr>
+                        <th class="left">Student #</th>
+                        <th class="left filter-select">Student</th>
+                        <th class="left filter-select">Grade</th>
+                        <th class="left">S1</th>
+                        <th class="left">S1 Course #</th>
+                        <th class="left filter-select">S1 Course Name</th>
+                        <th class="left filter-select">S1 Course Teacher</th>
+                        <th class="left">S2</th>
+                        <th class="left">S2 Course #</th>
+                        <th class="left filter-select">S2 Course Name</th>
+                        <th class="left filter-select">S2 Course Teacher</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ~[tlist_sql;
+                    With semester1 as (
+                    SELECT cc.studentid, cc.termid, cc.course_number, cc.teacherid
+                    FROM CC
+                    WHERE cc.schoolid =~(curschoolid)
+                    and cc.termid Like '~(curyearid)01'
+                    ), Semester2 as (
+                    SELECT cc.studentid, cc.termid, cc.course_number, cc.teacherid
+                    FROM CC
+                    WHERE cc.schoolid =~(curschoolid)
+                    and cc.termid Like '~(curyearid)02'
+                    )
+                    SELECT students.dcid,
+                    students.student_number,
+                    students.lastfirst,
+                    students.grade_level,
+                    s1terms.abbreviation as S1,
+                    semester1.course_number as S1CourseNumber,
+                    s1courses.course_name as S1CourseName,
+                    s1teachers.lastfirst as S1Teacher,
+                    s2terms.abbreviation as S2,
+                    semester2.course_number as S2CourseNumber,
+                    s2courses.course_name as S2CourseName,
+                    s2teachers.lastfirst as S2Teacher
+                    FROM semester1
+                    LEFT JOIN semester2 on semester1.studentid = semester2.studentid
+                    LEFT JOIN students on semester1.studentid = students.id
+                    LEFT JOIN terms s1terms
+                    ON semester1.termid = s1terms.id
+                    AND students.schoolid = s1terms.schoolid
+                    LEFT JOIN terms s2terms
+                    ON semester2.termid = s2terms.id
+                    AND students.schoolid = s2terms.schoolid
+                    LEFT JOIN courses s1courses
+                    ON s1courses.course_number = semester1.course_number
+                    LEFT JOIN courses s2courses
+                    ON s2courses.course_number = semester2.course_number
+                    LEFT JOIN teachers s1teachers
+                    ON s1teachers.id = semester1.teacherid
+                    LEFT JOIN teachers s2teachers
+                    ON s2teachers.id = semester2.teacherid
+                    ~[if#e.~(gpv.ss)=cur] INNER JOIN ~[temp.table.current.selection:students] temp ON (students.dcid =
+                    temp.dcid) [/if#e]
+                    WHERE SUBSTR(semester1.course_number,1,5) = SUBSTR(Semester2.course_number,1,5)
+                    AND semester1.teacherid != semester2.teacherid
+                    ORDER BY students.grade_level, students.lastfirst ;alternatecolor;nonemessage=
+                    <tr>
+                        <td colspan="100%">No records returned.</td>
+                    </tr>]
+                    <tr class="Record" data-StudentID="~(dcid;t)">
+                        <td class="nowrap"><a href="/admin/students/schedulelist.html?frn=001~(dcid;t)"
+                                target="_blank">~(studnum;t)</a></td>
+                        <td>~(student;t)</td>
+                        <td>~(gradelvl;t)</td>
+                        <td>~(s1;t)</td>
+                        <td>~(s1coursenum)</td>
+                        <td>~(s1coursename)</td>
+                        <td>~(s1TchName;t)</td>
+                        <td>~(s2;t)</td>
+                        <td>~(s2coursenum)</td>
+                        <td>~(s2coursename)</td>
+                        <td>~(s2TchName;t)</td>
+                    </tr>
+                    [/tlist_sql]
+                </tbody>
+            </table>
+        </div>
+
+        <br>
+        <!-- end of content of bounding box -->
+        ~[wc:admin_footer_css]
+    </body>
+
+</html><!-- non framed -->

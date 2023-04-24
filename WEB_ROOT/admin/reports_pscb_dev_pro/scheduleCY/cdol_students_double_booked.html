@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <title>Student Double Booked </title>
+        ~[wc:commonscripts]
+        <link href="/images/css/screen.css" rel="stylesheet" media="screen">
+        <link href="/images/css/print.css" rel="stylesheet" media="print">
+        ~[wc:pscb_init]
+    </head>
+
+    <body>
+        ~[wc:admin_header_frame_css]<!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a>
+        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html" target="_top">PSCB DEV Custom Reports</a>
+        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_scheduleCY_menu.html" target="_top">Scheduling
+            (Current Year)</a> &gt; Student Double Booked
+        <!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
+        <h1>Student Double Booked</h1>
+        <form name="rptFilters" action="#" method="POST">
+            <div class="box-round">
+                <h2>Report Filters</h2>
+                <table border="0" cellspacing="0" cellpadding="0" class="linkDescList">
+                    <tr>
+                        <th style="white-space: nowrap;" width="180px"> Student Selection</th>
+                        <th style="white-space: nowrap;">Term</th>
+                    </tr>
+                    <tr>
+                        <td>
+                            <select name="ss">
+                                <option value="cur" ~[if.~[gpv:ss]=cur]selected[/if]>Current Selection (~[x:studsinset])
+                                <option value='' ~[if.~[gpv:ss]=]selected[/if]>All Students
+                            </select>
+                        </td>
+                        <td valign="top" nowrap>
+                            <select id="term" name="term">
+                                <option value="" ~[if.~[gpv:term]=]selected[/if]>All Terms
+                                    ~[tlist_sql;SELECT terms.id termid, CASE WHEN terms.id = '~[gpv:term]' THEN
+                                    'selected' ELSE
+                                    '' END isselected, Upper(Abbreviation) term FROM terms WHERE terms.schoolid =
+                                    ~(curschoolid)
+                                    AND terms.yearid = ~(curyearid) ORDER BY Upper(Trim(term))]
+                                <option value="~(termid)" ~(isselected;t)>~(term)
+                                    [/tlist_sql]
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+                <div class="button-row">
+                    <input type="hidden" name="showData" value="1">
+                    <span class="red">&nbsp;&nbsp;Select parameters and click submit</span>
+                    <input type="hidden" name="ac" value="prim">~[submitbutton]
+                </div>
+            </div>
+        </form>
+        <!-- end of Options -->
+
+        <!-- Start of Results -->
+        ~[if#showData.~[gpv:showData]=1]
+        <div class="box-round">
+            <h2>Class Listing <span><label id="lblRecordCount"></label></span></h2>
+            <table border="0" cellspacing="0" cellpadding="0" class="tablesorter grid" id="results">
+                <thead>
+                    <tr>
+
+                        <th class="left">Student</th>
+                        <th class="left">Student Number</th>
+                        <th class="left">Course Number</th>
+                        <th class="left">Course</th>
+                        <th class="left">Term</th>
+                        <th class="left">Section</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ~[tlist_sql;
+                    WITH doublebooked as (
+                    SELECT
+                    students.dcid, cc.termid, cc.expression
+                    FROM students
+                    LEFT OUTER JOIN cc ON (students.ID = cc.StudentID AND students.SchoolID = cc.SchoolID AND cc.TermID
+                    BETWEEN
+                    ~(curyearid)00 AND ~(curyearid)99)
+                    GROUP BY students.dcid, cc.termid, cc.expression
+                    HAVING count(*) > 1
+                    )
+                    SELECT students.dcid, students.lastfirst, students.student_number, courses.course_number,
+                    courses.course_name,
+                    terms.abbreviation as term, doublebooked.expression
+                    FROM students
+                    INNER JOIN doublebooked
+                    ON students.dcid = doublebooked.dcid
+                    INNER JOIN terms
+                    ON doublebooked.termid = terms.id
+                    AND students.schoolid = terms.schoolid
+                    LEFT JOIN CC
+                    ON Students.ID = CC.StudentID
+                    and doublebooked.expression = cc.expression
+                    and doublebooked.termid = cc.termid
+                    LEFT JOIN Courses
+                    ON CC.Course_Number = Courses.Course_Number
+                    LEFT JOIN Sections
+                    ON ABS(CC.SectionID) = Sections.ID
+                    ~[if#e.~[gpv:ss]=cur] INNER JOIN ~[temp.table.current.selection:students] temp ON (students.dcid =
+                    temp.dcid) [/if#e]
+                    WHERE students.Enroll_Status <= 0 AND students.SchoolID=~(curschoolid) ~[if.~[gpv:term]#] AND
+                        sections.termid=~[gpv:term][/if] ORDER BY students.lastfirst, terms.abbreviation,
+                        courses.course_name, sections.external_expression ;nonemessage=<tr>
+                        <td colspan="100%">No data</td>
+                        </tr>]
+                        <tr class="Record" data-StudentID="~(dcid;t)">
+                            <td><a href="/admin/students/schedulelist.html?frn=001~(dcid;t)"
+                                    target="_top">~(studname;t)</a>
+                            </td>
+                            <td>~(stunum;t)</td>
+                            <td>~(CrsNum;t)</td>
+                            <td>~(CrsTitle;t)</td>
+                            <td>~(term;t)</td>
+                            <td>~(expression;t;externalExpression)</td>
+                        </tr>
+                        [/tlist_sql]
+                </tbody>
+            </table>
+        </div>
+        [/if#showData]
+        <br>
+        <!-- end of content of bounding box -->
+        ~[wc:admin_footer_css]
+    </body>
+
+</html><!-- non framed -->

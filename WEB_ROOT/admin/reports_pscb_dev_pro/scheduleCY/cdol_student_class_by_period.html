@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<title>Students - Class by Period </title>
+		~[wc:commonscripts]
+		<link href="/images/css/screen.css" rel="stylesheet" media="screen">
+		<link href="/images/css/print.css" rel="stylesheet" media="print">
+		~[wc:pscb_init]
+		<script>
+			$j(function () {
+				$j("select#pid").on("change", function () {
+					var pid = "'" + $j("select#pid option:selected").map(function () { return $j(this).val() }).get().join("','") + "'";
+					$j("#pidList").val(pid);
+				})
+			})
+		</script>
+	</head>
+
+	<body>
+		~[wc:admin_header_frame_css]<!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a>
+		&gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html" target="_top">PSCB DEV Custom Reports</a>
+		&gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_scheduleCY_menu.html" target="_top">Scheduling
+			(Current Year)</a> &gt; Students - Class by
+		Period
+		<!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
+		<h1>Students - Class by Period</h1>
+		<form name="rptFilters" action="#" method="POST">
+			<div class="box-round" style="overflow: hidden;">
+				<h2>Report Filters</h2>
+				<table border="0" cellspacing="0" cellpadding="4" style="line-height: 25px">
+					<tr>
+						<th>Student Selection</th>
+						<th>Grade Level</th>
+						<th>Term</th>
+						<th>Period</th>
+						<th>Course Name</th>
+						<th>Teacher</th>
+						<th width="100%">Department</th>
+					</tr>
+					<tr>
+						<td>
+							<select name="ss">
+								<option value="cur" ~[if.~(gpv.ss)=cur]selected[/if]>Current Selection (~[x:studsinset])
+								</option>
+								<option value='' ~[if.~(gpv.ss)=]selected[/if]>All Students</option>
+							</select>
+						</td>
+						<td>
+							<select name="gr">
+								<option value='' ~[if.~[gpv:gr]=]selected[/if]>All Grades</option>
+								~[tlist_sql;
+								SELECT DISTINCT GRADE_LEVEL,
+								CASE
+								WHEN TO_CHAR(grade_level) = -2 then 'PK3'
+								WHEN TO_CHAR(grade_level) = -1 then 'PK4'
+								WHEN TO_CHAR(grade_level) = 0 then 'K'
+								WHEN TO_CHAR(grade_level) = 99 then 'Graduated'
+								ELSE TO_CHAR(grade_level)
+								END as prettygrade
+								FROM STUDENTS
+								WHERE TO_CHAR(SCHOOLID) LIKE CASE WHEN TO_CHAR(~(curschoolid)) = '0'
+								THEN '%' ELSE TO_CHAR(~(curschoolid)) END
+								AND ENROLL_STATUS = 0
+								ORDER BY GRADE_LEVEL]
+								<option value="'~(gr)'">~(prettygrade)</option>
+								[/tlist_sql]
+							</select>
+						</td>
+						<td valign="top" nowrap>
+							<select id="term" name="term">
+								<option value="" ~[if.~(gpv.term)=]selected[/if]>All Terms</option>
+								~[tlist_sql;SELECT terms.id termid, CASE WHEN terms.id = '~(gpv.term;sqlText)' THEN
+								'selected' ELSE '' END
+								isselected, Upper(Abbreviation) term FROM terms WHERE terms.schoolid = ~(curschoolid)
+								AND terms.yearid =
+								~(curyearid) ORDER BY Upper(Trim(term))]
+								<option value="~(termid)" ~(isselected;t)>~(term)</option>
+								[/tlist_sql]
+							</select>
+						</td>
+						<td>
+							<select name="pid" id="pid" multiple="multiple" size="5">
+								~[tlist_sql;
+								SELECT DISTINCT cc.expression, CASE WHEN cc.expression = '~(gpv.pid)' THEN 'selected'
+								END isSelected
+								FROM cc
+								WHERE cc.SchoolID = ~(curschoolid) AND cc.termid like '~(curyearid)__'
+								ORDER BY to_number(NVL(SUBSTR(cc.expression, 0, INSTR(cc.expression, '(')-1),
+								cc.expression)), cc.expression]
+								<option value="~(expression;t)" ~(isSelected)>~(expression;t;externalExpression)
+								</option>
+								[/tlist_sql]
+							</select>
+						</td>
+
+						<td valign="top" nowrap>
+							<select id="cn" name="cn">
+								<option value="" ~[if.~(gpv.cn)=]selected[/if]>All Courses</option>
+								~[tlist_sql;SELECT DISTINCT Upper(crs.course_name) course_name, CASE WHEN
+								Upper(crs.course_name) =
+								'~(gpv.cn;sqlText)' THEN 'selected' ELSE '' END isselected FROM sections sect INNER JOIN
+								courses crs ON
+								sect.course_number = crs.course_number WHERE sect.schoolid = ~(curschoolid) AND
+								sect.termid LIKE
+								'~(curyearid)__' ORDER BY Upper(Trim(Course_Name))]
+								<option value="~(course_name;t)" ~(isselected;t)>~(course_name;t)</option>
+								[/tlist_sql]
+							</select>
+						</td>
+						<td valign="top" nowrap>
+							<select id="TchName" name="TchName">
+								<option value="" ~[if.~(gpv.TchName)=]selected[/if]>All Teachers</option>
+								~[tlist_sql;SELECT DISTINCT t.id, CASE WHEN t.id = '~(gpv.TchName;sqlText)' THEN
+								'selected' ELSE '' END isselected, t.lastfirst FROM sections sect INNER JOIN teachers t
+								ON t.id = sect.teacher AND t.schoolid = sect.schoolid WHERE sect.schoolid =
+								~(curschoolid) AND sect.termid LIKE '~(curyearid)__' ORDER BY Upper(Trim(t.lastfirst))]
+								<option value="~(t.id)" ~(isselected;t)>~(t.lastfirst; t)</option>
+								[/tlist_sql]
+							</select>
+						</td>
+						<td valign="top" nowrap>
+							<select id="dept" name="dept">
+								<option value="" ~[if.~(gpv.dept)=]selected[/if]>All Departments</option>
+								~[tlist_sql;SELECT DISTINCT Upper(crs.sched_department) dept, CASE WHEN
+								Upper(crs.sched_department) =
+								'~(gpv.dept;sqlText)' THEN 'selected' ELSE '' END isselected FROM sections sect INNER
+								JOIN courses crs ON
+								sect.course_number = crs.course_number WHERE sect.schoolid = ~(curschoolid) AND
+								sect.termid LIKE
+								'~(curyearid)__' ORDER BY Upper(Trim(dept))]
+								<option value="~(dept;t)" ~(isselected;t)>~(dept;t)</option>
+								[/tlist_sql]
+							</select>
+						</td>
+					</tr>
+				</table>
+				<div class="button-row" style="float: left;">
+					<input type="hidden" name="showData" value="1">
+					<input type="hidden" name="pidList" id="pidList" value="~(gpv.pidList)">
+					<span class="red">&nbsp;&nbsp;Select parameters and click submit</span>
+					<input type="hidden" name="ac" value="prim">~[submitbutton]
+				</div>
+			</div>
+		</form>
+		<!-- end of Options -->
+
+		<!-- Start of Results -->
+		~[if#showData.~(gpv.showData)=1]
+		<div class="box-round">
+			<h2>Class Listing <span><label id="lblRecordCount"></label></span></h2>
+			<table border="0" cellspacing="0" cellpadding="0" class="tablesorter grid" id="results" groupRowsByCol="1"
+				color1="#ffffff" color2="#d7edfe">
+				<thead>
+					<tr>
+						<th class="left">Student #</th>
+						<th class="left filter-select">Student</th>
+						<th class="left filter-select">Grade</th>
+						<th class="left filter-select">Gender</th>
+						<th class="left filter-select">Term</th>
+						<th class="left filter-select">Period</th>
+						<th class="left">Course Number</th>
+						<th class="left">Section</th>
+						<th class="left filter-select">Course</th>
+						<th class="left filter-select">Teacher</th>
+						<th class="left">Teacher Number</th>
+						<th class="left filter-select">Course Dept</th>
+						<th class="left filter-select">Room</th>
+						<th class="left filter-select">School</th>
+					</tr>
+				</thead>
+				<tbody>
+					~[tlist_sql;
+					SELECT s.dcid
+					,s.Student_Number
+					,s.Last_name || ' ' || s.first_name AS StudName
+					,s.grade_Level AS GradeLvl
+					,s.Gender
+					,Decode(Trm.IsYearRec, 1, 'YR', Trm.Abbreviation) AS Term
+					,cc.Expression
+					,cc.COURSE_NUMBER AS CrseNum
+					,cc.SECTION_NUMBER AS CrsSec
+					,c.Course_Name AS CrsTitle
+					,t.LastFirst AS TchName
+					,t.TeacherNumber AS TchNumber
+					,c.Sched_Department AS CrsDept
+					,ss.Room
+					,sch.abbreviation school
+					FROM Students s
+					LEFT OUTER JOIN cc ON (s.ID = cc.StudentID AND cc.TermID BETWEEN ~(curyearid)00 AND ~(curyearid)99)
+					LEFT OUTER JOIN Sections ss ON (cc.SectionID = ss.ID)
+					LEFT OUTER JOIN Teachers t ON (ss.Teacher = t.ID)
+					LEFT OUTER JOIN courses c ON (cc.Course_Number = c.Course_Number)
+					LEFT OUTER JOIN terms trm ON (ss.TermID = trm.ID AND ss.SchoolID = trm.SchoolID)
+					LEFT OUTER JOIN schools sch ON (s.schoolid = sch.school_number)
+					~[if#e.~(gpv.ss)=cur] INNER JOIN ~[temp.table.current.selection:students] temp ON (s.dcid =
+					temp.dcid) [/if#e]
+					WHERE s.Enroll_Status in (-1,0) AND cc.schoolid=~(curschoolid)
+					~[if.~(gpv.sec)#] AND ss.id=~(gpv.sec;sqlText) [/if]
+					~[if.~(gpv.dept)#] AND Upper(c.sched_department)='~(gpv.dept;sqlText)' [/if]
+					~[if.~(gpv.cn)#] AND Upper(c.course_name)='~(gpv.cn;sqlText)' [/if]
+					~[if.~(gpv.TchName)#] AND ss.Teacher=~(gpv.TchName;sqlText) [/if]
+					~[if.~(gpv.term)#] AND ss.termid=~(gpv.term;sqlText) [/if]
+					~[if.~(gpv.pidList)#] AND cc.Expression IN (~(gpv.pidList)) [/if]
+					~[if#gr.~(gpv.gr;sqlText)#] AND s.grade_level = ~(gpv.gr) [/if#gr]
+					ORDER BY Upper(Trim(s.LastFirst)), cc.expression, Upper(Trim(CrsTitle)) ;alternatecolor;nonemessage=
+					<tr>
+						<td colspan="100%">No records returned.</td>
+					</tr>]
+					<tr class="Record" data-StudentID="~(dcid;t)">
+						<td class="nowrap"><a href="/admin/students/schedulelist.html?frn=001~(dcid;t)"
+								target="_blank">~(studnum;t)</a></td>
+						<td>~(sutdent;t)</td>
+						<td>~(gradelvl;t)</td>
+						<td>~(gender;t)</td>
+						<td>~(term;t)</td>
+						<td class="nowrap">~(expression;t;externalExpression)</td>
+						<td>~(CrsNum;t)</td>
+						<td>~(CrsSec;t)</td>
+						<td class="nowrap">~(CrsTitle;t)</td>
+						<td class="nowrap">~(TchName;t)</td>
+						<td>~(TchNumber;t)</td>
+						<td>~(CrsDept;t)</td>
+						<td>~(room;t)</td>
+						<td>~(school;t)</td>
+					</tr>
+					[/tlist_sql]
+				</tbody>
+			</table>
+		</div>
+		[/if#showData]
+		<br>
+		<!-- end of content of bounding box -->
+		~[wc:admin_footer_css]
+	</body>
+
+</html><!-- non framed -->
