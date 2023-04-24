@@ -1,0 +1,10 @@
+
+<tr class="~[evenoddrow]">
+    <td>
+        <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_schoolmessenger_menu.html">SchoolMessenger</a>
+    </td>
+    <td>
+        Custom CDOL SchoolMessenger reports.
+    </td>
+</tr>
+

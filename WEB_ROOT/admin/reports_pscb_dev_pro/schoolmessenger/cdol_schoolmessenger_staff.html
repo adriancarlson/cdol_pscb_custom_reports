@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <title>SchoolMessenger - Staff</title>
+        ~[wc:commonscripts]
+        <link href="/images/css/screen.css" rel="stylesheet" media="screen">
+        <link href="/images/css/print.css" rel="stylesheet" media="print">
+        ~[wc:pscb_init]
+        <script>
+            pscbToolButtons = { "copyData": "Yes", "csvFile": "Yes", "pdfFile": "Yes", "curSel": "Yes" };
+        </script>
+    </head>
+
+    <body>
+        ~[wc:admin_header_frame_css]<!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a>
+        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html" target="_top">PSCB DEV Custom Reports</a>
+        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_schoolmessenger_menu.html" target="_top">SchoolMessenger</a> &gt; SchoolMessenger - Staff
+        <!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
+
+        <!-- Start of Results -->
+        <h1>SchoolMessenger - Staff</h1>
+        <div class="box-round">
+            <table class="tablesorter grid" id="results">
+                <thead>
+                    <tr>
+                        <th class="left">Last Name</th>
+                        <th class="left">First Name</th>
+                        <th class="left filter-select">Gender</th>
+                        <th class="center">Home Phone</th>
+                        <th class="center">Mobile Phone</th>
+                        <th class="center">Email Address</th>
+                        <th class="center">Personal Email</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ~[tlist_sql;
+                    SELECT DISTINCT
+                    Users.Last_Name,
+                    Users.First_Name,
+                    CASE
+                    WHEN UPPER(gender) = 'F' THEN 'Female'
+                    WHEN UPPER(gender) = 'M' THEN 'Male'
+                    ELSE gender
+                    END AS gender,
+                    HOME_PHONE,
+                    Addtl_User.MOBILE_PHONE,
+                    Users.EMAIL_ADDR,
+                    Addtl_User.ALTERNATIVE_EMAIL
+                    FROM SchoolStaff
+                    INNER JOIN Users
+                    ON SchoolStaff.USERS_DCID = USERS.DCID
+                    LEFT JOIN U_STAFF_ADDITIONAL_INFO Addtl_Staff
+                    ON Addtl_Staff.SCHOOLSTAFFDCID = SchoolStaff.DCID
+                    LEFT JOIN U_USERS_ADDITIONAL_INFO Addtl_User
+                    ON Users.DCID = Addtl_User.USERSDCID
+                    INNER JOIN USERSCOREFIELDS
+                    ON USERSCOREFIELDS.USERSDCID = USERS.DCID
+                    INNER JOIN SCHOOLS
+                    ON SchoolStaff.SchoolID = SCHOOLS.SCHOOL_NUMBER
+                    WHERE SchoolStaff.Status = 1
+                    ~[if.is.a.school] AND SchoolStaff.schoolid = ~(curschoolid) [/if.is.a.school]
+                    ORDER BY
+                    Users.Last_Name
+                    ;alternatecolor;nonemessage=
+                    <tr nodata>
+                        <td colspan="100%">No Records Found.</td>
+                    </tr>]
+                    <tr class="Record" d>
+                        <td>~(Last_Name)</td>
+                        <td>~(First_Name)</td>
+                        <td>~(gender)</td>
+                        <td>~(HOME_PHONE)</td>
+                        <td>~(MOBILE_PHONE)</td>
+                        <td>~(EMAIL_ADDR)</td>
+                        <td>~(PERSONAL_EMAIL)</td>
+                    </tr>
+                    [/tlist_sql]
+                </tbody>
+            </table>
+        </div>
+        <!-- End of results -->
+        <div style="clear: both;">
+            <p>
+                <center>Report generated at ~[time] on ~[date]</center>
+            </p>
+        </div>
+        [/if#showData]
+        ~[wc:admin_footer_frame_css]
+    </body>
+
+</html>
