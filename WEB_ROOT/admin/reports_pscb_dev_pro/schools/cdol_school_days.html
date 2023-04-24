@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+    <!-- non framed -->
+
+    <head>
+        <title>Schools - Calendar Days Not In Session</title>
+        ~[wc:commonscripts]
+        <link href="/images/css/screen.css" rel="stylesheet" media="screen">
+        <link href="/images/css/print.css" rel="stylesheet" media="print">
+        ~[wc:pscb_init]
+    </head>
+
+    <body>
+        ~[wc:admin_header_frame_css]<!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a>
+        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html" target="_top">PSCB DEV Custom Reports</a>
+        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_schools_menu.html" target="_top">Schools</a> &gt;
+        Schools - Calendar Days Not In Session
+        <!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
+
+        <!-- Start of Results -->
+        <h1>Schools - Calendar Days Not In Session</h1>
+        <div class="box-round">
+            <h2>Calendar Days Not In Session</h2>
+            <table border="0" cellspacing="0" cellpadding="4" align="center" class="tablesorter grid" id="results">
+                <thead>
+                    <tr>
+                        <th class="left">Date</th>
+                        <th class="left">Note</th>
+                        <th class="left">School</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ~[tlist_sql;
+                    SELECT
+                    CALENDAR_DAY.date_value,
+                    CALENDAR_DAY.note,
+                    schools.name
+                    FROM terms
+                    LEFT JOIN SCHOOLS
+                    ON TERMS.SCHOOLID = SCHOOLS.SCHOOL_NUMBER
+                    JOIN CALENDAR_DAY
+                    on TERMS.schoolid = CALENDAR_DAY.schoolid
+                    WHERE terms.isyearrec = 1
+                    AND terms.schoolid <> 0
+                        AND terms.yearid = ~(curyearid)
+                        AND CALENDAR_DAY.date_value between terms.firstday and terms.lastday
+                        AND CALENDAR_DAY.insession = 0
+                        AND TO_CHAR(CALENDAR_DAY.date_value, 'DY') NOT IN ('SUN', 'SAT')
+                        ~[if.is.a.school] AND schools.school_number = ~(curschoolid) [/if.is.a.school]
+                        order by schools.name, CALENDAR_DAY.date_value
+                        ;alternatecolor;nonemessage=
+                        <tr>
+                            <td colspan="100%">No records returned.</td>
+                        </tr>]
+                        <tr class="Record">
+                            <td>~(date;d)</td>
+                            <td>~(note)</td>
+                            <td>~(school)</td>
+                        </tr>
+                        [/tlist_sql]
+                </tbody>
+            </table>
+            <!-- End of shaded content table -->
+        </div>
+        <!-- End of results -->
+        <div style="clear: both;">
+            <p>
+                <center>Report generated at ~[time] on ~[date]</center>
+            </p>
+        </div>
+        ~[wc:admin_footer_frame_css]
+    </body>
+
+</html>

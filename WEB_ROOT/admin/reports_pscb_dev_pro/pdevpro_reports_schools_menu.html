@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<title>PSCB DEV Custom Reports - Schools</title>
+		~[wc:commonscripts]
+		<link href="/images/css/screen.css" rel="stylesheet" media="screen">
+		<link href="/images/css/print.css" rel="stylesheet" media="print">
+	</head>
+
+	<body>
+		~[wc:admin_header_css]<!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a> &gt; <a
+			href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html">PSCB DEV Custom Reports</a> &gt;
+		Schools<!-- breadcrumb end -->~[wc:admin_navigation_css]
+
+		<!-- start of title -->
+		<div>
+			<table style="margin:0px 0px 0px 22px">
+				<thead>
+					<tr>
+						<th width="250px" style="background-color: #ffffff"><img
+								src="/pscb_dev_pro/images/PSCB_DEV_Logo.png" height="50" width="220" border="2" alt=""
+								</th>
+						<th nowrap style="background-color: #ffffff;font-size:25px">Custom Reports - Schools</th>
+						<th width="100%" style="background-color: #ffffff;font-size:17px">~[tlist_sql;SELECT pd.Version
+							FROM PluginDef pd
+							WHERE pd.name = 'CDOL PSCB Custom
+							Reports';;nonemessage=]&nbsp;&nbsp;&nbsp;&nbsp;v~(version;t)[/tlist_sql]
+						</th>
+					</tr>
+				</thead>
+			</table>
+		</div>
+
+		<!-- start of content and bounding box -->
+		<div class="box-round">
+			<table border="0" cellspacing="0" cellpadding="4" class="table grid">
+				<thead>
+					<tr>
+						<th class="left" width="280px" style="height:30px">Schools</th>
+						<th class="left" style="height:30px">Description</th>
+					</tr>
+				</thead>
+				<tr>
+					<td><a href="/admin/reports_pscb_dev_pro/schools/cdol_school_info.html">School Info</a></td>
+					<td>List information about your school</td>
+				</tr>
+				<tr>
+					<td><a href="/admin/reports_pscb_dev_pro/validation/BellScheduleSetup.html">Bell Schedule Setup</a>
+					</td>
+					<td>Lists the school Bell Schedule Setup information for the current year.</td>
+				</tr>
+				~[if.is.a.school]
+				<tr>
+					<td><a href="/admin/reports_pscb_dev_pro/validation/CalendarSetup.html">Calendar Setup</a></td>
+					<td>Lists the school Calendar Setup information for the current year.</td>
+				</tr>
+				[/if.is.a.school]
+				<tr>
+					<td><a href="/admin/reports_pscb_dev_pro/validation/CalendarDaysInSessionSummary.html">Calendar Days
+							In
+							Session Summary</a>
+					</td>
+					<td>Lists all schools and the number of days each school is in session for the current year.
+					</td>
+				</tr>
+				<tr>
+					<td><a href="/admin/reports_pscb_dev_pro/schools/cdol_school_days.html">Calendar Days Not In
+							Session</a>
+					</td>
+					<td>A list of all the vacation days of your school year. Days school is not in session.</td>
+				</tr>
+			</table>
+		</div>
+		<!-- end of content of bounding box -->
+		~[cust.insertion_point:pscb_dev_pro.schools]
+		~[wc:admin_footer_css]
+	</body>
+
+</html><!-- non framed -->
