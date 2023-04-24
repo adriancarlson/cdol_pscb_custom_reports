@@ -1,0 +1,25 @@
+<table id="cdolHealthTable" border="0" cellspacing="0" cellpadding="4" class="table grid">
+	<thead>
+		<tr>
+			<th class="left" width="350px" style="height:30px">CDOL Perscription Medications</th>
+			<th class="left" style="height:30px">Description</th>
+		</tr>
+	</thead>
+	<tr>
+		<td><a href="/admin/reports_pscb_dev_pro/health/cdol_perscription_list.html">Prescribed Medications List</a>
+		</td>
+		<td>List students who have prescribed medications (one row per medication)</td>
+	</tr>
+	<tr>
+		<td><a href="/admin/reports_pscb_dev_pro/health/cdol_perscriptions_by_student.html">Prescribed Medications by
+				Student</a></td>
+		<td>List students who have prescribed medications (one row per student)</td>
+	</tr>
+
+</table>
+<script>
+	/*checks to make sure page is loaded */
+	$j(function () {
+		$j('.box-round').append($j('#cdolHealthTable'));
+	});
+</script>
