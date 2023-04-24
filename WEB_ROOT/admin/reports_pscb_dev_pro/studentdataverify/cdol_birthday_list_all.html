@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <title>Birthday List - All
+        </title>
+        ~[wc:commonscripts]
+        <link href="/images/css/screen.css" rel="stylesheet" media="screen">
+        <link href="/images/css/print.css" rel="stylesheet" media="print">
+        ~[wc:pscb_init]
+    </head>
+
+    <body>
+        ~[wc:admin_header_frame_css]<!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a>
+        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html" target="_top">PSCB DEV Custom Reports</a>
+        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_studentdataverify_menu.html" target="_top">Student
+            Data Verification</a> &gt; Birthday List - All
+        <!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
+
+        <!-- Begin report filters -->
+        <form id="rptFilters" action="#" method="POST">
+            <h1>Birthday List - All</h1>
+            <div class="box-round">
+                <h2>Report Filters</h2>
+                <table border="0" cellspacing="0" cellpadding="0" class="linkDescList">
+                    <thead>
+                        <tr>
+                            <th>&nbsp;Sort:&nbsp;&nbsp;
+                                <select name="m">
+                                    <option value="" ~[if.~[gpv:m]=]selected="selected" [/if]></option>
+                                    <option value="aj" ~[if.~[gpv:m]=aj]selected="selected" [/if]>Aug - July</option>
+                                    <option value="jd" ~[if.~[gpv:m]=jd]selected="selected" [/if]>Jan - Dec</option>
+                                </select>
+                            </th>
+                        </tr>
+                    </thead>
+                </table>
+                <div class="button-row">
+                    <input type="hidden" name="showData" value="1">
+                    <span class="red">&nbsp;&nbsp;Select parameters and click submit</span>
+                    <input type="hidden" name="ac" value="prim">~[submitbutton]
+                </div>
+            </div>
+        </form>
+        <!-- End report filters-->
+
+        <!-- Start of Results -->
+        ~[if#showData.~[gpv:showData]=1]
+        <div class="box-round">
+            <h2>Birthday List - All &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Student Age as of ~[date]</h2>
+            <table border="0" cellspacing="0" cellpadding="4" class="tablesorter grid" id="results">
+                <thead>
+                    <tr>
+                        <th class="left">Student Number</th>
+                        <th class="left">Name</th>
+                        <th class="left filter-select">Gender</th>
+                        <th class="left filter-select">Grade Level</th>
+                        <th class="left filter-select">Homeroom</th>
+                        <th class="left filter-select">School</th>
+                        <th class="left">DOB</th>
+                        <th class="left">Current Age</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ~[if#m.~(gpv.m;sqlText)=]
+                    <tr>
+                        <td colspan="100%"></td>
+                    </tr>
+                    [else#m]
+                    ~[tlist_sql;
+                    SELECT
+                    s.dcid,
+                    s.Student_Number,
+                    s.LastFirst,
+                    s.Gender,
+                    CASE
+                    WHEN s.grade_level < 0 THEN 'PK' WHEN s.grade_level=0 THEN 'K' ELSE TO_CHAR (s.grade_level) END
+                        grade_level, s.Home_Room, sch.abbreviation, to_char(s.dob,'FMMonth DD, YYYY') dob,
+                        Trunc(Months_Between(Sysdate,Dob)/12) || ' years ' || Trunc(Mod(Months_Between(Sysdate,Dob),12))
+                        || ' months ' ||
+                        trunc(sysdate-add_months(dob,trunc(months_between(sysdate,dob)/12)*12+trunc(mod(months_between(sysdate,dob),12))))
+                        ||' days' currentage, CASE WHEN to_char(s.dob,'MM')=08 THEN 1 WHEN to_char(s.dob,'MM')=09 THEN 2
+                        WHEN to_char(s.dob,'MM')=10 THEN 3 WHEN to_char(s.dob,'MM')=11 THEN 4 WHEN
+                        to_char(s.dob,'MM')=12 THEN 5 WHEN to_char(s.dob,'MM')=01 THEN 6 WHEN to_char(s.dob,'MM')=02
+                        THEN 7 WHEN to_char(s.dob,'MM')=03 THEN 8 WHEN to_char(s.dob,'MM')=04 THEN 9 WHEN
+                        to_char(s.dob,'MM')=05 THEN 10 WHEN to_char(s.dob,'MM')=06 THEN 11 WHEN to_char(s.dob,'MM')=07
+                        THEN 12 ELSE 99 END as SchoolYearOrder, to_char(s.dob,'DD') dayOrder FROM students s INNER JOIN
+                        Schools sch ON s.schoolID=sch.school_number WHERE to_char(s.schoolID) LIKE CASE WHEN
+                        ~(curschoolid)=0 THEN '%' ELSE to_char(~(curschoolid)) END AND s.enroll_status in (-1, 0)
+                        ~[if#aj.~(gpv.m;sqlText)=aj]ORDER BY SchoolYearOrder, dayOrder [/if#aj]
+                        ~[if#jd.~(gpv.m;sqlText)=jd]ORDER BY to_char(s.dob,'MM')[/if#jd] ;alternatecolor;nonemessage=<tr
+                        nodata>
+                        <td colspan="100%">No Records Found.</td>
+                        </tr>]
+                        <tr class="Record" data-StudentID="~(DCID)">
+                            <td class="nowrap"><a href="/admin/students/home.html?frn=001~(dcid)"
+                                    target="_blank">~(s.Student_Number;t)</a></td>
+                            <td>~(s.lastfirst)</td>
+                            <td>~(s.Gender;t)</td>
+                            <td>~(sch.abbreviation;t)</td>
+                            <td>~(s.Grade_Level;t)</td>
+                            <td>~(s.Home_Room;t)</td>
+                            <td>~(s.DOB)</td>
+                            <td class="nowrap">~(currentage;t)</td>
+                        </tr>
+                        [/tlist_sql]
+                        [/if#m]
+                </tbody>
+            </table>
+        </div>
+        <!-- End of results -->
+        <div>
+            <p>
+                <center>Report generated at ~[time] on ~[date]</center>
+            </p>
+        </div>
+        ~[/if#showData]
+        ~[wc:admin_footer_frame_css]
+    </body>
+
+</html>

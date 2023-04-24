@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+    <!-- non framed -->
+
+    <head>
+        <title>Census Data</title>
+        ~[wc:commonscripts]
+        <link href="/images/css/screen.css" rel="stylesheet" media="screen">
+        <link href="/images/css/print.css" rel="stylesheet" media="print">
+        ~[wc:pscb_init]
+        <script>
+            pscbToolButtons = { "copyData": "Yes", "csvFile": "Yes", "pdfFile": "Yes", "curSel": "Yes" };
+        </script>
+    </head>
+
+    <body>
+        ~[wc:admin_header_frame_css]<!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a>
+        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html" target="_top">PSCB DEV Custom Reports</a>
+        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_studentdataverify_menu.html" target="_top">Student
+            Data Verification</a> &gt; Census Data
+        <!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
+        <!-- start of Options -->
+        <h1>Census Data</h1>
+        <form name="searchform" action="#" method="POST">
+            <div class="box-round" style="overflow: hidden;">
+                <h2>Report Filters</h2>
+                <table border="0" cellspacing="0" cellpadding="0" class="linkDescList">
+                    <thead>
+                        <tr>
+                            <th style="white-space: nowrap;" width="180px">Student Selection</th>
+                            <th style="white-space: nowrap;">Grade Selection</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <select name="ss" id="ss">
+                                    <option value='' ~[if.~[gpv:ss]=]selected[/if]>All Students</option>
+                                    <option value="cur" ~[if.~[gpv:ss]=cur]selected[/if]>Current Selection
+                                        (~[x:studsinset])</option>
+                                </select>
+                            </td>
+                            <td>
+                                <select name="gr" name="gr">
+                                    <option value='' ~[if.~[gpv:gr]=]selected[/if]>All Grades</option>
+                                    ~[tlist_sql;
+                                    SELECT DISTINCT GRADE_LEVEL,
+                                    CASE
+                                    WHEN TO_CHAR(grade_level) = -2 then 'PK3'
+                                    WHEN TO_CHAR(grade_level) = -1 then 'PK4'
+                                    WHEN TO_CHAR(grade_level) = 0 then 'K'
+                                    WHEN TO_CHAR(grade_level) = 99 then 'Graduated'
+                                    ELSE TO_CHAR(grade_level)
+                                    END as prettygrade
+                                    FROM STUDENTS
+                                    WHERE TO_CHAR(SCHOOLID) LIKE CASE WHEN TO_CHAR(~(curschoolid)) = '0'
+                                    THEN '%' ELSE TO_CHAR(~(curschoolid)) END
+                                    AND ENROLL_STATUS = 0
+                                    ORDER BY GRADE_LEVEL]
+                                    <option value="'~(gr)'">~(prettygrade)</option>
+                                    [/tlist_sql]
+                                </select>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="button-row" style="float: left;">
+                    <input type="hidden" name="showData" value="1">
+                    <span class="red">&nbsp;&nbsp;Select parameters and click submit</span>
+                    <input type="hidden" name="ac" value="prim">~[submitbutton]
+                </div>
+            </div>
+        </form>
+        <!-- Start of Results -->
+        ~[if#showData.~(gpv.showData;sqlText)=1]
+        <div class="box-round">
+            <h2>Health Screening Report</h2>
+            <table border="0" cellspacing="0" cellpadding="4" align="center" class="tablesorter grid" id="results">
+                <thead>
+                    <tr>
+                        <th class="left">Last Name</th>
+                        <th class="left">First Name</th>
+                        <th class="left filter-select">Gender</th>
+                        <th class="left">DOB</th>
+                        <th class="center filter-select">Grade Level</th>
+                        <th class="left">Ethnicity</th>
+                        <th class="left">Race</th>
+                        <th class="left">Mailing Street</th>
+                        <th class="left">Mailing City</th>
+                        <th class="left">Mailing State</th>
+                        <th class="left">Mailing Zip</th>
+                        <th class="left">Physical Street</th>
+                        <th class="left">Physical City</th>
+                        <th class="left">Physical State</th>
+                        <th class="left">Physical Zip</th>
+                        <th class="left">Phone</th>
+                        <th class="left">Father Name</th>
+                        <th class="left">Mother Name</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ~[tlist_sql;
+                    WITH pcontact AS (
+                    SELECT
+                    DISTINCT students.dcid,
+                    CASE
+                    WHEN person.firstname IS NULL
+                    AND person.lastname IS NULL THEN '-No Name-'
+                    ELSE person.firstname || ' ' || person.lastname
+                    END contact_name,
+                    codeset.code Relationship
+                    FROM
+                    students
+                    LEFT JOIN studentcontactassoc
+                    ON students.dcid = studentcontactassoc.studentdcid
+                    LEFT JOIN studentcontactdetail
+                    ON studentcontactassoc.studentcontactassocid = studentcontactdetail.studentcontactassocid
+                    LEFT JOIN person
+                    ON studentcontactassoc.personid = person.ID
+
+                    LEFT JOIN codeset
+                    ON codeset.codesetid = studentcontactdetail.relationshiptypecodesetid
+                    )
+                    SELECT
+                    students.dcid,
+                    students.last_name,
+                    students.first_name,
+                    CASE
+                    WHEN UPPER(students.gender) = 'M' THEN 'Male'
+                    WHEN UPPER(students.gender) = 'F' THEN 'Female'
+                    ELSE students.gender
+                    END as gender,
+                    students.dob,
+                    CASE
+                    WHEN TO_CHAR(students.grade_level) = -2 then 'PK3'
+                    WHEN TO_CHAR(students.grade_level) = -1 then 'PK4'
+                    WHEN TO_CHAR(students.grade_level) = 0 then 'K'
+                    WHEN TO_CHAR(students.grade_level) = 99 then 'Graduated'
+                    ELSE TO_CHAR(students.grade_level)
+                    END as pretty_grade,
+                    Decode(students.FedEthnicity,-2,'',1,'Hispanic/Latino','Not Hispanic/Latino') Hispanic,
+                    LISTAGG(studentrace.racecd,', ') WITHIN GROUP (ORDER BY studentrace.racecd) OVER (PARTITION BY
+                    students.dcid) racecodes,
+                    students.mailing_street,
+                    students.mailing_city,
+                    students.mailing_state,
+                    students.mailing_zip,
+                    students.street,
+                    students.city,
+                    students.state,
+                    students.zip,
+                    students.home_phone,
+                    father.contact_name as Father,
+                    mother.contact_name as Mother
+                    FROM
+                    students
+                    ~[if#ss.~(gpv.ss;sqlText)=cur]
+                    INNER JOIN ~[temp.table.current.selection:students] temp ON (students.dcid = temp.dcid)
+                    [/if#ss]
+                    LEFT OUTER JOIN studentrace
+                    ON students.id = studentrace.studentid
+                    LEFT JOIN pcontact mother
+                    ON mother.dcid = students.dcid
+                    AND mother.relationship = 'Mother'
+                    LEFT JOIN pcontact father
+                    ON father.dcid = students.dcid
+                    AND father.relationship = 'Father'
+                    WHERE
+                    students.enroll_status = 0
+                    ~[if.is.a.school] AND students.schoolid = ~(curschoolid) [/if.is.a.school]
+                    ~[if#gr.~(gpv.gr;sqlText)#] AND students.grade_level = ~(gpv.gr) [/if#gr]
+                    ORDER BY
+                    students.last_name
+                    ;]
+                    <tr data-StudentID="~(dcid)">
+                        <td class="nowrap">~(last)</td>
+                        <td class="nowrap">~(first)</td>
+                        <td>~(gender)</td>
+                        <td>~(dob;d)</td>
+                        <td class="center">~(grade_level)</td>
+                        <td class="nowrap">~(ethnicity)</td>
+                        <td>~(race)</td>
+                        <td class="nowrap">~(mailing_street)</td>
+                        <td class="nowrap">~(mailing_city)</td>
+                        <td>~(mailing_state)</td>
+                        <td>~(mailing_zip)</td>
+                        <td class="nowrap">~(street)</td>
+                        <td class="nowrap">~(city)</td>
+                        <td>~(state)</td>
+                        <td>~(zip)</td>
+                        <td class="nowrap">~(phone)</td>
+                        <td class="nowrap">~(father)</td>
+                        <td class="nowrap">~(mother)</td>
+                    </tr>
+                    [/tlist_sql]
+                </tbody>
+            </table>
+        </div>
+        [/if#showData]
+        <!-- end of content of bounding box -->
+        ~[wc:admin_footer_frame_css]
+    </body>
+
+</html><!-- end right frame -->

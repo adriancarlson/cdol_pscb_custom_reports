@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+    <!-- non framed -->
+
+    <head>
+        <title>Race/Religion</title>
+        ~[wc:commonscripts]
+        <link href="/images/css/screen.css" rel="stylesheet" media="screen">
+        <link href="/images/css/print.css" rel="stylesheet" media="print">
+        ~[wc:pscb_init]
+    </head>
+
+    <body>
+        ~[wc:admin_header_frame_css]<!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a>
+        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html" target="_top">PSCB DEV Custom Reports</a>
+        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_studentdataverify_menu.html" target="_top">Student
+            Data Verification</a> &gt;
+        Race/Religion
+        <!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
+        <!-- start of Options -->
+        <h1>Demographics</h1>
+        <form name="searchform" action="#" method="POST">
+            <div class="box-round" style="overflow: hidden;">
+                <h2>Report Filters</h2>
+                <table border="0" cellspacing="0" cellpadding="0" class="linkDescList">
+                    <thead>
+                        <tr>
+                            <th width="180px">Student Selection</th>
+                            <th>Grade Level</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <select name="s" id="s">
+                                    <option value='' ~[if.~[gpv:s]=]selected[/if]>All Students
+                                    <option value="cur" ~[if.~[gpv:s]=cur]selected[/if]>Current Selection
+                                        (~[x:studsinset])
+                                </select>
+                            </td>
+                            <td>
+                                <select name="grlvl">
+                                    <option ~[if.~[gpv:grlvl]='' ]selected[/if] value=''>All Grades</option>
+                                    ~[tlist_sql;
+                                    SELECT DISTINCT GRADE_LEVEL, DECODE('~[gpv:grlvl]', GRADE_LEVEL, 'SELECTED', '')
+                                    isselected,
+                                    CASE
+                                    WHEN grade_level = -2 THEN 'PK3'
+                                    WHEN grade_level = -1 THEN 'PK4'
+                                    WHEN grade_level = 0 THEN 'K'
+                                    WHEN grade_level = 99 THEN 'Gr'
+                                    ELSE TO_CHAR(grade_level)
+                                    END pretty_grade
+                                    FROM STUDENTS
+                                    WHERE TO_CHAR(SCHOOLID) LIKE CASE WHEN TO_CHAR(~(curschoolid)) = '0'
+                                    THEN '%' ELSE TO_CHAR(~(curschoolid)) END
+                                    AND ENROLL_STATUS = 0
+                                    ORDER BY GRADE_LEVEL]
+                                    <option value="~(grlvl)" ~(isselected)>~(prettygrlvl)</option>
+                                    [/tlist_sql]
+                                </select>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="button-row" style="float: left;">
+                    <input type="hidden" name="showData" value="1">
+                    <span class="red">&nbsp;&nbsp;Select parameters and click submit</span>
+                    <input type="hidden" name="ac" value="prim">~[submitbutton]
+                </div>
+            </div>
+        </form>
+
+        <!-- end of Options -->
+        ~[if#showData.~[gpv:showData]=1]
+        <!-- Start of Results -->
+        <div class="box-round">
+            <h2>Race/Religion</h2>
+            <table border="0" cellspacing="0" cellpadding="4" align="center" class="tablesorter grid" id="results">
+                <thead>
+                    <tr>
+                        <th class="left">Student Number</th>
+                        <th class="left">Student Name</th>
+                        <th class="left">DOB</th>
+                        <th class="left">Grade</th>
+                        <th class="left">Religion</th>
+                        <th class="left">Ethnicity</th>
+                        <th class="left">Race</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ~[tlist_sql;
+                    SELECT
+                    s.dcid
+                    ,s.Student_Number
+                    ,s.lastfirst
+                    ,s.dob
+                    ,CASE
+                    WHEN grade_level = -2 THEN 'PK3'
+                    WHEN grade_level = -1 THEN 'PK4'
+                    WHEN grade_level = 0 THEN 'K'
+                    WHEN grade_level = 99 THEN 'Gr'
+                    ELSE TO_CHAR(grade_level)
+                    END pretty_grade
+                    ,CASE WHEN NCEA.RELIGIOUSAFFILIATION= 'C' THEN 'Catholic' WHEN NCEA.RELIGIOUSAFFILIATION= 'N' THEN
+                    'Non-Catholic'ELSE ''
+                    END AS Religion
+                    ,Decode(s.FedEthnicity,-2,'',1,'Hispanic/Latino','Not Hispanic/Latino') Hispanic,
+                    LISTAGG(r.racecd,', ') WITHIN GROUP (ORDER BY r.racecd) OVER (PARTITION BY s.dcid) racecodes
+                    FROM students s
+                    JOIN schools sch ON (s.schoolid = sch.school_number)
+                    JOIN StudentCoreFields scf ON (s.dcid = scf.studentsdcid)
+                    LEFT OUTER JOIN studentrace r ON (s.id = r.studentid)
+                    LEFT OUTER JOIN S_STU_NCEA_X NCEA on (s.dcid = NCEA.studentsdcid)
+                    WHERE s.enroll_status = 0
+                    ~[if.is.a.school] AND s.schoolid = ~(curschoolid) [/if.is.a.school]
+
+                    ~[if#1.~(gpv.s;sqlText)#] AND S.dcid IN (SELECT dcid FROM ~[temp.table.current.selection:students])
+                    [else#1] AND S.Enroll_Status <= 0 [/if#1] ~[if#2.~(gpv.grlvl;sqlText)='' ] AND
+                        S.Grade_Level=~(gpv.grlvl) [else#2][/if#2] ORDER BY s.Grade_Level,s.lastfirst
+                        ;alternatecolor;nonemessage=<tr nodata>
+                        <td colspan="100%">No Records Found.</td>
+                        </tr>]
+                        <tr class="Record" data-StudentID="~(dcid;t)">
+                            <td>~(student_number;t)</td>
+                            <td>~(LastFirst)</td>
+                            <td>~(dob;d)</td>
+                            <td>~(Grade_Level)</td>
+                            <td>~(religion)</td>
+                            <td>~(hispanic;t)</td>
+                            <td>~(racecodes;t)</td>
+                        </tr>
+                        [/tlist_sql]
+                </tbody>
+            </table>
+        </div>
+        [/if#showData]
+
+        <!-- end of content of bounding box -->
+        ~[wc:admin_footer_frame_css]
+    </body>
+
+</html><!-- end right frame -->

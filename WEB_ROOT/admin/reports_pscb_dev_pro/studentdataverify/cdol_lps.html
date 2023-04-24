@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+    <!-- non framed -->
+
+    <head>
+        <title>LPS Student Report</title>
+        ~[wc:commonscripts]
+        <link href="/images/css/screen.css" rel="stylesheet" media="screen">
+        <link href="/images/css/print.css" rel="stylesheet" media="print">
+        ~[wc:pscb_init]
+        <script>
+            pscbToolButtons = { "copyData": "Yes", "csvFile": "Yes", "pdfFile": "Yes", "curSel": "Yes" };
+        </script>
+    </head>
+
+    <body>
+        ~[wc:admin_header_frame_css]<!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a>
+        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html" target="_top">PSCB DEV Custom Reports</a>
+        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_studentdataverify_menu.html" target="_top">Student
+            Data Verification</a> &gt; LPS
+        Student Report
+        <!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
+        <!-- start of Options -->
+        <h1>LPS Student Report</h1>
+        <form name="searchform" action="#" method="POST">
+            <div class="box-round" style="overflow: hidden;">
+                <h2>Report Filters</h2>
+                <table border="0" cellspacing="0" cellpadding="0" class="linkDescList">
+                    <thead>
+                        <tr>
+                            <th style="white-space: nowrap;" width="180px">Student Selection</th>
+                            <th style="white-space: nowrap;">Grade Selection</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <select name="ss" id="ss">
+                                    <option value='' ~[if.~[gpv:ss]=]selected[/if]>All Students</option>
+                                    <option value="cur" ~[if.~[gpv:ss]=cur]selected[/if]>Current Selection
+                                        (~[x:studsinset])</option>
+                                </select>
+                            </td>
+                            <td>
+                                <select name="gr" name="gr">
+                                    <option value='' ~[if.~[gpv:gr]=]selected[/if]>All Grades</option>
+                                    ~[tlist_sql;
+                                    SELECT DISTINCT GRADE_LEVEL,
+                                    CASE
+                                    WHEN TO_CHAR(grade_level) = -2 then 'PK3'
+                                    WHEN TO_CHAR(grade_level) = -1 then 'PK4'
+                                    WHEN TO_CHAR(grade_level) = 0 then 'K'
+                                    WHEN TO_CHAR(grade_level) = 99 then 'Graduated'
+                                    ELSE TO_CHAR(grade_level)
+                                    END as prettygrade
+                                    FROM STUDENTS
+                                    WHERE TO_CHAR(SCHOOLID) LIKE CASE WHEN TO_CHAR(~(curschoolid)) = '0'
+                                    THEN '%' ELSE TO_CHAR(~(curschoolid)) END
+                                    AND ENROLL_STATUS = 0
+                                    ORDER BY GRADE_LEVEL]
+                                    <option value="'~(gr)'">~(prettygrade)</option>
+                                    [/tlist_sql]
+                                </select>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="button-row" style="float: left;">
+                    <input type="hidden" name="showData" value="1">
+                    <span class="red">&nbsp;&nbsp;Select parameters and click submit</span>
+                    <input type="hidden" name="ac" value="prim">~[submitbutton]
+                </div>
+            </div>
+        </form>
+        <!-- Start of Results -->
+        ~[if#showData.~(gpv.showData;sqlText)=1]
+        <div class="box-round">
+            <h2>LPS Student Report</h2>
+            <table border="0" cellspacing="0" cellpadding="4" align="center" class="tablesorter grid" id="results">
+                <thead>
+                    <tr>
+                        <th class="left filter-select">Student</th>
+                        <th class="left">DOB</th>
+                        <th class="left filter-select">Grade Level</th>
+                        <th class="left filter-select">Gender</th>
+                        <th class="left">Home Phone</th>
+                        <th class="left">Address</th>
+                        <th class="left">Adults Student Lives With</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ~[tlist_sql;
+                    SELECT DCID, LASTFIRST, DOB, PRETTY_GRADE, GENDER, HOME_PHONE, ADDRESS, LISTAGG(Contact, ' | ')
+                    WITHIN GROUP(ORDER BY
+                    DCID,contactpriorityorder) as Adults_students_live_with, GRADE_LEVEL
+                    FROM (
+                    SELECT
+                    s.dcid ,
+                    s.lastfirst,
+                    TO_CHAR(s.dob, 'MM/DD/YYYY') as DOB,
+                    s.grade_level,
+                    CASE
+                    WHEN TO_CHAR(s.grade_level) = -2 then 'PK3'
+                    WHEN TO_CHAR(s.grade_level) = -1 then 'PK4'
+                    WHEN TO_CHAR(s.grade_level) = 0 then 'K'
+                    WHEN TO_CHAR(s.grade_level) = 99 then 'Graduated'
+                    ELSE TO_CHAR(s.grade_level)
+                    END as PRETTY_GRADE,
+                    CASE
+                    WHEN UPPER(s.gender) = 'M' THEN 'Male'
+                    WHEN UPPER(s.gender) = 'F' THEN 'Female'
+                    ELSE s.gender
+                    END as GENDER,
+                    s.home_phone,
+                    s.street || ' ' || s.city || ' ' || s.state || ' ' || s.zip as ADDRESS,
+                    CASE WHEN p.firstname IS NULL AND p.lastname IS NULL THEN '-No Name-' ELSE p.firstname||'
+                    '||p.lastname ||' - '|| cs.code
+                    END as Contact,
+                    sca.contactpriorityorder contactpriorityorder,
+                    s.schoolid
+                    FROM Students s
+                    ~[if#ss.~(gpv.ss;sqlText)=cur] INNER JOIN ~[temp.table.current.selection:students] temp ON (s.dcid =
+                    temp.dcid)
+                    [/if#ss]
+                    JOIN schools sch ON (s.schoolid = sch.school_number)
+                    LEFT JOIN studentcontactassoc sca ON (s.dcid = sca.studentdcid)
+                    LEFT JOIN studentcontactdetail scd ON (sca.studentcontactassocid = scd.studentcontactassocid)
+                    LEFT JOIN person p ON (sca.personid = p.ID)
+                    LEFT JOIN codeset cs ON (cs.codesetid = scd.relationshiptypecodesetid)
+                    LEFT JOIN guardianpersonassoc gp ON (p.id = gp.personid)
+                    LEFT JOIN guardianstudent gs ON (s.dcid = gs.studentsdcid AND gp.guardianid = gs.guardianid)
+                    WHERE s.enroll_status = 0
+                    AND scd.liveswithflg = 1
+                    AND cs.code NOT IN ('Brother','Friend','Neighbor','Other','Sister','Resource Teacher')
+                    ~[if.is.a.school] AND s.schoolid = ~(curschoolid) [/if.is.a.school]
+                    ~[if#gr.~(gpv.gr;sqlText)#] AND s.grade_level = ~(gpv.gr) [/if#gr]
+                    ORDER BY s.lastfirst, sca.contactpriorityorder
+                    ) GROUP BY DCID, LASTFIRST, DOB, PRETTY_GRADE, GENDER, HOME_PHONE, ADDRESS, SCHOOLID, GRADE_LEVEL
+                    ORDER BY SCHOOLID, GRADE_LEVEL, LASTFIRST;]
+                    <tr data-StudentID="~(dcid)">
+                        <td class="nowrap"><a href="/admin/students/contacts.html?frn=001~(dcid)"
+                                target="_blank">~(lastfirst;t)</a>
+                        </td>
+                        <td>~(dob;t)</td>
+                        <td>~(grade_level;t)</td>
+                        <td>~(gender;t)</td>
+                        <td>~(phone)</td>
+                        <td class="nowrap">~(address;t)</td>
+                        <td class="nowrap">~(contacts)</td>
+                    </tr>
+                    [/tlist_sql]
+                </tbody>
+            </table>
+        </div>
+        [/if#showData]
+        <!-- end of content of bounding box -->
+        ~[wc:admin_footer_frame_css]
+    </body>
+
+</html><!-- end right frame -->
