@@ -63,26 +63,29 @@
 		</td>
 	</tr>
 	<tr>
-		<td><a href="/admin/reports_pscb/contacts/cdol_receive_mail_not_lives_with.html">Receive Mail But Does Not Live
+		<td><a href="/admin/reports_pscb_dev_pro/contacts/cdol_receive_mail_not_lives_with.html">Receive Mail But Does
+				Not Live
 				With</a>
 		</td>
 		<td>List students and any contacts that is marked as receives mail but does not live with students
 		</td>
 	</tr>
 	<tr id="mailAndLives">
-		<td><a href="/admin/reports_pscb/contacts/cdol_receive_mail_and_lives_with.html">Receive Mail & Lives With</a>
+		<td><a href="/admin/reports_pscb_dev_pro/contacts/cdol_receive_mail_and_lives_with.html">Receive Mail & Lives
+				With</a>
 		</td>
 		<td>List students and any contacts that is marked as receives mail & lives with students
 		</td>
 	</tr>
 	<tr id="missingZip">
-		<td><a href="/admin/reports_pscb/contacts/cdol_contacts_missing_zip.html">Contacts Missing Zip Code</a>
+		<td><a href="/admin/reports_pscb_dev_pro/contacts/cdol_contacts_missing_zip.html">Contacts Missing Zip Code</a>
 		</td>
 		<td>List students and any contacts that have an address but no Zip Code
 		</td>
 	</tr>
 	<tr id="maidenName">
-		<td><a href="/admin/reports_pscb/contacts/cdol_contacts_w_maiden_name.html">Contacts with Maiden Name</a>
+		<td><a href="/admin/reports_pscb_dev_pro/contacts/cdol_contacts_w_maiden_name.html">Contacts with Maiden
+				Name</a>
 		</td>
 		<td>List students and any contacts that have an Maiden Name
 		</td>

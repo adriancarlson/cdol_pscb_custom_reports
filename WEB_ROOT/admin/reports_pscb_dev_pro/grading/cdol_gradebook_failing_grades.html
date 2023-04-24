@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Gradebook - Failing Grades</title>
+        ~[wc:commonscripts]
+        <link href="/images/css/screen.css" rel="stylesheet" media="screen">
+        <link href="/images/css/print.css" rel="stylesheet" media="print">
+        <link href="/images/css/cdol_pscb_custom.css" rel="stylesheet" media="screen">
+        ~[wc:pscb_init]
+    </head>
+
+    <body>
+        ~[wc:admin_header_frame_css]<!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a>
+        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html" target="_top">PSCB DEV Custom Reports</a>
+        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_grading_menu.html" target="_top">Grading</a> &gt;
+        Gradebook - Failing
+        Grades<!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
+
+        <!-- Begin report filters-->
+        <form name="searchform" action="#" method="POST">
+            <h1>Gradebook - Failing Grades</h1>
+            <div class="box-round oh">
+                <h2>Report Filters</h2>
+                <table cellspacing="0" cellpadding="4" class="linkDescList">
+                    <thead>
+                        <tr>
+                            <th width="160px">Reporting Term</th>
+                            <th>Students</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <select title="tm" name="tm">
+                                    <option value="">All Terms</option>
+                                    ~[tlist_sql;
+                                    SELECT distinct storecode, CASE WHEN storecode = '~(gpv.tm;sqlText)' THEN 'selected'
+                                    ELSE '' END selectedterm
+                                    FROM termbins
+                                    WHERE yearid = ~(curyearid)
+                                    AND schoolid = ~(curschoolid)
+                                    ORDER BY storecode]
+                                    <option value="~(storecode;t)" ~(selectedterm,t)>~(storecode;t)</option>
+                                    [/tlist_sql]
+                                </select>
+                            </td>
+                            <td>
+                                <select title="se" name="se">
+                                    <option value="all">All Students
+                                    <option ~[if.~(gpv.se)=cur]selected[/if] value="cur">Current Selection
+                                        (~[x:studsinset])
+                                </select>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="button-row fl">
+                    <input type="hidden" name="showData" value="1">
+                    <span class="red">&nbsp;&nbsp;Select parameters and click submit</span>
+                    <input type="hidden" name="ac" value="prim">~[submitbutton]
+                </div>
+            </div>
+        </form>
+
+        <!-- End report filters-->
+        ~[if#showData.~(gpv.showData)=1]
+        <!-- Start of Results -->
+        <div class="box-round">
+            <h2>Gradebook - Failing Grades</h2>
+            <table cellspacing="0" cellpadding="4" class="tablesorter grid" id="results">
+                <thead>
+                    <tr class="headerRow">
+                        <th class="left">Student Number</th>
+                        <th class="left">Student</th>
+                        <th class="filter-select">Grade Level</th>
+                        <th>Reporting Term</th>
+                        <th class="right">Percent</th>
+                        <th class="right filter-select">Grade</th>
+                        <th class="left">Section</th>
+                        <th class="left filter-select">Course</th>
+                        <th class="left filter-select">Teacher</th>
+                        <th class="left">Last Updated</th>
+                        <th class="left">Drop Date</th>
+                    </tr>
+                </thead>
+                ~[tlist_sql;
+                SELECT
+                STUDENTS.DCID SDCID,
+                STUDENTS.STUDENT_NUMBER,
+                STUDENTS.LASTFIRST,
+                STUDENTS.GRADE_LEVEL,
+                pgfinalgrades.FINALGRADENAME,
+                pgfinalgrades.PERCENT,
+                pgfinalgrades.GRADE,
+                sections.COURSE_NUMBER || '-' || sections.SECTION_NUMBER CRSSEC,
+                courses.COURSE_NAME,
+                teachers.LASTFIRST,
+                pgfinalgrades.LASTGRADEUPDATE,
+                cc.dateleft
+                FROM
+                pgfinalgrades
+                INNER JOIN students
+                ON pgfinalgrades.studentid = students.id
+                INNER JOIN sections
+                ON pgfinalgrades.sectionid = sections.id
+                INNER JOIN cc
+                ON pgfinalgrades.sectionid = cc.sectionid
+                AND pgfinalgrades.studentid = cc.studentid
+                ~[if#se.~(gpv.se;sqlText)=cur] INNER JOIN ~[temp.table.current.selection:students] temp ON
+                (STUDENTS.dcid = temp.dcid) [/if#se]
+                INNER JOIN teachers
+                ON sections.teacher = teachers.id
+                INNER JOIN courses
+                ON sections.course_number = courses.course_number
+                INNER JOIN schools
+                ON sections.schoolid = schools.school_number
+                WHERE
+                STUDENTS.schoolid = ~(curschoolid)
+                ~[if#se.~(gpv.se;sqlText)#cur] AND students.enroll_status = 0 [/if#se]
+                ~[if#tm.~(gpv.tm;sqlText)#] and pgfinalgrades.FinalGradeName = '~(gpv.tm;sqlText)' [/if#tm]
+                and sections.Termid BETWEEN ~(curyearid)00 AND ~(curyearid)99
+                and sections.ExcludeFromStoredGrades = 0
+                and pgfinalgrades.Grade NOT LIKE '-%'
+                ~[if#letter.~(f.in;value=~(curschoolid);in=101,130)=1] and pgfinalgrades.grade IN
+                ('D+','D','D-','F','INC') [/if#letter]
+                ~[if#percent.~(f.in;value=~(curschoolid);in=160,189,210)=1] and pgfinalgrades.percent BETWEEN .1 AND
+                69.9 [/if#percent]
+                ~[if#bnho.~(curschoolid)=115] and pgfinalgrades.percent BETWEEN .1 AND 76.9 [/if#bnho]
+
+
+                ORDER BY students.lastfirst,
+                sections.expression, pgfinalgrades.FinalGradeName ;alternatecolor;nonemessage=<tr nodata>
+                    <td colspan="100%">No Records Found.</td>
+                </tr>]
+                <tr class="Record" data-StudentID="~(sdcid;t)">
+                    <td>~(student_number;t)</td>
+                    <td class="nowrap">~(LastFirst;t)</td>
+                    <td class="center">~(grade_level;t)</td>
+                    <td class="center">~(FinalGradeName;t)</td>
+                    <td class="right">~(Percent;l)%</td>
+                    <td class="right">~(Grade;t)</td>
+                    <td>~(crssec;t)</td>
+                    <td class="nowrap">~(Course_Name;t)</td>
+                    <td class="nowrap">~(Teacher;t)</td>
+                    <td>~(LastGradeUpdate;d)</td>
+                    <td>~(dropdate;d)</td>
+                </tr>
+                [/tlist_sql]
+            </table>
+        </div>
+        <!-- End of results -->
+        <div class="cb">
+            <p class="center">Report generated at ~[time] on ~[date]</p>
+        </div>
+        [/if#showData]
+        ~[wc:admin_footer_frame_css]
+    </body>
+
+</html>

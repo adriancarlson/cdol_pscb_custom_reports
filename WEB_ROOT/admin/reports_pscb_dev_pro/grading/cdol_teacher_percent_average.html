@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <title>Teacher - Percent Averages</title>
+        ~[wc:commonscripts]
+        <link href="/images/css/screen.css" rel="stylesheet" media="screen">
+        <link href="/images/css/print.css" rel="stylesheet" media="print">
+        ~[wc:pscb_init]
+        <script>
+            pscbToolButtons = { "copyData": "Yes", "csvFile": "Yes", "pdfFile": "No", "curSel": "Yes" };
+        </script>
+    </head>
+
+    <body>
+        ~[wc:admin_header_frame_css]<!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a>
+        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html" target="_top">PSCB DEV Custom Reports</a>
+        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_grading_menu.html" target="_top">Grading</a> &gt;
+        Teacher - Percent Averages
+        <!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
+        <!-- Begin report filters-->
+        <h1>Teacher - Percent Averages</h1>
+        <form name="rptFilters" action="#" method="POST">
+            <div class="box-round" style="overflow: hidden;">
+                <h2>Report Filters</h2>
+                <table border="0" cellspacing="0" cellpadding="0" class="linkDescList">
+                    <thead>
+                        <tr>
+                            <th width="100px">Year</th>
+                            <th width="200px">Grade Reporting Term</th>
+                            <th width="100px">Section To View</th>
+                            <th width="100%">&nbsp;Teacher</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <select name="term">
+                                    <option value="" ~[if.~(gpv.term)=]selected[/if]>All Years</option>
+                                    ~[tlist_sql;
+                                    SELECT DISTINCT YEARID, CASE WHEN TO_CHAR(YEARID) = TO_CHAR(~(curyearid)) THEN
+                                    'selected' ELSE 'not' END slct, NAME
+                                    FROM TERMS
+                                    WHERE ISYEARREC = 1
+                                    AND YEARID >= 25
+                                    ORDER BY YEARID]
+                                    <option value="~(YearID;l)" ~(isselected;t)>~(Name;t)
+                                        [/tlist_sql]
+                                </select>
+                            </td>
+                            <td>
+                                <select name="sc">
+                                    <option value="" ~[if.~(gpv.sc)=]selected[/if]>Select Grade Reporting Term</option>
+                                    ~[tlist_sql;SELECT DISTINCT
+                                    storecode,
+                                    CASE WHEN storecode='~(gpv.sc;sqlText)' THEN 'selected' ELSE '' END as selected
+                                    FROM termbins
+                                    WHERE schoolid = ~(curschoolid)
+                                    ORDER BY upper(storecode)]
+                                    <option value="~(storecode;t)" ~(sel;t)>~(storecode)</option>
+                                    [/tlist_sql]
+                                </select>
+                            </td>
+                            <td valign="top" nowrap>
+                                <select id="cn" name="cn">
+                                    <option value="" ~[if.~(gpv.cn)=]selected[/if]>All Courses
+                                        ~[tlist_sql;SELECT DISTINCT Upper(c.course_name) AS course_name_value, CASE WHEN
+                                        Upper(c.course_name) = '~(gpv.cn;sqlText)' THEN 'selected' ELSE '' END AS
+                                        isselected, c.course_name FROM ps.sections sect INNER JOIN
+                                        ps.courses c ON sect.course_number = c.course_number WHERE sect.schoolid =
+                                        ~(curschoolid) AND sect.termid >= ~(curyearid)00 AND sect.termid <
+                                            (~(curyearid)00 + 100) ORDER BY Course_Name] <option
+                                            value="~(course_name_value;t)" ~(isselected;t)>~(course_name;t)
+                                            [/tlist_sql]
+                                </select>
+                            </td>
+                            <td valign="top" nowrap>
+                                <select id="teacher" name="teacher">
+                                    <option value="" ~[if.~(gpv.teacher)=]selected[/if]>All Teachers
+                                        ~[tlist_sql;SELECT DISTINCT t.id, CASE WHEN t.id = '~(gpv.teacher;sqlText)' THEN
+                                        'selected' ELSE '' END AS isselected, t.lastfirst FROM ps.sections sect INNER
+                                        JOIN ps.teachers t ON t.id = sect.teacher AND t.schoolid = sect.schoolid WHERE
+                                        sect.schoolid = ~(curschoolid) AND sect.termid >= ~(curyearid)00 AND sect.termid
+                                        < (~(curyearid)00 + 100) ORDER BY t.lastfirst] <option value="~(t.id)"
+                                            ~(isselected;t)>~(t.lastfirst; t)
+                                            [/tlist_sql]
+                                </select>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="button-row" style="float: left;">
+                    <input type="hidden" name="showData" value="1">
+                    <span class="red">&nbsp;&nbsp;Select parameters and click submit</span>
+                    <input type="hidden" name="ac" style="float: left;" value="prim">~[submitbutton]
+                </div>
+            </div>
+        </form>
+        <!-- End report parameters-->
+        ~[if#showData.~(gpv.showData)=1]
+        <div class="box-round">
+            <h2>Teacher - Percent Averages</h2>
+            <table border="0" cellspacing="0" cellpadding="4" class="tablesorter grid" id="results">
+                <thead>
+                    <tr>
+                        <th class="left filter-select">Year</th>
+                        <th class="left filter-select">Reporting Term</th>
+                        <th class="left filter-select">Course Number</th>
+                        <th class="left filter-select">Course Name</th>
+                        <th class="left filter-select">Section Number</th>
+                        <th class="left filter-select">Term</th>
+                        <th class="left filter-select">Teacher</th>
+                        <th class="left">Stu Count</th>
+                        <th class="left">Percent Average</th>
+                        <th class="left">School</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ~[tlist_sql;
+                    SELECT
+                    (t.yearid +1990) || '-' || (t.yearid +1991),
+                    pgf.finalgradename AS FinalGrade,
+                    sec.course_number,
+                    crs.course_name,
+                    sec.section_number,
+                    t.name,
+                    tch.lastfirst AS Teacher,
+                    COUNT(pgf.percent) AS NumStudents,
+                    ROUND(AVG(pgf.percent),1)||'%' AS PercentAvg,
+                    schools.name AS School
+                    FROM
+                    PGFinalGrades pgf
+                    INNER JOIN Sections sec
+                    ON pgf.sectionid = sec.id
+                    INNER JOIN cc
+                    ON pgf.sectionid = cc.sectionid
+                    AND pgf.studentid = cc.studentid
+                    INNER JOIN Teachers tch
+                    ON sec.teacher = tch.id
+                    INNER JOIN Courses crs
+                    ON sec.course_number = crs.course_number
+                    INNER JOIN terms t
+                    ON sec.termid = t.id
+                    AND sec.schoolid = t.schoolid
+                    INNER JOIN Schools
+                    ON sec.schoolid = Schools.school_number
+                    WHERE
+                    ~[if.is.a.school] sec.schoolid = ~(curschoolid) [/if.is.a.school]
+                    ~[if.~(gpv.term;sqlText)#] AND sec.termID BETWEEN ~(gpv.term;sqlText)00 AND ~(gpv.term;sqlText)99
+                    [/if]
+                    ~[if.~(gpv.sc)#] AND pgf.finalgradename = '~(gpv.sc;sqlText)'[/if]
+                    ~[if.~(gpv.cn)#] AND Upper(crs.course_name) = Upper('~(gpv.cn;sqlText)')[/if]
+                    ~[if.~(gpv.teacher)#] AND sec.teacher = ~(gpv.teacher;sqlText)[/if]
+                    GROUP BY
+                    (t.yearid +1990) || '-' || (t.yearid +1991), schools.name, sec.course_number,
+                    crs.course_name,sec.section_number, t.name, tch.lastfirst,
+                    pgf.finalgradename
+                    ORDER BY schools.name, crs.course_name, sec.section_number, pgf.finalgradename, t.name,
+                    tch.lastfirst
+                    ;alternatecolor;nonemessage=
+                    <tr nodata>
+                        <td colspan="100%">No Records Found.</td>
+                    </tr>]
+                    <tr class="~[evenoddrow]">
+                        <td class="left">~(year;t)</td>
+                        <td class="center">~(rptterm;t)</td>
+                        <td class="left">~(cnumb;t)</td>
+                        <td class="nowrap">~(course;t)</td>
+                        <td class="center">~(section;t)</td>
+                        <td class="center">~(term;t)</td>
+                        <td class="nowrap">~(teacher;t)</td>
+                        <td class="center">~(count)</td>
+                        <td class="center">~(avg;t)</td>
+                        <td class="nowrap">~(school;t)</td>
+                    </tr>
+                    [/tlist_sql]
+                </tbody>
+            </table>
+        </div>
+        <!-- End of results -->
+        <div>
+            <p>
+                <center>Report generated at ~[time] on ~[date]</center>
+            </p>
+        </div>
+        [/if#showData]
+        ~[wc:admin_footer_frame_css]
+    </body>
+
+</html>
