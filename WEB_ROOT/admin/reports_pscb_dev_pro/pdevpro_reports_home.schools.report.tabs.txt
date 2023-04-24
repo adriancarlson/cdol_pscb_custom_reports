@@ -1,0 +1,10 @@
+
+<tr class="~[evenoddrow]">
+    <td>
+        <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_schools_menu.html">Schools</a>
+    </td>
+    <td>
+        Custom CDOL School reports.
+    </td>
+</tr>
+
