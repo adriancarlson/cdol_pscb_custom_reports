@@ -23,6 +23,6 @@
 	$j(document).ready(function () {
 		var bottomTable = $j('#bottomTable');
 		$j("td:contains('School Attendance - Daily Attendance Summary by Date/Code')").closest('tr').parent().parent().after(bottomTable);
-
+$j()
 	});
 </script>

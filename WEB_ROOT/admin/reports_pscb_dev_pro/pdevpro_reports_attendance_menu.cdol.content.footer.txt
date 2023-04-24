@@ -1,0 +1,20 @@
+<table  id="cdol-table" style="display:none;" border="0" cellspacing="0" cellpadding="4" class="table grid">
+	<tr id="cdol-student-attendance-totals">
+		<td><a href="/admin/reports_pscb_dev_pro/attendance/cdol_student_attendance_totals.html">Student Attendance -
+				Totals</a></td>
+		<td>Lists attendance totals.</td>
+	</tr>
+	~[if.~[f.in;value=~(curschoolid);in=150,264,109,102,211,131,111,184,263,104,262,282,260,105,261,437,120,107,310,110,108,272,140]=1]
+	<tr id="cdol-perfect-attendance">
+		<td><a href="/admin/reports_pscb_dev_pro/attendance/cdol_perfect_attendance.html">School Attendance - Perfect Attendance</a></td>
+		<td>Lists students with perfect attendance.</td>
+	</tr>
+	[/if]
+</table>
+
+<script>
+	$j(function () {
+	   $j("td:contains('Student Attendance - Meeting Dates and Count Summary')").last().closest('tr').after($j('#cdol-student-attendance-totals'));
+	   $j("td:contains('School Attendance - Daily Attendance Summary by Date/Totals')").last().closest('tr').after($j('#cdol-perfect-attendance'));
+	});
+</script>

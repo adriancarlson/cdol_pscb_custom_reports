@@ -1,0 +1,10 @@
+
+<tr class="~[evenoddrow]">
+    <td>
+        <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_activities_menu.html">Activities</a>
+    </td>
+    <td>
+        Custom Activities reports.
+    </td>
+</tr>
+
