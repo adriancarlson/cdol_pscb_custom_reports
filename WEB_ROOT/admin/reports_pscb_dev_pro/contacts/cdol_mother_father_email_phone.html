@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+    <!-- non framed -->
+
+    <head>
+        <title>Students - Mother/Father Email & Phone</title>
+        ~[wc:commonscripts]
+        <link href="/images/css/screen.css" rel="stylesheet" media="screen">
+        <link href="/images/css/print.css" rel="stylesheet" media="print">
+        ~[wc:pscb_init]
+        <script>
+            pscbToolButtons = { "copyData": "Yes", "csvFile": "Yes", "pdfFile": "No", "curSel": "Yes" };
+        </script>
+    </head>
+
+    <body>
+        ~[wc:admin_header_frame_css] <!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a>
+        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html" target="_top">PSCB DEV Custom Reports</a>
+        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_contacts_menu.html" target="_top">Contacts</a> &gt;
+        Students - Mother/Father Email
+        & Phone
+        <!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
+        <!-- start of Options -->
+        <h1>Students - Mother/Father Email & Phone</h1>
+        <form name="searchform" action="#" method="POST">
+            <div class="box-round" style="overflow: hidden;">
+                <h2>Report Filters</h2>
+                <table border="0" cellspacing="0" cellpadding="0" class="linkDescList">
+                    <thead>
+                        <tr>
+                            <th style="white-space: nowrap;">Student Selection</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <select name="ss" id="ss">
+                                    <option value='' ~[if.~[gpv:ss]=]selected[/if]>All Students
+                                    <option value="cur" ~[if.~[gpv:ss]=cur]selected[/if]>Current Selection
+                                        (~[x:studsinset])
+                                </select>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="button-row" style="float: left;">
+                    <input type="hidden" name="showData" value="1">
+                    <span class="red">&nbsp;&nbsp;Select parameters and click submit</span>
+                    <input type="hidden" name="ac" value="prim">~[submitbutton]
+                </div>
+            </div>
+        </form>
+        <!-- Start of Results -->
+        ~[if#showData.~(gpv.showData;sqlText)=1]
+        <div class="box-round">
+            <h2>Students - Contacts Address List</h2>
+            <table border="0" cellspacing="0" cellpadding="4" align="center" class="tablesorter grid" id="results">
+                <thead>
+                    <tr>
+                        <th class="left">Std Num</th>
+                        <th class="left">Student Name</th>
+                        <th class="left filter-select">Grade Level</th>
+                        <th class="left filter-select">Home Room</th>
+                        <th class="left">Mother</th>
+                        <th class="left">Mother Phone</th>
+                        <th class="left">Mother Email</th>
+                        <th class="left">Father</th>
+                        <th class="left">Father Phone</th>
+                        <th class="left">Father Email</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ~[tlist_sql;
+                    WITH HA AS (
+                    SELECT *
+                    FROM (
+                    SELECT
+                    p.id,
+                    pa.street Home_Street,
+                    pa.city Home_City,
+                    scs.code Home_State,
+                    pa.postalcode Home_Zip,
+                    ROW_NUMBER() OVER (
+                    PARTITION BY p.id
+                    ORDER BY paa.personaddressassocid ASC
+                    ) AS RowNumber
+                    FROM
+                    person p
+                    LEFT OUTER JOIN personaddressassoc paa ON (p.id = paa.personid)
+                    LEFT OUTER JOIN personaddress pa ON (paa.personAddressID = pa.personAddressID)
+                    JOIN codeset cs ON (paa.AddressTypeCodeSetID = cs.CodeSetID)
+                    LEFT JOIN codeset scs ON (pa.statescodesetid = scs.codesetid)
+                    WHERE cs.code = 'Home'
+                    and paa.enddate is null
+                    )
+                    WHERE RowNumber =1
+                    ), MA AS (
+                    SELECT *
+                    FROM (
+                    SELECT
+                    p.id,
+                    pa.street Mailing_Street,
+                    pa.city Mailing_City,
+                    scs.code Mailing_State,
+                    pa.postalcode Mailing_Zip,
+                    ROW_NUMBER() OVER (
+                    PARTITION BY p.id
+                    ORDER BY paa.personaddressassocid ASC
+                    ) AS RowNumber
+                    FROM
+                    person p
+                    LEFT OUTER JOIN personaddressassoc paa ON (p.id = paa.personid)
+                    LEFT OUTER JOIN personaddress pa ON (paa.personAddressID = pa.personAddressID)
+                    JOIN codeset cs ON (paa.AddressTypeCodeSetID = cs.CodeSetID)
+                    LEFT JOIN codeset scs ON (pa.statescodesetid = scs.codesetid)
+                    WHERE cs.code = 'Mailing'
+                    and paa.enddate is null
+                    )
+                    WHERE RowNumber =1
+                    ),
+                    pcontact as (
+                    SELECT DISTINCT
+                    s.dcid,
+                    sch.abbreviation school,
+                    s.student_number,
+                    s.lastfirst,
+                    s.grade_level,
+                    s.home_room,
+                    p.id contactid,
+                    sca.contactpriorityorder as pcontactorder,
+                    precs.code Prefix,
+                    p.firstname,
+                    p.middlename,
+                    p.lastname,
+                    CASE
+                    WHEN p.firstname IS NULL AND p.lastname IS NULL
+                    THEN '-No Name-'
+                    ELSE p.firstname||' '||p.lastname
+                    END ContactFirstLast,
+                    sufcs.code Suffix,
+                    sca.contactpriorityorder,
+                    cs.code Relationship,
+                    gcs.displayvalue Gender,
+                    p.employer,
+                    u.PERSON_POSITION,
+                    Decode(p.isActive, 1, 'Active', 'Inactive') isactive,
+                    u.person_status,
+                    u.PERSON_MAIDEN_NAME,
+                    u.PERSON_PHONETIC_PRONUNCIATION,
+                    (
+                    SELECT LISTAGG(
+                    Nvl(ppa.phonenumberasentered,'') || ' ' || Nvl(cs.code,''), ' '
+                    )
+                    WITHIN GROUP (ORDER BY po.phoneorder)
+                    FROM (
+                    SELECT
+                    LEVEL AS phoneorder
+                    FROM
+                    DUAL CONNECT BY LEVEL <= 3 ) po LEFT JOIN personphonenumberassoc ppa ON
+                        (po.phoneorder=ppa.phonenumberpriorityorder AND ppa.personid=p.id) LEFT JOIN codeset cs ON
+                        (ppa.PhoneTypeCodeSetID=cs.CodeSetID) ) AS Contact_Phone_Numbers, ( SELECT
+                        LISTAGG(ea.emailaddress, ' | ' ) WITHIN GROUP(ORDER BY pea.emailaddresspriorityorder)
+                        Email_Addresses FROM PersonEmailAddressAssoc pea INNER JOIN EmailAddress ea ON
+                        (pea.EmailAddressID=ea.EmailAddressID) WHERE pea.personid=p.id GROUP BY pea.personid ) AS
+                        Email_Addresses, Decode(gs.studentsdcid, NULL, 'No' , 'Yes' ) dataaccess,
+                        DECODE(scd.iscustodial, 1, 'Yes' ,'No') iscustodial, DECODE(scd.liveswithflg, 1, 'Yes' ,'No')
+                        liveswithflg, DECODE(scd.receivesmailflg, 1, 'Yes' ,'No') receivesmailflg,
+                        DECODE(scd.isemergency, 1, 'Yes' ,'No') isemergency, DECODE(scd.schoolpickupflg, 1, 'Yes' ,'No')
+                        schoolpickupflg, DECODE(uscd.schoolmessengerflg, 1, 'Yes' ,'No') schoolmessengerflg,
+                        u.person_religion, u.person_parish, u.person_parish_city, u.person_parish_state FROM Students s
+                        JOIN schools sch ON (s.schoolid=sch.school_number) LEFT JOIN studentcontactassoc sca ON
+                        (s.dcid=sca.studentdcid) LEFT JOIN studentcontactdetail scd ON
+                        (sca.studentcontactassocid=scd.studentcontactassocid) LEFT JOIN u_studentcontactdetail_cdol uscd
+                        ON scd.studentcontactdetailid=uscd.studentcstudentcontactdetailid LEFT JOIN person p ON
+                        (sca.personid=p.ID) LEFT JOIN codeset cs ON (cs.codesetid=scd.relationshiptypecodesetid) LEFT
+                        JOIN codeset precs ON (precs.codesetid=p.PREFIXCODESETID) LEFT JOIN codeset sufcs ON
+                        (sufcs.codesetid=p.SUFFIXCODESETID) LEFT JOIN codeset gcs ON (gcs.codesetid=p.GENDERCODESETID)
+                        LEFT JOIN guardianpersonassoc gp ON (p.id=gp.personid) LEFT JOIN GUARDIAN g ON
+                        (gp.guardianid=g.guardianid) LEFT JOIN guardianstudent gs ON (s.dcid=gs.studentsdcid AND
+                        gp.guardianid=gs.guardianid) LEFT JOIN U_PERSON_ADDITIONAL_INFO U ON (p.ID=u.personid) WHERE
+                        s.enroll_status=0 and cs.codesetid !=32 ORDER BY s.lastfirst, sca.contactpriorityorder ) SELECT
+                        a.dcid, A.STUDENT_NUMBER, A.LASTFIRST AS LastFirst, A.GRADE_LEVEL, A.HOME_ROOM, C1.lastname
+                        || ', ' || C1.firstname as Contact_1_First_Last, C1.CONTACT_PHONE_NUMBERS as
+                        Contact_1_Phone_numbers, C1.EMAIL_ADDRESSES as Contact_1_Email_Adresses, C2.lastname || ', ' ||
+                        C2.firstname as Contact_2_First_Last, C2.CONTACT_PHONE_NUMBERS as Contact_2_Phone_numbers,
+                        C2.EMAIL_ADDRESSES as Contact_2_Email_Adresses FROM STUDENTS A ~[if#ss.~(gpv.ss;sqlText)=cur]
+                        INNER JOIN ~[temp.table.current.selection:students] temp ON (A.dcid=temp.dcid) [/if#ss] LEFT
+                        JOIN SCHOOLS B ON B.SCHOOL_NUMBER=A.SCHOOLID LEFT JOIN SCHOOLS nxtsch ON
+                        nxtsch.SCHOOL_NUMBER=A.Next_School LEFT JOIN U_STUDENT_SACRAMENTAL SAC ON
+                        SAC.STUDENTSDCID=A.DCID LEFT JOIN U_STUDENT_ADDITIONAL_INFO AD ON AD.STUDENTSDCID=A.DCID INNER
+                        JOIN StudentCoreFields SCF ON SCF.STUDENTSDCID=A.DCID LEFT JOIN S_STU_NCEA_X NCEA ON
+                        NCEA.STUDENTSDCID=A.DCID LEFT JOIN Gen G ON G.value=A.DistrictOfResidence AND G.cat='districts'
+                        LEFT JOIN (select * from pcontact) C1 ON (C1.DCID=A.DCID AND C1.Relationship='Mother' ) LEFT
+                        JOIN (select * from pcontact) C2 ON (C2.DCID=A.DCID AND C2.Relationship='Father' ) WHERE
+                        A.enroll_status=0 ~[if.is.a.school] AND A.schoolid=~(curschoolid) [/if.is.a.school] ORDER BY
+                        A.lastfirst;] <tr data-StudentID="~(dcid)">
+                        <td>~(student_number;t)</td>
+                        <td class="nowrap">~(lastfirst;t)</td>
+                        <td>~(grade_level;t)</td>
+                        <td>~(home_room;t)</td>
+                        <td class="nowrap">~(mother;t)</td>
+                        <td class="nowrap">~(mother_phone;t)</td>
+                        <td class="nowrap">~(mother_email;t)</td>
+                        <td class="nowrap">~(father;t)</td>
+                        <td class="nowrap">~(father_phone;t)</td>
+                        <td class="nowrap">~(father_email;t)</td>
+                        </tr>
+                        [/tlist_sql]
+                </tbody>
+            </table>
+        </div>
+        [/if#showData]
+        <!-- end of content of bounding box -->
+        ~[wc:admin_footer_frame_css]
+    </body>
+
+</html><!-- end right frame -->

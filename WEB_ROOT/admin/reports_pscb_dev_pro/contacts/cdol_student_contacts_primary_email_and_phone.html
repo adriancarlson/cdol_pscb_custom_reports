@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+    <!-- non framed -->
+
+    <head>
+        <title>Students - Contacts Primary Email and Phone</title>
+        ~[wc:commonscripts]
+        <link href="/images/css/screen.css" rel="stylesheet" media="screen">
+        <link href="/images/css/print.css" rel="stylesheet" media="print">
+        ~[wc:pscb_init]
+        <script>
+            pscbToolButtons = { "copyData": "Yes", "csvFile": "Yes", "pdfFile": "No", "curSel": "Yes" };
+        </script>
+    </head>
+
+    <body>
+        ~[wc:admin_header_frame_css] <!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a>
+        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html" target="_top">PSCB DEV Custom Reports</a>
+        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_contacts_menu.html" target="_top">Contacts</a> &gt;
+        Students - Contacts Primary
+        Email and Phone
+        List
+        <!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
+        <!-- start of Options -->
+        <h1>Contacts Primary Email and Phone</h1>
+        <form name="searchform" action="#" method="POST">
+            <div class="box-round" style="overflow: hidden;">
+                <h2>Report Filters</h2>
+                <table border="0" cellspacing="0" cellpadding="0" class="linkDescList">
+                    <thead>
+                        <tr>
+                            <th style="white-space: nowrap;">Student Selection</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <select name="ss" id="ss">
+                                    <option value='' ~[if.~[gpv:ss]=]selected[/if]>All Students
+                                    <option value="cur" ~[if.~[gpv:ss]=cur]selected[/if]>Current Selection
+                                        (~[x:studsinset])
+                                </select>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="button-row" style="float: left;">
+                    <input type="hidden" name="showData" value="1">
+                    <span class="red">&nbsp;&nbsp;Select parameters and click submit</span>
+                    <input type="hidden" name="ac" value="prim">~[submitbutton]
+                </div>
+            </div>
+        </form>
+        <!-- Start of Results -->
+        ~[if#showData.~(gpv.showData;sqlText)=1]
+        <div class="box-round">
+            <h2>Students - Contacts Address List</h2>
+            <table border="0" cellspacing="0" cellpadding="4" align="center" class="tablesorter grid" id="results">
+                <thead>
+                    <tr>
+                        <th class="left">Student</th>
+                        <th class="center filter-select">Grade</th>
+                        <th class="center filter-select">Priority</th>
+                        <th class="left">Contact Name</th>
+                        <th class="left">Relationship</th>
+                        <th class="left">Contact Email</th>
+                        <th class="left">Contact Phone</th>
+                        <th class="left">Phone Type</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ~[tlist_sql;
+                    with cont as
+                    (select s.dcid studcid, p.id persid, case when p.firstname is null and p.lastname is null then '-No
+                    Name-' else
+                    p.firstname||' '||p.lastname end pname,
+                    relcs.code relname, row_number() over (partition by s.dcid order by sca.contactpriorityorder) rnk
+                    from person p
+                    join studentcontactassoc sca on sca.personid = p.id
+                    join studentcontactdetail scd on scd.studentcontactassocid = sca.studentcontactassocid
+                    join students s on s.dcid = sca.studentdcid
+                    join codeset relcs on relcs.codesetid = scd.relationshiptypecodesetid
+                    where p.isactive = 1 and trunc(sysdate) between nvl(scd.startdate,trunc(sysdate)) and
+                    nvl(scd.enddate,trunc(sysdate))
+                    ~[if.~(gpv.ss)=cur]
+                    and s.dcid in (select dcid from ~[temp.table.current.selection:students])
+                    [/if]
+                    and s.enroll_status = 0
+                    ~[if.is.a.school] AND s.schoolid = ~(curschoolid) [/if.is.a.school]
+                    order by s.dcid),
+                    priemail as
+                    (select ct.persid pid, ea.emailaddress emailaddr, row_number() over (partition by ct.persid order by
+                    peaa.emailaddresspriorityorder) rnk
+                    from emailaddress ea
+                    join personemailaddressassoc peaa on peaa.emailaddressid = ea.emailaddressid
+                    join cont ct on ct.persid = peaa.personid
+                    order by ct.persid),
+                    priphone as
+                    (select ct.persid pid, ppna.phonenumberasentered pnum, phcs.code ptype, row_number() over (partition
+                    by ct.persid order
+                    by ppna.ispreferred desc, ppna.phonenumberpriorityorder) rnk
+                    from personphonenumberassoc ppna
+                    join cont ct on ct.persid = ppna.personid
+                    join codeset phcs on phcs.codesetid = ppna.phonetypecodesetid
+                    order by ct.persid)
+                    select stu.dcid studcid, stu.lastfirst, stu.grade_level, c.rnk, c.pname, nvl(c.relname,'-None-'),
+                    nvl(pem.emailaddr,'-None-'), nvl(pph.pnum,'-None-'), nvl(pph.ptype,'-None-')
+                    from students stu
+                    join cont c on c.studcid = stu.dcid
+                    left outer join priemail pem on pem.pid = c.persid and pem.rnk = 1
+                    left outer join priphone pph on pph.pid = c.persid and pph.rnk = 1
+                    ~[if.~(gpv.ss)=cur] INNER JOIN ~[temp.table.current.selection:students] stusel ON stusel.dcid =
+                    stu.dcid [/if]
+                    where stu.enroll_status = 0
+                    ~[if.is.a.school] AND stu.schoolid = ~(curschoolid) [/if.is.a.school]
+                    order by stu.lastfirst, c.rnk;]
+                    <tr data-StudentID="~(dcid)">
+                        <td class="nowrap">~(lastfirst;t)</td>
+                        <td class="center">~(grade_level;t)</td>
+                        <td class="center">~(priority;t)</td>
+                        <td class="nowrap">~(contact;t)</td>
+                        <td>~(relationship;t)</td>
+                        <td class="nowrap">~(contact_email;t)</td>
+                        <td class="nowrap">~(contact_phone;t)</td>
+                        <td>~(type;t)</td>
+                    </tr>
+                    [/tlist_sql]
+                </tbody>
+            </table>
+        </div>
+        [/if#showData]
+        <!-- end of content of bounding box -->
+        ~[wc:admin_footer_frame_css]
+    </body>
+
+</html><!-- end right frame -->
