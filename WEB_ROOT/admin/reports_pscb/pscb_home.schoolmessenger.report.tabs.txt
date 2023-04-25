@@ -1,9 +1,0 @@
-
-<tr class="~[evenoddrow]">
-    <td>
-        <a href="/admin/reports_pscb/pscb_schoolmessenger.html">SchoolMessenger</a>
-    </td>
-    <td>
-        Custom CDOL SchoolMessenger reports.
-    </td>
-</tr>

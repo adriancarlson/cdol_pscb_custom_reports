@@ -1,0 +1,10 @@
+
+<tr class="~[evenoddrow]">
+    <td>
+        <a href="/admin/reports_pscb_dev/pscb_standards.html">Standards</a>
+    </td>
+    <td>
+        Custom Standards reports.
+    </td>
+</tr>
+
