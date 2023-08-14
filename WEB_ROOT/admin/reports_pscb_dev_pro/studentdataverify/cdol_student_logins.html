@@ -23,7 +23,7 @@
     </head>
 
     <body>
-        ~[wc:admin_header_frame_css]<!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a>
+        ~[wc:admin_header_css]<!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a>
         &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html" target="_top">PSCB DEV Custom Reports</a>
         &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_studentdataverify_menu.html" target="_top">Student
             Data Verification</a> &gt;
@@ -39,7 +39,9 @@
                         <tr>
                             <th class="ws-nw">Student Selection</th>
                             <th class="ws-nw">Grade Selection</th>
-                            <th class="ws-nw" width="100%">Homeroom</th>
+                            <th class="ws-nw">Homeroom</th>
+                            ~[if.is.a.school]<th class="ws-nw" width="100%">Include Remote Enrollments</th>
+                            [/if.is.a.school]
                         </tr>
                     </thead>
                     <tbody>
@@ -52,10 +54,11 @@
                                 </select>
                             </td>
                             <td>
-                                <select title="gr" name="gr">
+                                <select title="gr" name="gr" id="gr">
                                     <option value='' ~[if.~[gpv:gr]=]selected[/if]>All Grades</option>
                                     ~[tlist_sql;
                                     SELECT DISTINCT GRADE_LEVEL,
+                                    CASE WHEN GRADE_LEVEL = '~(gpv.gr;sqlText)' THEN 'selected' ELSE '' END isselected,
                                     CASE
                                     WHEN TO_CHAR(grade_level) = -2 then 'PK3'
                                     WHEN TO_CHAR(grade_level) = -1 then 'PK4'
@@ -68,12 +71,12 @@
                                     THEN '%' ELSE TO_CHAR(~(curschoolid)) END
                                     AND ENROLL_STATUS in (-1, 0)
                                     ORDER BY GRADE_LEVEL]
-                                    <option value="'~(gr)'">~(prettygrade)</option>
+                                    <option value="~(gr)" ~(isselected;t)>~(prettygrade)</option>
                                     [/tlist_sql]
                                 </select>
                             </td>
                             <td>
-                                <select title="hr" name="hr">
+                                <select title="hr" name="hr" id="hr">
                                     <option value='' ~[if.~[gpv:hr]=]selected[/if]>All Homerooms</option>
                                     ~[tlist_sql;
                                     SELECT DISTINCT Home_room,
@@ -92,7 +95,12 @@
                                     [/tlist_sql]
                                 </select>
                             </td>
+                            ~[if.is.a.school]<td>
+                                <input type="checkbox" id="remote" name="remote" ~[if.~[gpv:remote]=on]checked[/if]>
+                            </td>
+                            [/if.is.a.school]
                         </tr>
+
                     </tbody>
                 </table>
                 <div class="button-row fl">
@@ -159,9 +167,11 @@
                     temp.dcid)
                     [/if#ss]
                     LEFT JOIN schools sch ON (s.schoolid = sch.school_number)
-                    LEFT JOIN RemoteEnrollments ON (s.id = RemoteEnrollments.studentid)
+                    ~[if.is.a.school] ~[if#remote.~(gpv.remote;sqlText)=on]LEFT JOIN RemoteEnrollments ON (s.id =
+                    RemoteEnrollments.studentid)[/if#remote][/if.is.a.school]
                     WHERE s.enroll_status in (-1,0)
-                    ~[if.is.a.school] AND RemoteEnrollments.schoolid = ~(curschoolid) [/if.is.a.school]
+                    ~[if.is.a.school] ~[if#remote.~(gpv.remote;sqlText)=on]AND RemoteEnrollments.schoolid =
+                    ~(curschoolid)[else#remote] AND s.schoolid = ~(curschoolid)[/if#remote][/if.is.a.school]
                     ~[if#gr.~(gpv.gr;sqlText)#] AND s.grade_level = ~(gpv.gr) [/if#gr]
                     ~[if#hr.~(gpv.hr;sqlText)#] AND s.home_room = ~(gpv.hr) [/if#hr]
                     ORDER BY sch.abbreviation, s.grade_level desc, s.lastfirst
