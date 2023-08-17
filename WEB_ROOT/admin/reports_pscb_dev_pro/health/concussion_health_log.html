@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Concussion Evaluations</title>
+        ~[wc:commonscripts]
+        <link href="/images/css/screen.css" rel="stylesheet" media="screen">
+        <link href="/images/css/print.css" rel="stylesheet" media="print">
+        ~[wc:pscbdevpro_init]
+        <script>
+            pscbToolButtons = { "copyData": "Yes", "csvFile": "Yes", "pdfFile": "yea", "curSel": "Yes" };
+        </script>
+    </head>
+
+    <body>
+        ~[wc:admin_header_css]<!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a>
+        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html">PSCB Custom Reports</a> &gt; <a
+            href="/admin/reports_pscb_dev_pro/pdevpro_reports_health_menu.html">Health Office</a> &gt; Concussion
+        Evaluations<!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
+
+        <!-- Begin report filters-->
+        <form name="searchform" action="#" method="POST">
+            <h1>Concussion Evaluations</h1>
+            <div class="box-round">
+                <h2>Report Filters</h2>
+                <table cellspacing="0" cellpadding="0" class="linkDescList">
+                    <thead>
+                        <tr>
+                            <th style="width: 125px">Student Selection</th>
+                            <th style="width: 150px">Log Start Date</th>
+                            <th>Log End Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <select name="ss">
+                                    <option value='' ~[if.~(gpv.ss)=]selected[/if]>All Students</option>
+                                    <option value="cur" ~[if.~(gpv.ss)=cur]selected[/if]>Current Selection
+                                        (~[x:studsinset])</option>
+                                </select>
+                            </td>
+                            <td>
+                                <input name="sDate" id="sDate" class="psDateWidget" type="text"
+                                    value="~[if.~(gpv.sDate)=]~[x:termbegdate][else]~(gpv.sDate)[/if]" size="10" />
+                            </td>
+                            <td>
+                                <input name="eDate" id="eDate" class="psDateWidget" type="text"
+                                    value="~[if.~(gpv.eDate)=]~(f.currentdate;dateformat=MM/DD/YYYY)[else]~(gpv.eDate)[/if]"
+                                    size="10" />
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="button-row left">
+                    <span style="color: red;">&nbsp;&nbsp;Select parameters and click submit</span>
+                    <input type="hidden" name="showData" value="1">
+                    <input type="hidden" name="ac" value="prim">~[submitbutton]
+                </div>
+            </div>
+        </form>
+        ~[if#showData.~(gpv.showData)=1]
+        <div class="box-round">
+            <h2 class="pscbdevBkgColor">&nbsp;&nbsp; Concussion Evaluations &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~(gpv.sdate)
+                to
+                ~(gpv.edate)</h2>
+            <table cellspacing="0" cellpadding="0" class="tablesorter grid" id="pscbDevPro">
+                <thead>
+                    <tr>
+                        <th class="left filter-select">Log Date/Time</th>
+                        <th class="left filter-select">Student</th>
+                        <th class="left filter-select">Grade Level</th>
+                        <th class="left filter-select">Date of Injury</th>
+                        <th class="left">Total Symptoms</th>
+                        <th class="left">System Score</th>
+                        <th class="left filter-select">Treatment Provider</th>
+                        <th class="left">Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ~[tlist_sql;
+                    SELECT
+                    u_cdol_health_log.studentsdcid,
+                    to_char(u_cdol_health_log.log_date, 'MM/DD/YYYY')|| ' ' || TO_CHAR(TO_DATE('1970-01-01',
+                    'YYYY-MM-DD') + NUMTODSINTERVAL(u_cdol_health_log.log_time, 'SECOND'), 'HH' || CHR(58) || 'MI AM'),
+                    students.lastfirst,
+                    students.grade_level,
+                    to_char(u_cdol_health_log.injury_date, 'MM/DD/YYYY'),
+                    u_cdol_health_log.total_systems_score || '/21 Total Symptoms',
+                    u_cdol_health_log.systems_score || '/126 Symptoms Score',
+                    users.lastfirst,
+                    u_cdol_health_log.notes_memory,
+                    u_cdol_health_log.notes_bess,
+                    u_cdol_health_log.notes_voms,
+                    u_cdol_health_log.notes
+                    FROM students
+                    ~[if#ss.~(gpv.ss;sqlText)=cur] INNER JOIN ~[temp.table.current.selection:students] temp ON
+                    (students.dcid =
+                    temp.dcid)
+                    [/if#ss]
+                    INNER JOIN u_cdol_health_log
+                    ON students.dcid = u_cdol_health_log.studentsdcid
+                    INNER JOIN users
+                    ON u_cdol_health_log.users_dcid = users.dcid
+                    WHERE u_cdol_health_log.yearid= ~(curyearid)
+                    AND u_cdol_health_log.log_date >= to_date('~(gpv.sDate;sqlText)','MM/DD/YYYY') AND
+                    u_cdol_health_log.log_date <= to_date('~(gpv.eDate;sqlText)','MM/DD/YYYY') AND
+                        u_cdol_health_log.log_type='Concussion' ~[if.is.a.school] AND
+                        students.schoolid=~(curschoolid)[/if.is.a.school] ORDER BY log_date DESC, log_time;;] <tr
+                        class="evenoddrow" data-StudentID="~(dcid;t)">
+                        <td class="nowrap">~(log_date_time;t)</td>
+                        <td class="nowrap"><a
+                                href='/admin/students/health_log/concussion_health_log.html?frn=001~(dcid;t)'
+                                target="_blank">~(lastfirst;t)</a></td>
+                        <td>~(grade;t)</td>
+                        <td class="nowrap">~(injury_date;t)</td>
+                        <td>~(total_systems_score;t)</td>
+                        <td>~(systems_score;t)</td>
+                        <td>~(userlastfirst;t)</td>
+                        <td>Memory ~(notes_memory;t)<br>
+                            BESS: ~(notes_bess;t)<br>
+                            VOMS: ~(notes_voms;t)<br>
+                            Other: ~(notes;t)</td>
+                        </tr>
+                        [/tlist_sql]
+                </tbody>
+            </table>
+        </div>
+        <p class="center">Report generated at ~[time] on ~[date]</p>
+        [/if#showData]
+        ~[wc:admin_footer_frame_css]
+    </body>
+
+</html>

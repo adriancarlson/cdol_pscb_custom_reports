@@ -25,9 +25,24 @@
 		</tr>
 	</thead>
 	<tr>
-		<td><a href="/admin/reports_pscb_dev_pro/health/cdol_health_log.html">CDOL Health Logs</a>
+		<td><a href="/admin/reports_pscb_dev_pro/health/daily_health_log.html">Daily Health Logs</a>
 		</td>
-		<td>List CDOL Custom Health Logs (Daily, Athletic, Concussion, Injury Eval)</td>
+		<td>List Daily Health Logs </td>
+	</tr>
+	<tr>
+		<td><a href="/admin/reports_pscb_dev_pro/health/athletic_health_log.html">Athletic Injury Logs</a>
+		</td>
+		<td>List Athletic Injury Logs</td>
+	</tr>
+	<tr>
+		<td><a href="/admin/reports_pscb_dev_pro/health/concussion_health_log.html">Concussion Evaluations</a>
+		</td>
+		<td>List Concussion Evaluations</td>
+	</tr>
+	<tr>
+		<td><a href="/admin/reports_pscb_dev_pro/health/eval_health_log.html">Injury Evaluations</a>
+		</td>
+		<td>List Injury Evaluations</td>
 	</tr>
 </table>
 <script>
