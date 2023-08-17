@@ -1,4 +1,4 @@
-<table id="cdolHealthTable" border="0" cellspacing="0" cellpadding="4" class="table grid">
+<table id="cdolHealthTable" cellspacing="0" cellpadding="4" class="table grid">
 	<thead>
 		<tr>
 			<th class="left" width="350px" style="height:30px">CDOL Perscription Medications</th>
@@ -17,9 +17,23 @@
 	</tr>
 
 </table>
+<table id="cdolHealthLogTable" cellspacing="0" cellpadding="4" class="table grid">
+	<thead>
+		<tr>
+			<th class="left" width="350px" style="height:30px">CDOL Health Logs</th>
+			<th class="left" style="height:30px">Description</th>
+		</tr>
+	</thead>
+	<tr>
+		<td><a href="/admin/reports_pscb_dev_pro/health/cdol_health_log.html">CDOL Health Logs</a>
+		</td>
+		<td>List CDOL Custom Health Logs (Daily, Athletic, Concussion, Injury Eval)</td>
+	</tr>
+</table>
 <script>
 	/*checks to make sure page is loaded */
-	$j(function () {
-		$j('.box-round').append($j('#cdolHealthTable'));
+	$j(() => {
+		$j('.box-round').append($j('#cdolHealthTable'))
+		$j('#cdolHealthTable').after($j('#cdolHealthLogTable'))
 	});
 </script>

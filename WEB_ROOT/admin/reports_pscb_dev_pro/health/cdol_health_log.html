@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>CDOL Health Logs</title>
+        ~[wc:commonscripts]
+        <link href="/images/css/screen.css" rel="stylesheet" media="screen">
+        <link href="/images/css/print.css" rel="stylesheet" media="print">
+        ~[wc:pscbdevpro_init]
+        <script>
+            pscbToolButtons = { "copyData": "Yes", "csvFile": "Yes", "pdfFile": "No", "curSel": "Yes" };
+        </script>
+    </head>
+
+    <body>
+        ~[wc:admin_header_css]<!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a>
+        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html">PSCB Custom Reports</a> &gt; <a
+            href="/admin/reports_pscb_dev_pro/pdevpro_reports_health_menu.html">Health Office</a> &gt; Daily Health
+        Logs<!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
+
+        <!-- Begin report filters-->
+        <form name="searchform" action="#" method="POST">
+            <h1>Daily Health Logs</h1>
+            <div class="box-round">
+                <h2>Report Filters</h2>
+                <table cellspacing="0" cellpadding="0" class="linkDescList">
+                    <thead>
+                        <tr>
+                            <th style="width: 125px">Student Selection</th>
+                            <th style="width: 150px">Log Start Date</th>
+                            <th style="width: 150px">Log End Date</th>
+                            <th>Log Type</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <select name="ss">
+                                    <option value='' ~[if.~(gpv.ss)=]selected[/if]>All Students</option>
+                                    <option value="cur" ~[if.~(gpv.ss)=cur]selected[/if]>Current Selection
+                                        (~[x:studsinset])</option>
+                                </select>
+                            </td>
+                            <td>
+                                <input name="sDate" id="sDate" class="psDateWidget" type="text"
+                                    value="~[if.~(gpv.sDate)=]~[x:termbegdate][else]~(gpv.sDate)[/if]" size="10" />
+                            </td>
+                            <td>
+                                <input name="eDate" id="eDate" class="psDateWidget" type="text"
+                                    value="~[if.~(gpv.eDate)=]~(f.currentdate;dateformat=MM/DD/YYYY)[else]~(gpv.eDate)[/if]"
+                                    size="10" />
+                            </td>
+                            <td>
+                                <select name="vt">
+                                    <option value='' ~[if.~(gpv.vt)=]selected[/if]>All Visit Types</option>
+                                    ~[tlist_sql;
+                                    SELECT Distinct
+                                    u_cdol_health_log.log_type, DECODE('~(gpv.vt;sqlText)', u_cdol_health_log.log_type,
+                                    'SELECTED', '')
+                                    isselected
+                                    FROM
+                                    u_cdol_health_log
+                                    ORDER BY u_cdol_health_log.log_type]
+                                    <option value="~(log_type;t)" ~(isselected;t)>~(log_type;t)</option>
+                                    [/tlist_sql]
+                                </select>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="button-row left">
+                    <span style="color: red;">&nbsp;&nbsp;Select parameters and click submit</span>
+                    <input type="hidden" name="showData" value="1">
+                    <input type="hidden" name="ac" value="prim">~[submitbutton]
+                </div>
+            </div>
+        </form>
+        ~[if#showData.~(gpv.showData)=1]
+        <div class="box-round">
+            <h2 class="pscbdevBkgColor">&nbsp;&nbsp; ~(gpv.vt) Logs &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~(gpv.sdate) to
+                ~(gpv.edate)</h2>
+            <table cellspacing="0" cellpadding="0" class="tablesorter grid" id="pscbDevPro">
+                <thead>
+                    <tr>
+                        <th class="left filter-select">Log Date/Time</th>
+                        <th class="left filter-select">Log Type</th>
+                        <th class="left filter-select">Student</th>
+                        <th class="left filter-select">Grade Level</th>
+                        <th class="left filter-select">Complaint</th>
+                        <th class="left filter-select">Treatment</th>
+                        <th class="left filter-select">Destination</th>
+                        <th class="left filter-select">Time Left</th>
+                        <th class="left filter-select">Treatment Provider</th>
+                        <th class="left">Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ~[tlist_sql;
+                    SELECT
+                    u_cdol_health_log.studentsdcid,
+                    to_char(u_cdol_health_log.log_date, 'MM/DD/YYYY')|| ' ' || TO_CHAR(TO_DATE('1970-01-01',
+                    'YYYY-MM-DD') + NUMTODSINTERVAL(u_cdol_health_log.log_time, 'SECOND'), 'HH' || CHR(58) || 'MI AM'),
+                    u_cdol_health_log.log_type,
+                    students.lastfirst,
+                    students.grade_level,
+                    u_cdol_health_log.complaint,
+                    u_cdol_health_log.treatment,
+                    u_cdol_health_log.destination,
+                    TO_CHAR(TO_DATE('1970-01-01', 'YYYY-MM-DD') + NUMTODSINTERVAL(u_cdol_health_log.left_time,
+                    'SECOND'), 'HH' || CHR(58) || 'MI AM'),
+                    users.lastfirst,
+                    u_cdol_health_log.notes
+                    FROM students
+                    ~[if#ss.~(gpv.ss;sqlText)=cur] INNER JOIN ~[temp.table.current.selection:students] temp ON
+                    (students.dcid =
+                    temp.dcid)
+                    [/if#ss]
+                    INNER JOIN u_cdol_health_log
+                    ON students.dcid = u_cdol_health_log.studentsdcid
+                    INNER JOIN users
+                    ON u_cdol_health_log.users_dcid = users.dcid
+                    WHERE u_cdol_health_log.yearid= ~(curyearid)
+                    AND u_cdol_health_log.log_date >= to_date('~(gpv.sDate;sqlText)','MM/DD/YYYY') AND
+                    u_cdol_health_log.log_date <= to_date('~(gpv.eDate;sqlText)','MM/DD/YYYY')
+                        ~[if#b.~(gpv.vt;sqlText)#] AND u_cdol_health_log.log_type='~(gpv.vt;sqlText)' [/if#b]
+                        ~[if.is.a.school] AND students.schoolid=~(curschoolid)[/if.is.a.school] ;] <tr
+                        class="evenoddrow" data-StudentID="~(dcid;t)">
+                        <td>~(log_date_time;t)</td>
+                        <td>~(log_type;t)</td>
+                        <td><a href='/admin/students/health_log/~(log_type;t)_health_log.html?frn=001~(dcid;t)'
+                                target="_blank">~(lastfirst;t)</a></td>
+                        <td>~(grade;t)</td>
+                        <td>~(complaint;t)</td>
+                        <td>~(treatment;t)</td>
+                        <td>~(destination;t)</td>
+                        <td>~(left_time;t)</td>
+                        <td>~(userlastfirst;t)</td>
+                        <td>~(notes;t)</td>
+                        </tr>
+                        [/tlist_sql]
+                </tbody>
+            </table>
+        </div>
+        <p class="center">Report generated at ~[time] on ~[date]</p>
+        [/if#showData]
+        ~[wc:admin_footer_frame_css]
+    </body>
+
+</html>
