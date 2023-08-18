@@ -1,0 +1,10 @@
+~[if#distCheck.security.inrole=9]
+<tr class="~[evenoddrow]">
+    <td>
+        <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_asm_menu.html">Apple School Manager</a>
+    </td>
+    <td>
+        Custom CDOL Apple School Manager reports.
+    </td>
+</tr>
+[/if#distCheck]
