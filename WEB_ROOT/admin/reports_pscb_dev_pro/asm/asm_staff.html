@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Apple School Manager - Staff</title>
+        ~[wc:commonscripts]
+        <link href="/images/css/screen.css" rel="stylesheet" media="screen">
+        <link href="/images/css/print.css" rel="stylesheet" media="print">
+        ~[wc:pscbdevpro_init]
+        <script>
+            pscbToolButtons = { "copyData": "No", "csvFile": "Yes", "pdfFile": "No", "curSel": "Yes" };
+        </script>
+
+    </head>
+
+    <body>
+        ~[wc:admin_header_css]<!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a>
+        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html">PSCB Custom Reports</a> &gt; <a
+            href="/admin/reports_pscb_dev_pro/pdevpro_reports_asm_menu.html">Apple School Manager</a> &gt; Apple School
+        Manager - Staff<!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
+
+        <!-- Begin report filters-->
+        <h1>Apple School Manager - Staff</h1>
+        ~[if#showData.~(gpv.showData)=1]
+        <div class="box-round">
+            <h2 class="pscbdevBkgColor">&nbsp;&nbsp; Apple School Manager - Staff &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            </h2>
+            <table cellspacing="0" cellpadding="0" class="tablesorter grid" id="pscbDevPro">
+                <thead>
+                    <tr>
+                        <th class="left">person_id</th>
+                        <th class="left">person_number</th>
+                        <th class="left">first_name</th>
+                        <th class="left">last_name</th>
+                        <th class="left">email_address</th>
+                        <th class="left">sis_username</th>
+                        <th class="left">location_id</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ~[tlist_sql;
+                    SELECT Distinct
+                    schoolstaff.id as person_id,
+                    users.teachernumber as person_number,
+                    users.first_name,
+                    users.last_name,
+                    users.email_addr as email_address,
+                    NVL(SUBSTR(users.email_addr, 0, INSTR(users.email_addr, '@')-1), users.email_addr) as sis_username,
+                    schoolstaff.schoolid as location_id
+                    FROM schoolstaff
+                    INNER JOIN users
+                    on schoolstaff.users_dcid = users.dcid
+                    LEFT JOIN CC
+                    ON schoolstaff.id = cc.teacherid
+                    WHERE
+                    cc.termid >=~(yearid)00
+                    ~[if.is.a.school] AND
+                    schoolstaff.schoolid=~(curschoolid)[/if.is.a.school]
+                    ;alternatecolor;nonemessage=<tr nodata>
+                        <td colspan="100%">No Records Found.</td>
+                    </tr>]
+                    <tr class="Record evenoddrow">
+                        <td>~(person_id;t)</td>
+                        <td>~(person_number;t)</td>
+                        <td>~(first_name;t)</td>
+                        <td>~(last_name;t)</td>
+                        <td>~(email_address;t)</td>
+                        <td>~(sis_username;t)</td>
+                        <td>~(location_id;t)</td>
+                    </tr>
+                    [/tlist_sql]
+                </tbody>
+            </table>
+        </div>
+        <p class="center">Report generated at ~[time] on ~[date]</p>
+        [/if#showData]
+        ~[wc:admin_footer_frame_css]
+    </body>
+
+</html>

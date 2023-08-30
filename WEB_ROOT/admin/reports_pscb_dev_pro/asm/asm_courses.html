@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Apple School Manager - Courses</title>
+        ~[wc:commonscripts]
+        <link href="/images/css/screen.css" rel="stylesheet" media="screen">
+        <link href="/images/css/print.css" rel="stylesheet" media="print">
+        ~[wc:pscbdevpro_init]
+        <script>
+            pscbToolButtons = { "copyData": "No", "csvFile": "Yes", "pdfFile": "No", "curSel": "Yes" };
+        </script>
+
+    </head>
+
+    <body>
+        ~[wc:admin_header_css]<!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a>
+        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html">PSCB Custom Reports</a> &gt; <a
+            href="/admin/reports_pscb_dev_pro/pdevpro_reports_asm_menu.html">Apple School Manager</a> &gt; Apple School
+        Manager - Courses<!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
+
+        <!-- Begin report filters-->
+        <h1>Apple School Manager - Courses</h1>
+        ~[if#showData.~(gpv.showData)=1]
+        <div class="box-round">
+            <h2 class="pscbdevBkgColor">&nbsp;&nbsp; Apple School Manager - Courses &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            </h2>
+            <table cellspacing="0" cellpadding="0" class="tablesorter grid" id="pscbDevPro">
+                <thead>
+                    <tr>
+                        <th class="left">class_id</th>
+                        <th class="left">course_number</th>
+                        <th class="left">course_name</th>
+                        <th class="left">location_id</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ~[tlist_sql;
+                    SELECT DISTINCT
+                    courses.course_number || '-' || sections.schoolid ||'.' || sections.section_number as course_id,
+                    courses.course_number,
+                    courses.course_name,
+                    sections.schoolid as location_id
+                    FROM courses
+                    INNER JOIN sections
+                    ON courses.course_number = sections.course_number
+                    INNER JOIN cc
+                    on sections.id = cc.sectionid
+                    WHERE
+                    cc.termid >=~(yearid)00
+                    ~[if.is.a.school] AND
+                    cc.schoolid=~(curschoolid)[/if.is.a.school]
+                    ;alternatecolor;nonemessage=<tr nodata>
+                        <td colspan="100%">No Records Found.</td>
+                    </tr>]
+                    <tr class="Record evenoddrow">
+                        <td>~(class_id;t)</td>
+                        <td>~(course_number;t)</td>
+                        <td>~(course_name;t)</td>
+                        <td>~(location_id;t)</td>
+                    </tr>
+                    [/tlist_sql]
+                </tbody>
+            </table>
+        </div>
+        <p class="center">Report generated at ~[time] on ~[date]</p>
+        [/if#showData]
+        ~[wc:admin_footer_frame_css]
+    </body>
+
+</html>

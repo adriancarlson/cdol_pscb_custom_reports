@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Contacts - Deceased List</title>
+        ~[wc:commonscripts]
+        <link href="/images/css/screen.css" rel="stylesheet" media="screen">
+        <link href="/images/css/print.css" rel="stylesheet" media="print">
+        ~[wc:pscbdevpro_init]
+    </head>
+    <script>
+        pscbToolButtons = { "copyData": "Yes", "csvFile": "Yes", "pdfFile": "yea", "curSel": "Yes" };
+    </script>
+
+    <body>
+        ~[wc:admin_header_css] <!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a>
+        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html" target="_top">PSCB DEV Custom Reports</a>
+        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_contacts_menu.html" target="_top">Contacts</a> &gt;
+        Contacts - Deceased List
+        List<!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
+
+        <!-- Begin report filters-->
+        <form name="searchform" action="#" method="POST">
+            <h1>Contacts - Deceased List</h1>
+            <div class="box-round" style="overflow: hidden;">
+                <h2>Report Filters</h2>
+                <table cellspacing="0" cellpadding="0" class="linkDescList">
+                    <thead>
+                        <tr>
+                            <th style="white-space: nowrap;">Student Selection</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <select name="ss" id="ss">
+                                    <option value='' ~[if.~[gpv:ss]=]selected[/if]>All Students
+                                    <option value="cur" ~[if.~[gpv:ss]=cur]selected[/if]>Current Selection
+                                        (~[x:studsinset])
+                                </select>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="button-row left">
+                    <span style="color: red;">&nbsp;&nbsp;Select parameters and click submit</span>
+                    <input type="hidden" name="showData" value="1">
+                    <input type="hidden" name="ac" value="prim">~[submitbutton]
+                </div>
+            </div>
+        </form>
+        <!-- End report filters-->
+
+        <!-- Start of Results -->
+        ~[if#showData.~(gpv.showData)=1]
+        <div class="box-round">
+            <h2 class="pscbdevBkgColor">&nbsp;&nbsp; Contacts - Deceased List</h2>
+            <table cellspacing="0" cellpadding="0" class="tablesorter grid" id="pscbDevPro">
+                <thead>
+                    <tr>
+                        <th class="left">Contact ID</th>
+                        <th class="left">Contact Name</th>
+                        <th class="left">Contact Living Status</th>
+                        <th class="right">Count of Students</th>
+                        <th class="left">Student(s)</th>
+                    </tr>
+                </thead>
+                <!-- Report Filters have not been submited -->
+                <tbody>
+                    ~[tlist_sql;
+                    WITH stuCount AS (
+                    SELECT StudentsAndContactsAssoc.personid, COUNT(Students.dcid) cnt,
+                    '
+                    <ul>' || LISTAGG('
+                        <li><a href="/admin/students/contacts.html?frn=001' || Students.dcid || '">' ||
+                                Students.lastfirst || ' (' || Students.grade_level || ' - ' || schools.abbreviation ||
+                                ')</a></li>', '')
+                        WITHIN GROUP (ORDER BY Students.grade_level DESC, Students.lastfirst) || '
+                    </ul>' StudentList
+                    FROM Students
+                    ~[if#ss.~(gpv.ss;sqlText)=cur] INNER JOIN ~[temp.table.current.selection:students] temp ON
+                    (Students.dcid = temp.dcid) [/if#ss]
+                    INNER JOIN schools ON (Students.schoolid = schools.school_number)
+                    INNER JOIN studentcontactassoc StudentsAndContactsAssoc ON (Students.dcid =
+                    StudentsAndContactsAssoc.studentdcid)
+                    WHERE Students.enroll_status = 0 ~[if.is.a.school] AND Students.schoolid = ~(curschoolid)
+                    [/if.is.a.school]
+                    GROUP BY StudentsAndContactsAssoc.personid
+                    )
+                    SELECT person.id, person.LastName, person.FirstName, U_PERSON_ADDITIONAL_INFO.person_status,
+                    stuCount.cnt, stuCount.studentList
+                    FROM stuCount
+                    INNER JOIN person ON (stuCount.personid = person.ID)
+                    LEFT JOIN U_PERSON_ADDITIONAL_INFO ON (person.ID = U_PERSON_ADDITIONAL_INFO.personid)
+                    LEFT JOIN PersonEmailAddressAssoc ON (PersonEmailAddressAssoc.personid = person.id)
+                    LEFT JOIN EmailAddress ON (PersonEmailAddressAssoc.EmailAddressID = EmailAddress.EmailAddressID AND
+                    PersonEmailAddressAssoc.IsPrimaryEmailAddress = 1)
+                    WHERE person.LastName IS NOT NULL
+                    AND U_PERSON_ADDITIONAL_INFO.person_status ='Deceased'
+                    ORDER BY person.LastName, person.FirstName
+                    ;alternatecolor;nonemessage=
+                    <tr>
+                        <td colspan="100%">No Parent/Guardian Accounts for SSO were found.</td>
+                    </tr>]
+                    <tr class="Record">
+                        <td>~(id;t)</td>
+                        <td><a href="/admin/contacts/edit.html#?contactid=~(id;t)" target="_blank">~(LastName;t),
+                                ~(FirstName;t)</a>
+                        </td>
+                        <td>~(living_status;t)</td>
+                        <td class="right">~(Num)</td>
+                        <td>~(studentlist;t)</td>
+                    </tr>
+                    [/tlist_sql]
+                </tbody>
+            </table>
+        </div>
+        <p class="center">Report generated at ~[time] on ~[date]</p>
+        [/if#showData]
+        ~[wc:admin_footer_frame_css]
+    </body>
+
+</html>

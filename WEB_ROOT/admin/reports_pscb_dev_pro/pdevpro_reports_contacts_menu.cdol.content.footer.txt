@@ -3,6 +3,10 @@
 		<td><a href="/admin/reports_pscb_dev_pro/contacts/CDOL_contacts_employer.html">Contacts - Employer List</a></td>
 		<td>List of Contacts and their Employer</td>
 	</tr>
+	<tr id="deceasedContacts">
+		<td><a href="/admin/reports_pscb_dev_pro/contacts/CDOL_contacts_deceased.html">Contacts - Deceased</a></td>
+		<td>List of Deceased Contacts</td>
+	</tr>
 	<tr id="potentialContacts">
 		<td><a href="/admin/reports_pscb_dev_pro/contacts/CDOL_Contacts_Potential_Duplicates.html">CDOL Contacts -
 				Potential
@@ -92,18 +96,11 @@
 	</tr>
 </table>
 
-~[if#pius.~(curschoolid)=101]
-<script>
-	$j(function () {
-		let pxhl8grade = $j('#pxhl8grade').closest('tr');
-		$j("td:contains('Students - Contacts Access List')").closest('tr').before(pxhl8grade);
-	});
-</script>
-[/if#pius]
+
 
 <script>
 	/*checks to make sure page is loaded */
-	$j(function () {
+	$j(() => {
 		/* insert custom CDOL fields onto the page. */
 		let employerContacts = $j('#employerContacts').closest('tr');
 		$j("td:contains('Contacts - Students List')").closest('tr').after(employerContacts);
@@ -129,9 +126,23 @@
 		let bottomTable = $j('#bottomTable');
 		$j("td:contains('Students - Contacts Information List')").closest('tr').parent().parent().after(bottomTable);
 
+	});
+</script>
+~[if#pius.~(curschoolid)=101]
+<script>
+	$j(() => {
+		let pxhl8grade = $j('#pxhl8grade').closest('tr');
+		$j("td:contains('Students - Contacts Access List')").closest('tr').before(pxhl8grade);
+		let employerContacts = $j('#employerContacts').closest('tr');
+		let deceasedContacts = $j('#deceasedContacts').closest('tr');
+		$j(employerContacts).after(deceasedContacts)
 
-		/* remove the hidden tables  and divs */
-
+	});
+</script>
+[/if#pius]
+<script>
+	/*checks to make sure page is loaded */
+	$j(() => {
 		$j("#cdolContactsTable").remove();
 	});
 </script>
