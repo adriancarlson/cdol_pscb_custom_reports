@@ -6,6 +6,10 @@
 		</tr>
 	</thead>
 	<tr>
+		<td><a href="/admin/reports_pscb_dev_pro/studentdataverify/cdol_student_directory.html">Student Directory</a></td>
+		<td>List Students Mother and Father with Addresses, Phone Numbers, and Emails</td>
+	</tr>
+	<tr>
 		<td><a href="/admin/reports_pscb_dev_pro/misc/activityparticipants.html">Student Activities</a></td>
 		<td>View membership list for a selected school activity.</td>
 	</tr>
