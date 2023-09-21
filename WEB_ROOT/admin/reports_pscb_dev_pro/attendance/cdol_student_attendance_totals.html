@@ -1,31 +1,27 @@
 <!DOCTYPE html>
-<html>
-    <!-- non framed -->
+<html lang="en">
 
     <head>
-        <title>Students Attendance - Totals</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         ~[wc:commonscripts]
         <link href="/images/css/screen.css" rel="stylesheet" media="screen">
         <link href="/images/css/print.css" rel="stylesheet" media="print">
-        ~[wc:pscb_init]
-        <script>
-            pscbToolButtons = { "copyData": "Yes", "csvFile": "Yes", "pdfFile": "Yes", "curSel": "Yes" };
-        </script>
+        ~[wc:pscbdevpro_init]
     </head>
 
     <body>
-        ~[wc:admin_header_frame_css]
-        <!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a> &gt; <a
+        ~[wc:admin_header_css]
+        <a href="/admin/home.html" target="_top">Start Page</a> &gt; <a
             href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html" target="_top">PSCB DEV Custom Reports</a> &gt;
         <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_attendance_menu.html" target="_top">Attendance</a> &gt;
         Students Attendance - Totals
-        <!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
-        <!-- start of Options -->
+        ~[wc:admin_navigation_frame_css]
         <h1>Students Attendance - Totals</h1>
         <form name="searchform" action="#" method="POST">
             <div class="box-round" style="overflow: hidden;">
                 <h2>Report Filters</h2>
-                <table border="0" cellspacing="0" cellpadding="0" class="linkDescList">
+                <table cellspacing="0" cellpadding="0" class="linkDescList">
                     <thead>
                         <tr>
                             <th style="white-space: nowrap;" width="180px">Student Selection</th>
@@ -131,18 +127,17 @@
                         </tr>
                     </tbody>
                 </table>
-                <div class="button-row" style="float: left;">
+                <div class="button-row left">
                     <input type="hidden" name="showData" value="1">
                     <span class="red">&nbsp;&nbsp;Select parameters and click submit</span>
                     <input type="hidden" name="ac" value="prim">~[submitbutton]
                 </div>
             </div>
         </form>
-        <!-- Start of Results -->
-        ~[if#showData.~(gpv.showData;sqlText)=1]
+        ~[if#showData.~(gpv.showData)=1]
         <div class="box-round">
-            <h2>Students Attendance - Totals</h2>
-            <table border="0" cellspacing="0" cellpadding="4" align="center" class="tablesorter grid" id="results">
+            <h2 class="pscbdevBkgColor">&nbsp;&nbsp;Students Attendance - Totals</h2>
+            <table cellspacing="0" cellpadding="4" class="tablesorter grid center" id="pscbDevPro">
                 <thead>
                     <tr>
                         <th class="left">Student Number</th>
@@ -258,25 +253,30 @@
                         DETAILPERIOD.LASTFIRST, DETAILPERIOD.expression, DETAILPERIOD.course_name,
                         ABSPERIODCOUNT.COUNTOFPERIOD, DETAILPERIOD.schoolname, ABSLIST.ABSDates,
                         TARPERIODCOUNT.COUNTOFPERIOD, TARLIST.TARDates ORDER BY DETAILPERIOD.schoolname,
-                        DETAILPERIOD.LASTFIRST, DETAILPERIOD.EXPRESSION ;] <tr data-StudentID="~(dcid)">
-                        <td><a href="/admin/students/att_daily.html?frn=001~(dcid)" target="_blank">~(stunum)</a></td>
-                        <td class="nowrap">~(stuname;t)</td>
-                        <td class="center">~(expression;t;externalExpression)</td>
-                        <td class="nowrap">~(coursename)</td>
-                        <td class="center">~(abscnt)</td>
-                        <td>~(abslist)</td>
-                        <td class="center">~(tarcnt)</td>
-                        <td>~(tarlist)</td>
-                        <td class="nowrap">~(school)</td>
+                        DETAILPERIOD.LASTFIRST, DETAILPERIOD.EXPRESSION ;alternatecolor;nonemessage=<tr nodata>
+                        <td colspan="100%">No Records Found.</td>
+                        </tr>]
+                        <tr class="Record" data-StudentID="~(dcid;t)">
+                            <td><a href="/admin/students/att_daily.html?frn=001~(dcid)" target="_blank">~(stunum)</a>
+                            </td>
+                            <td nowrap>~(stuname;t)</td>
+                            <td class="center">~(expression;t;externalExpression)</td>
+                            <td nowrap>~(coursename)</td>
+                            <td class="center">~(abscnt)</td>
+                            <td>~(abslist)</td>
+                            <td class="center">~(tarcnt)</td>
+                            <td>~(tarlist)</td>
+                            <td nowrap>~(school)</td>
                         </tr>
                         [/tlist_sql]
                 </tbody>
             </table>
         </div>
-        <!-- End of Results -->
-        <p class="center">Report generated at ~[time] on ~[date]</p>
+        <div style="clear: both;">
+            <p class="center">Report generated at ~[time] on ~[date]</p>
+        </div>
         [/if#showData]
         ~[wc:admin_footer_frame_css]
     </body>
 
-</html><!-- end right frame -->
+</html>

@@ -1,20 +1,18 @@
 <!DOCTYPE html>
-<html>
-    <!-- non framed -->
+<html lang="en">
 
     <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Student Agreements</title>
         ~[wc:commonscripts]
         <link href="/images/css/screen.css" rel="stylesheet" media="screen">
         <link href="/images/css/print.css" rel="stylesheet" media="print">
-        ~[wc:pscb_init]
-        <script>
-            pscbToolButtons = { "copyData": "Yes", "csvFile": "Yes", "pdfFile": "Yes", "curSel": "Yes" };
-        </script>
+        ~[wc:pscbdevpro_init]
     </head>
 
     <body>
-        ~[wc:admin_header_frame_css]<!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a>
+        ~[wc:admin_header_css]<!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a>
         &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html" target="_top">PSCB DEV Custom Reports</a>
         &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_studentdataverify_menu.html" target="_top">Student
             Data Verification</a> &gt;
@@ -25,7 +23,7 @@
         <form name="searchform" action="#" method="POST">
             <div class="box-round" style="overflow: hidden;">
                 <h2>Report Filters</h2>
-                <table border="0" cellspacing="0" cellpadding="0" class="linkDescList">
+                <table cellspacing="0" cellpadding="0" class="linkDescList">
                     <thead>
                         <tr>
                             <th style="white-space: nowrap;" width="180px">Student Selection</th>
@@ -65,9 +63,9 @@
                         </tr>
                     </tbody>
                 </table>
-                <div class="button-row" style="float: left;">
+                <div class="button-row left">
+                    <span style="color:red">&nbsp;&nbsp;Select parameters and click submit</span>
                     <input type="hidden" name="showData" value="1">
-                    <span class="red">&nbsp;&nbsp;Select parameters and click submit</span>
                     <input type="hidden" name="ac" value="prim">~[submitbutton]
                 </div>
             </div>
@@ -76,7 +74,7 @@
         ~[if#showData.~(gpv.showData;sqlText)=1]
         <div class="box-round">
             <h2>Student Agreements</h2>
-            <table border="0" cellspacing="0" cellpadding="4" align="center" class="tablesorter grid" id="results">
+            <table cellspacing="0" cellpadding="4" class="tablesorter grid center" id="pscbDevPro">
                 <thead>
                     <tr>
                         <th class="left">Student Number</th>
@@ -88,8 +86,7 @@
                         <th class="center filter-select">Medication?</th>
                         <th class="center filter-select">Agreed to Handbook?</th>
                         <th class="center filter-select">Agreed to AUP?</th>
-                        <th class="center filter-select">Agreed to Print Release?</th>
-                        <th class="center filter-select">Agreed to Web Release?</th>
+                        <th class="center filter-select">Agreed Media Consent and Release?</th>
                         <th class="center filter-select">Agreed to Lunch Policy?</th>
                         <th class="center filter-select">Agreed to Late Policy?</th>
                         <th class="center filter-select">Agreed to Field Trip?</th>
@@ -121,7 +118,6 @@
                     DECODE(AD.HANDBOOK_AGREE,1,'Yes',0,'No','TBD') AS "Agreed to Handbook",
                     DECODE(AD.APU_AGREE,1,'Yes',0,'No','TBD') AS "Agreed to AUP",
                     DECODE(AD.PRINT_PUBLICITY,1,'Yes',0,'No','TBD') AS "Agreed to Print Release",
-                    DECODE(AD.WEB_PUBLICITY,1,'Yes',0,'No','TBD') AS "Agreed to Web Release",
                     DECODE(AD.LUNCH_POLICY_AGREE,1,'Yes',0,'No','TBD') AS "Agreed to Lunch Policy",
                     DECODE(AD.LATE_POLICY_AGREE,1,'Yes',0,'No','TBD') AS "Agreed to Late Policy",
                     DECODE(AD.FIELD_TRIP_PERMISSION,1,'Yes',0,'No','TBD') AS "Agreed to Field Trip",
@@ -139,9 +135,10 @@
                     WHERE s.enroll_status in (-1,0)
                     ~[if.is.a.school] AND s.schoolid = ~(curschoolid) [/if.is.a.school]
                     ~[if#gr.~(gpv.gr;sqlText)#] AND s.grade_level = ~(gpv.gr) [/if#gr]
-                    ORDER BY sch.abbreviation, s.lastfirst
-                    ;]
-                    <tr data-StudentID="~(dcid)">
+                    ORDER BY sch.abbreviation, s.lastfirst;alternatecolor;nonemessage=<tr nodata>
+                        <td colspan="100%">No Records Found.</td>
+                    </tr>]
+                    <tr class="Record" data-StudentID="~(dcid)">
                         <td class="nowrap"><a href="/admin/students/studentpages/agreements.html?frn=001~(dcid)"
                                 target="_blank">~(studentnumb)</a>
                         </td>
@@ -153,8 +150,7 @@
                         <td class="nowrap center">~(medication;t)</td>
                         <td class="nowrap center">~(handbook;t)</td>
                         <td class="nowrap center">~(APU;t)</td>
-                        <td class="nowrap center">~(pr;t)</td>
-                        <td class="nowrap center">~(wr;t)</td>
+                        <td class="nowrap center">~(mr;t)</td>
                         <td class="nowrap center">~(lur;t)</td>
                         <td class="nowrap center">~(lar;t)</td>
                         <td class="nowrap center">~(ft;t)</td>
@@ -165,8 +161,11 @@
                 </tbody>
             </table>
         </div>
+        <!-- End of pscbDevPro -->
+        <div style="clear: both;">
+            <p class="center">Report generated at ~[time] on ~[date]</p>
+        </div>
         [/if#showData]
-        <!-- end of content of bounding box -->
         ~[wc:admin_footer_frame_css]
     </body>
 
