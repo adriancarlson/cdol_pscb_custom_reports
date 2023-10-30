@@ -47,8 +47,8 @@
 		<td>List Contacts and associated students per address</td>
 	</tr>
 	<tr id="pxhl8grade">
-		<td><a href="/admin/reports_pscb_dev_pro/contacts/pxhl_8th_grade_contacts.html">PXHL 8th Grade Contacts</a></td>
-		<td>List 8th graders at Lincoln Elementary Schools and their contacts</td>
+		<td><a href="/admin/reports_pscb_dev_pro/contacts/pxhl_middle_school_contacts.html">PXHL Middle School Contacts</a></td>
+		<td>List Middle School students at Lincoln Elementary Schools and their contacts</td>
 	</tr>
 </table>
 <table id="bottomTable" border="0" cellspacing="0" cellpadding="4" class="table grid">
