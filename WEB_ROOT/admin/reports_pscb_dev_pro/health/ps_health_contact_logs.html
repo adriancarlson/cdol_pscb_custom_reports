@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <title>Health Contacts (Logs)</title>
+        ~[wc:commonscripts]
+        <link href="/images/css/screen.css" rel="stylesheet" media="screen">
+        <link href="/images/css/print.css" rel="stylesheet" media="print">
+        ~[wc:pscbdevpro_init]
+        <script>
+            pscbToolButtons = { "copyData": "Yes", "csvFile": "Yes", "pdfFile": "No", "curSel": "Yes" };
+        </script>
+    </head>
+
+    <body>
+        ~[wc:admin_header_css]<!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a> &gt; <a
+            href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html">PSCB Custom Reports</a> &gt; <a
+            href="/admin/reports_pscb_dev_pro/pdevpro_reports_health_menu.html">Health Office</a> &gt; Health Contacts
+        (Logs)<!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
+
+        <!-- Begin report filters-->
+        <form name="searchform" action="#" method="POST">
+            <h1>Health Contacts (Logs)</h1>
+            <div class="box-round">
+                <h2>Report Filters</h2>
+                <table cellspacing="0" cellpadding="0" class="linkDescList">
+                    <thead>
+                        <tr>
+                            <th nowrap style="width: 200px">Student Selection</th>
+                            <th nowrap style="width: 200px">Visit Start Date</th>
+                            <th nowrap>Visit End Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <select name="ss">
+                                    <option value='' ~[if.~(gpv.ss)=]selected[/if]>All Students</option>
+                                    <option value="cur" ~[if.~(gpv.ss)=cur]selected[/if]>Current Selection
+                                        (~[x:studsinset])</option>
+                                </select>
+                            </td>
+                            <td>
+                                <input name="sDate" id="sDate" class="psDateWidget" type="text"
+                                    value="~[if.~(gpv.sDate)=]~(f.currentdate;dateformat=MM/DD/YYYY)[else]~(gpv.sDate)[/if]"
+                                    size="10" />
+                            </td>
+                            <td>
+                                <input name="eDate" id="eDate" class="psDateWidget" type="text"
+                                    value="~[if.~(gpv.eDate)=]~(f.currentdate;dateformat=MM/DD/YYYY)[else]~(gpv.eDate)[/if]"
+                                    size="10" />
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="button-row left">
+                    <span style="color: red;">&nbsp;&nbsp;Select parameters and click submit
+                    </span>
+                    <input type="hidden" name="showData" value="1">
+                    <input type="hidden" name="ac" value="prim">~[submitbutton]
+                </div>
+            </div>
+        </form>
+        <!-- Start of Results -->
+        ~[if#showData.~(gpv.showData)=1]
+        <div class="box-round">
+            <h2 class="pscbdevBkgColor">&nbsp;&nbsp;Health Contacts (Log List)
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~(gpv.sdate) to
+                ~(gpv.edate)</h2>
+            <table cellspacing="0" cellpadding="0" class="tablesorter grid" id="pscbDevPro">
+                <thead>
+                    <tr>
+                        <th class="left filter-select">Contact Date</th>
+                        <th class="left">Contact Time In</th>
+                        <th class="left">Contact Time Out</th>
+                        <th class="left filter-select">Student</th>
+                        <th class="left filter-select">Current Grade</th>
+                        <th class="left filter-select">Staff Member</th>
+                        <th class="left filter-select">Group</th>
+                        <th class="left filter-select">Need</th>
+                        <th class="left filter-select">Intervention</th>
+                        <th class="left filter-select">Medicaide Code</th>
+                        <th class="left filter-select">Referred by</th>
+                        <th class="left filter-select">Follow Up</th>
+                        <th class="left">Comments</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ~[tlist_sql;
+                    SELECT
+                    students.dcid,
+                    to_char(healthcontactlog.contactdate, 'MM/DD/YYYY') contact_date,
+                    healthcontactlog.timein,
+                    healthcontactlog.timeout,
+                    students.last_name,
+                    students.first_name,
+                    students.grade_level,
+                    users.lastfirst,
+                    igroup.displayvalue AS intervention_group,
+                    need.displayvalue AS need,
+                    intervention.displayvalue intervention,
+                    medicaidcode.displayvalue AS medicaidcode,
+                    referredby.displayvalue AS referredby,
+                    CASE
+                    WHEN healthcontactlog.followup = 1 THEN 'Yes'
+                    ELSE 'No'
+                    END followup,
+                    healthcontactlog.comments
+                    FROM
+                    HealthContactLog
+                    INNER JOIN students ON healthcontactlog.studentsdcid = students.dcid
+                    LEFT JOIN users ON healthcontactlog.staffmember = users.dcid
+                    LEFT JOIN codeset intervention ON healthcontactlog.intervention = intervention.codesetid
+                    LEFT JOIN codeset igroup ON healthcontactlog.igroup = igroup.codesetid
+                    LEFT JOIN codeset need ON healthcontactlog.need = need.codesetid
+                    LEFT JOIN codeset medicaidcode ON healthcontactlog.medicaidcode = medicaidcode.codesetid
+                    LEFT JOIN codeset referredby ON healthcontactlog.referredby = referredby.codesetid
+                    WHERE healthcontactlog.contactdate >= to_date('~(gpv.sDate;sqlText)','MM/DD/YYYY') AND
+                    healthcontactlog.contactdate <= to_date('~(gpv.eDate;sqlText)','MM/DD/YYYY') ~[if#a.is.a.school] AND
+                        students.schoolid=~(curschoolid) [/if#a.is.a.school] ORDER BY healthcontactlog.contactdate DESC,
+                        healthcontactlog.timein, healthcontactlog.timeout, students.last_name, students.first_name
+                        ;alternatecolor;nonemessage=<tr nodata>
+                        <td colspan="100%">No Records Found.</td>
+                        </tr>]
+                        <tr class="evenoddrow" data-StudentID="~(dcid;t)">
+                            <td class="nowrap">~(contactdate;t)</td>
+                            <td class="nowrap">~(begtime't) </td>
+                            <td class="nowrap">~(endtime;t)</td>
+                            <td class="nowrap"><a href="/admin/students/health/home_contactlog.html?frn=001~(dcid;t)"
+                                    target="_blank">~(last_name;t), ~(first_name;t)</a>
+                            </td>
+                            <td>~(grade_level;t)</td>
+                            <td class="nowrap">~(staff;t)</td>
+                            <td>~(group;t)</td>
+                            <td>~(need;t)</td>
+                            <td>~(intervention;t)</td>
+                            <td>~(medcode;t)</td>
+                            <td>~(referrer;t)</td>
+                            <td>~(follow;t)</td>
+                            <td>~(comments;t)</td>
+                        </tr>
+                        [/tlist_sql]
+                </tbody>
+            </table>
+        </div>
+        <p class="center">Report generated at ~[time] on ~[date]</p>
+        [/if#showData]
+        ~[wc:admin_footer_frame_css]
+    </body>
+
+</html>

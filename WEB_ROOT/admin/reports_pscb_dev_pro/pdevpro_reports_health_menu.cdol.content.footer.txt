@@ -1,3 +1,16 @@
+<table id="cdolHealthContactTable" cellspacing="0" cellpadding="4" class="table grid">
+	<thead>
+		<tr>
+			<th class="left" width="350px" style="height:30px">Health Contact Reports</th>
+			<th class="left" style="height:30px">Description</th>
+		</tr>
+	</thead>
+	<tr>
+		<td><a href="/admin/reports_pscb_dev_pro/health/ps_health_contact_Logs.html">Health Contact Log Report</a>
+		</td>
+		<td>View a list of Health Office Contacts for a selected date range.</td>
+	</tr>
+</table>
 <table id="cdolHealthTable" cellspacing="0" cellpadding="4" class="table grid">
 	<thead>
 		<tr>
@@ -15,12 +28,11 @@
 				Student</a></td>
 		<td>List students who have prescribed medications (one row per student)</td>
 	</tr>
-
 </table>
 <table id="cdolHealthLogTable" cellspacing="0" cellpadding="4" class="table grid">
 	<thead>
 		<tr>
-			<th class="left" width="350px" style="height:30px">CDOL Health Logs</th>
+			<th class="left" width="350px" style="height:30px">CDOL Custom Health Logs</th>
 			<th class="left" style="height:30px">Description</th>
 		</tr>
 	</thead>
@@ -49,6 +61,8 @@
 	/*checks to make sure page is loaded */
 	$j(() => {
 		$j('.box-round').append($j('#cdolHealthTable'))
+		$j('#cdolHealthTable').after($j('#cdolHealthContactTable'))
+		$j('#cdolHealthContactTable').after($j('#cdolHealthTable'))
 		$j('#cdolHealthTable').after($j('#cdolHealthLogTable'))
 	});
 </script>
