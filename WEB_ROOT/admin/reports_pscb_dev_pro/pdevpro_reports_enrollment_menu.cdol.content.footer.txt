@@ -1,14 +1,18 @@
 <script>
 	~[tlist_sql;
-	SELECT
-            CASE 
-                WHEN schools.low_grade in (-2,-1) THEN 1
-                ELSE 0 
-            END AS has_preschool
-        FROM 
-            schools  
-        
-           ~[if.is.a.school] WHERE schools.school_number=~(curschoolid) [/if]
+	SELECT 
+    CASE 
+        WHEN EXISTS (
+            SELECT 1
+            FROM u_fb_form_sharing
+            WHERE u_fb_form_sharing.form_id = 184243
+            AND schools.school_number = u_fb_form_sharing.share_value
+        )
+        THEN 1
+        ELSE 0
+    END as has_pk_form
+FROM schools
+~[if.is.a.school] WHERE schools.school_number=~(curschoolid) [/if]
 	;]
 			let has_preschool = ~(has_preschool);
 		[/tlist_sql]
