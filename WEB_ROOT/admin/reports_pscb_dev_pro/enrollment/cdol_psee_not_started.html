@@ -1,32 +1,28 @@
 <!DOCTYPE html>
-<html>
-    <!-- non framed -->
+<html lang="en">
 
     <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        ~[SetPostValue:showData=1]
         <title>Students Not Started</title>
         ~[wc:commonscripts]
         <link href="/images/css/screen.css" rel="stylesheet" media="screen">
         <link href="/images/css/print.css" rel="stylesheet" media="print">
-        ~[wc:pscb_init]
-        <script>
-            pscbToolButtons = { "curSel": "Yes", "copyData": "Yes", "csvFile": "Yes", "pdfFile": "Yes" };
-        </script>
+        ~[wc:pscbdevpro_init]
     </head>
 
     <body>
-        ~[wc:admin_header_frame_css] <!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a>
-        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html" target="_top">PSCB DEV Custom Reports</a>
-        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_enrollment_menu.html" target="_top">Enrollment</a>
-        &gt; Students Not Started
-        <!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
-        <!-- start of Options -->
+        ~[wc:admin_header_css]
+        <a href="/admin/home.html" target="_top">Start Page</a> &gt; <a
+            href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html" target="_top">PSCB DEV Custom Reports</a> &gt;
+        <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_enrollment_menu.html" target="_top">Enrollment</a>&gt;
+        Students Not Started
+        ~[wc:admin_navigation_frame_css]
         <h1>Students Not Started</h1>
-
-        <!-- Start of Results -->
-
         <div class="box-round">
-            <h2>Students Not Started</h2>
-            <table border="0" cellspacing="0" cellpadding="4" align="center" class="tablesorter grid" id="results">
+            <h2 class="pscbdevBkgColor">Students Not Started</h2>
+            <table class="tablesorter grid" id="pscbDevPro">
                 <thead>
                     <tr>
                         <th>Stu #</th>
@@ -42,8 +38,8 @@
                         <th>E. Home Language</th>
                         <th>F. Agreements</th>
                         <th>G. Additional Docs</th>
-                        <th>Cur School</th>
-                        <th>Next School</th>
+                        <th class="filter-select">Cur School</th>
+                        <th class="filter-select">Next School</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -640,8 +636,10 @@
                 </tbody>
             </table>
         </div>
-        <!-- end of content of bounding box -->
+        <div style="clear: both;">
+            <p class="center">Report generated at ~[time] on ~[date]</p>
+        </div>
         ~[wc:admin_footer_frame_css]
     </body>
 
-</html><!-- end right frame -->
+</html>
