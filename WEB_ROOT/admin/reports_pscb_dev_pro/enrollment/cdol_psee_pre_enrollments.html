@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        ~[SetPostValue:showData=1]
+        <title>Pre-Enrollments</title>
+        ~[wc:commonscripts]
+        <link href="/images/css/screen.css" rel="stylesheet" media="screen">
+        <link href="/images/css/print.css" rel="stylesheet" media="print">
+        ~[wc:pscbdevpro_init]
+    </head>
+
+    <body>
+        ~[wc:admin_header_css]
+        <a href="/admin/home.html" target="_top">Start Page</a> &gt; <a
+            href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html" target="_top">PSCB DEV Custom Reports</a> &gt;
+        <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_enrollment_menu.html" target="_top">Enrollment</a>
+        &gt; Pre-Enrollments
+        ~[wc:admin_navigation_frame_css]
+        <h1>Pre-Enrollments</h1>
+        <div class="box-round">
+            <h2 class="pscbdevBkgColor">Pre-Enrollments</h2>
+            <table class="tablesorter grid" id="pscbDevPro">
+                <thead>
+                    <tr>
+                        <th class="filter-select">First Name</th>
+                        <th class="filter-select">Last Name</th>
+                        <th class="filter-select">Gender</th>
+                        <th>DOB</th>
+                        <th class="filter-select">Grade Level</th>
+                        <th class="filter-select">Status</th>
+                        <th>Submission Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ~[tlist_sql;
+                    SELECT
+                    element_198820,
+                    element_198830,
+                    CASE
+                    WHEN TO_CHAR(element_198828) = 'M' THEN 'Male'
+                    WHEN TO_CHAR(element_198828) = 'F' THEN 'Female'
+                    ELSE TO_CHAR(element_198828)
+                    END AS prettygender,
+                    element_198822,
+                    CASE
+                    WHEN TO_CHAR(element_198832) = -2 THEN 'PreSchool'
+                    WHEN TO_CHAR(element_198832) = -1 THEN 'PreSchool'
+                    WHEN TO_CHAR(element_198832) = 0 THEN 'K'
+                    ELSE TO_CHAR(element_198832)
+                    END AS prettygrade,
+                    approval_status,
+                    submissiondate
+                    FROM
+                    u_p_198789_forms
+                    WHERE
+                    element_198856 = 34 ~[if.is.a.school] AND element_198854 = ~(curschoolid) [/if]
+                    ORDER BY
+                    submissiondate DESC
+                    ;]
+                    <tr>
+                        <td class="left">~(fname)</td>
+                        <td class="left">~(lname)</td>
+                        <td class="center">~(gender)</td>
+                        <td class="center">~(dob)</td>
+                        <td class="center">~(grlevel)</td>
+                        <td class="center">~(status)</td>
+                        <td class="right">~(subdate)</td>
+                    </tr>
+                    [/tlist_sql]
+                </tbody>
+            </table>
+        </div>
+        <div style="clear: both;">
+            <p class="center">Report generated at ~[time] on ~[date]</p>
+        </div>
+        <div style="clear: both;">
+            <p>To approve these records ~[if.~(curyearid)=33]<a id="changeToFutureYear" class="button" href="#"
+                    target="_blank">Click
+                    Here</a> <span class="feedback-note">Note: Clicking this button will change your school year in
+                    PowerSchool to 2024-2025</span>[else]<a class="button"
+                    href="/admin/formbuilder/reports/prereg/preRegReport.html?formid=198789">Click
+                    Here</a></p>[/if]
+        </div>
+        <script type="text/template" id="diffYearTemplate">
+
+            <form method="post" action="/admin/formbuilder/reports/prereg/preRegReport.html?formid=198789" id="diffYearForm">
+                <input type="hidden" name="termid" value="3400" />
+                <input type="hidden" name="ac" value="changeterm" />
+            </form>
+        </script>
+        <script>
+            $j(function () {
+                $j("#changeToFutureYear").click(function (e) {
+                    e.preventDefault();
+                    $j('head').append($j('#diffYearTemplate').html());
+                    $j('#diffYearTemplate').remove();
+                    $j('#diffYearForm').submit();
+                });
+            });
+
+        </script>
+        ~[wc:admin_footer_frame_css]
+    </body>
+
+</html>

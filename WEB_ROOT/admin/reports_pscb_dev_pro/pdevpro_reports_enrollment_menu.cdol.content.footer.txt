@@ -26,6 +26,10 @@ FROM schools
 		</tr>
 	</thead>
 	<tr>
+		<td><a href="/admin/reports_pscb_dev_pro/enrollment/cdol_psee_pre_enrollments.html">Pre-Enrollments</a></td>
+		<td>List all Pre-Enrollments with all statuses</td>
+	</tr>
+	<tr>
 		<td><a href="/admin/reports_pscb_dev_pro/enrollment/cdol_psee_not_started.html">Students Not Started</a></td>
 		<td>List students who have not even started the enrollment process</td>
 	</tr>
