@@ -133,9 +133,6 @@
                     students
                     ~[if.~(gpv.ss)=cur] INNER JOIN ~[temp.table.current.selection:students] stusel ON stusel.dcid =
                     STUDENTS.dcid [/if]
-                    INNER JOIN SCHOOLS
-                    ON STUDENTS.SCHOOLID = SCHOOLS.SCHOOL_NUMBER
-                    ~[if.is.a.school] and STUDENTS.schoolid= ~(curschoolid) [/if]
                     INNER JOIN STUDENTCONTACTASSOC
                     ON STUDENTCONTACTASSOC.STUDENTDCID = STUDENTS.DCID
                     INNER JOIN PERSON ON PERSON.ID = STUDENTCONTACTASSOC.PERSONID
@@ -153,8 +150,11 @@
                         AND (current_date < personaddressassoc.enddate OR personaddressassoc.enddate IS NULL ) AND
                             (current_date> personaddressassoc.startdate OR personaddressassoc.startdate IS NULL)
                             WHERE students.enroll_status in (-1,0)
+                            ~[if.is.a.school] and (STUDENTS.schoolid= ~(curschoolid) OR students.Next_School =
+                            ~(curschoolid))[/if]
                             ORDER BY person.id
                             )
+
                             GROUP BY
                             personaddressid, person_id, firstname, lastname
                             )

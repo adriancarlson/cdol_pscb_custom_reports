@@ -46,7 +46,6 @@
                                     terms.id termid,
                                     CASE
                                     WHEN terms.id = '~(gpv.term;sqlText)' THEN 'selected'
-
                                     ELSE ''
                                     END isselected,
                                     Upper(Abbreviation) term
@@ -257,7 +256,7 @@
                         <td colspan="100%">No Records Found.</td>
                         </tr>]
                         <tr class="Record" data-StudentID="~(dcid;t)">
-                            <td><a href="/admin/students/att_daily.html?frn=001~(dcid)" target="_blank">~(stunum)</a>
+                            <td><a href="/admin/attendance/view/daily.html?frn=001~(dcid)" target="_blank">~(stunum)</a>
                             </td>
                             <td nowrap>~(stuname;t)</td>
                             <td class="center">~(expression;t;externalExpression)</td>
