@@ -1,31 +1,26 @@
 <!DOCTYPE html>
-<html>
-    <!-- non framed -->
+<html lang="en">
 
     <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Students - Mother/Father Email & Phone</title>
         ~[wc:commonscripts]
         <link href="/images/css/screen.css" rel="stylesheet" media="screen">
         <link href="/images/css/print.css" rel="stylesheet" media="print">
-        ~[wc:pscb_init]
-        <script>
-            pscbToolButtons = { "copyData": "Yes", "csvFile": "Yes", "pdfFile": "No", "curSel": "Yes" };
-        </script>
+        ~[wc:pscbdevpro_init]
     </head>
 
     <body>
-        ~[wc:admin_header_frame_css] <!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a>
-        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html" target="_top">PSCB DEV Custom Reports</a>
-        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_contacts_menu.html" target="_top">Contacts</a> &gt;
-        Students - Mother/Father Email
-        & Phone
-        <!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
-        <!-- start of Options -->
-        <h1>Students - Mother/Father Email & Phone</h1>
+        ~[wc:admin_header_css] <a href="/admin/home.html" target="_top">Start Page</a> &gt; <a
+            href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html" target="_top">PSCB DEV Custom Reports</a> &gt;
+        <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_contacts_menu.html" target="_top">Contacts</a> &gt;
+        Students - Mother/Father Email & Phone ~[wc:admin_navigation_frame_css]
         <form name="searchform" action="#" method="POST">
+            <h1>Students - Mother/Father Email & Phone</h1>
             <div class="box-round" style="overflow: hidden;">
                 <h2>Report Filters</h2>
-                <table border="0" cellspacing="0" cellpadding="0" class="linkDescList">
+                <table cellspacing="0" cellpadding="0" class="linkDescList">
                     <thead>
                         <tr>
                             <th style="white-space: nowrap;">Student Selection</th>
@@ -43,9 +38,9 @@
                         </tr>
                     </tbody>
                 </table>
-                <div class="button-row" style="float: left;">
+                <div class="button-row left">
+                    <span style="color: red;">&nbsp;&nbsp;Select parameters and click submit</span>
                     <input type="hidden" name="showData" value="1">
-                    <span class="red">&nbsp;&nbsp;Select parameters and click submit</span>
                     <input type="hidden" name="ac" value="prim">~[submitbutton]
                 </div>
             </div>
@@ -53,8 +48,9 @@
         <!-- Start of Results -->
         ~[if#showData.~(gpv.showData;sqlText)=1]
         <div class="box-round">
-            <h2>Students - Contacts Address List</h2>
-            <table border="0" cellspacing="0" cellpadding="4" align="center" class="tablesorter grid" id="results">
+            <h2 class="pscbdevBkgColor">&nbsp;&nbsp;Students - Mother/Father Email & Phone</h2>
+            <table cellspacing="0" cellpadding="4" class="tablesorter grid center" id="pscbDevPro" groupRowsByCol="2"
+                color1="#ffffff" color2="#d7edfe">
                 <thead>
                     <tr>
                         <th class="left">Std Num</th>
@@ -193,25 +189,30 @@
                         LEFT JOIN (select * from pcontact) C1 ON (C1.DCID=A.DCID AND C1.Relationship='Mother' ) LEFT
                         JOIN (select * from pcontact) C2 ON (C2.DCID=A.DCID AND C2.Relationship='Father' ) WHERE
                         A.enroll_status=0 ~[if.is.a.school] AND A.schoolid=~(curschoolid) [/if.is.a.school] ORDER BY
-                        A.lastfirst;] <tr data-StudentID="~(dcid)">
-                        <td>~(student_number;t)</td>
-                        <td class="nowrap">~(lastfirst;t)</td>
-                        <td>~(grade_level;t)</td>
-                        <td>~(home_room;t)</td>
-                        <td class="nowrap">~(mother;t)</td>
-                        <td class="nowrap">~(mother_phone;t)</td>
-                        <td class="nowrap">~(mother_email;t)</td>
-                        <td class="nowrap">~(father;t)</td>
-                        <td class="nowrap">~(father_phone;t)</td>
-                        <td class="nowrap">~(father_email;t)</td>
+                        A.lastfirst;alternatecolor;nonemessage=<tr>
+                        <td colspan="100%">No Records were found.</td>
+                        </tr>]
+                        <tr class="Record" data-StudentID="~(dcid)">
+                            <td>~(student_number;t)</td>
+                            <td class="nowrap">~(lastfirst;t)</td>
+                            <td>~(grade_level;t)</td>
+                            <td>~(home_room;t)</td>
+                            <td class="nowrap">~(mother;t)</td>
+                            <td class="nowrap">~(mother_phone;t)</td>
+                            <td class="nowrap">~(mother_email;t)</td>
+                            <td class="nowrap">~(father;t)</td>
+                            <td class="nowrap">~(father_phone;t)</td>
+                            <td class="nowrap">~(father_email;t)</td>
                         </tr>
                         [/tlist_sql]
                 </tbody>
             </table>
         </div>
+        <div style="clear: both;">
+            <p class="center">Report generated at ~[time] on ~[date]</p>
+        </div>
         [/if#showData]
-        <!-- end of content of bounding box -->
         ~[wc:admin_footer_frame_css]
     </body>
 
-</html><!-- end right frame -->
+</html>
