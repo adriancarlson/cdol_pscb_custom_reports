@@ -6,7 +6,8 @@
 		</tr>
 	</thead>
 	<tr>
-		<td><a href="/admin/reports_pscb_dev_pro/studentdataverify/cdol_student_directory.html">Student Directory</a></td>
+		<td><a href="/admin/reports_pscb_dev_pro/studentdataverify/cdol_student_directory.html">Student Directory</a>
+		</td>
 		<td>List Students Mother and Father with Addresses, Phone Numbers, and Emails</td>
 	</tr>
 	<tr>
@@ -85,6 +86,11 @@
 	<tr id="sAgreements">
 		<td><a href="/admin/reports_pscb_dev_pro/studentdataverify/cdol_agreements.html">Student Agreements</a></td>
 		<td>List Student Agreements</td>
+	</tr>
+	<tr id="sTextAgree">
+		<td><a href="/admin/reports_pscb_dev_pro/studentdataverify/cdol_textbook.html">Student Textbook Agreements</a>
+		</td>
+		<td>List Student Textbook Agreements</td>
 	</tr>
 	<tr id="sSacraments">
 		<td><a href="/admin/reports_pscb_dev_pro/studentdataverify/cdol_sacraments.html">Student Sacraments</a></td>

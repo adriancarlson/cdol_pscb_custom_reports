@@ -1,32 +1,28 @@
 <!DOCTYPE html>
-<html>
-    <!-- non framed -->
+<html lang="en">
 
     <head>
-        <title>Contacts - Student List</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Contacts - Employer</title>
         ~[wc:commonscripts]
         <link href="/images/css/screen.css" rel="stylesheet" media="screen">
         <link href="/images/css/print.css" rel="stylesheet" media="print">
-        ~[wc:pscb_init]
+        ~[wc:pscbdevpro_init]
     </head>
 
     <body>
-        ~[wc:admin_header_frame_css] <!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a>
-        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html" target="_top">PSCB DEV Custom Reports</a>
-        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_contacts_menu.html" target="_top">Contacts</a> &gt;
+        ~[wc:admin_header_css] <a href="/admin/home.html" target="_top">Start Page</a> &gt; <a
+            href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html" target="_top">PSCB DEV Custom Reports</a> &gt;
+        <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_contacts_menu.html" target="_top">Contacts</a> &gt;
         Contacts - Employer
-        List<!-- breadcrumb end -->~[wc:admin_navigation_frame_css] ~[if.is.a.school]
-        ~[if#sch.~(gpv.sch;sqlText)=]
-        ~[SetPostValue:sch=~(curschoolid)]
-        [/if#sch]
-        [/if.is.a.school]
+        ~[wc:admin_navigation_frame_css]
 
-        <!-- Begin report filters-->
         <form name="searchform" action="#" method="POST">
-            <h1>Contacts - Employer List</h1>
+            <h1>Contacts - Employer</h1>
             <div class="box-round" style="overflow: hidden;">
                 <h2>Report Filters</h2>
-                <table border="0" cellspacing="0" cellpadding="0" class="linkDescList">
+                <table cellspacing="0" cellpadding="0" class="linkDescList">
                     <thead>
                         <tr>
                             <th style="white-space: nowrap;">Student Selection</th>
@@ -44,22 +40,18 @@
                         </tr>
                     </tbody>
                 </table>
-                <div class="button-row" style="float: left;">
+                <div class="button-row left">
+                    <span style="color: red;">&nbsp;&nbsp;Select parameters and click submit</span>
                     <input type="hidden" name="showData" value="1">
-                    <span>
-                        <font color="red">&nbsp;&nbsp;Select parameters and click submit</font>
-                    </span>
-                    <button type="submit" id="btnSubmit" name="btnSubmit" onClick="actionChange()">Submit</button>
+                    <input type="hidden" name="ac" value="prim">~[submitbutton]
                 </div>
             </div>
         </form>
-        <!-- End report filters-->
-
-        <!-- Start of Results -->
         ~[if#showData.~(gpv.showData;sqlText)=1]
         <div class="box-round">
-            <h2>Contacts - Employer List<span><label id="lblRecordCount"></label></span></h2>
-            <table border="0" cellspacing="0" cellpadding="4" class="tablesorter grid" id="results">
+            <h2 class="pscbdevBkgColor">&nbsp;&nbsp;Contacts - Employer List</h2>
+            <table cellspacing="0" cellpadding="4" class="tablesorter grid center" id="pscbDevPro" groupRowsByCol="2"
+                color1="#ffffff" color2="#d7edfe">
                 <thead>
                     <tr>
                         <th class="left">Contact ID</th>
@@ -70,14 +62,14 @@
                         <th class="left">Student(s)</th>
                     </tr>
                 </thead>
-                <!-- Report Filters have not been submited -->
                 <tbody>
                     ~[tlist_sql;
                     WITH stuCount AS (
                     SELECT sca.personid, Count(s.dcid) cnt,
                     '
-                    <ul>' || listagg('
-                        <li>' || s.lastfirst || ' (' || s.grade_level || ' - ' || sch.abbreviation || ')</li>', '')
+                    <ul>' || listagg('<li><a href="/admin/students/contacts.html?frn=001' || s.dcid || '"
+                                target="_blank">' || s.lastfirst || ' (' || s.grade_level || ' - ' || sch.abbreviation
+                                || ')</a></li>', '')
                         WITHIN GROUP (ORDER BY s.grade_level desc, s.lastfirst) || '
                     </ul>' StudentList
                     FROM Students s
@@ -97,7 +89,7 @@
                     ORDER BY p.LastName, p.FirstName
                     ;alternatecolor;nonemessage=
                     <tr>
-                        <td colspan="100%">No Parent/Guardian Accounts for SSO were found.</td>
+                        <td colspan="100%">No Records were found.</td>
                     </tr>]
                     <tr class="Record">
                         <td>~(id;t)</td>
@@ -106,18 +98,15 @@
                         </td>
                         <td>~(Email_Address;t)</td>
                         <td>~(Employer;t)</td>
-                        <td align="right">~(Num)</td>
+                        <td class="right">~(Num)</td>
                         <td>~(studentlist;t)</td>
                     </tr>
                     [/tlist_sql]
                 </tbody>
             </table>
         </div>
-        <!-- End of results -->
-        <div>
-            <p>
-                <center>Report generated at ~[time] on ~[date]</center>
-            </p>
+        <div style="clear: both;">
+            <p class="center">Report generated at ~[time] on ~[date]</p>
         </div>
         [/if#showData]
         ~[wc:admin_footer_frame_css]

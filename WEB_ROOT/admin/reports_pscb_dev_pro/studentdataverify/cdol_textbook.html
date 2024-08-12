@@ -4,7 +4,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Contacts with Maiden Name</title>
+        <title>Student Textbook Agreements</title>
         ~[wc:commonscripts]
         <link href="/images/css/screen.css" rel="stylesheet" media="screen">
         <link href="/images/css/print.css" rel="stylesheet" media="print">
@@ -12,19 +12,22 @@
     </head>
 
     <body>
-        ~[wc:admin_header_css] <a href="/admin/home.html" target="_top">Start Page</a> &gt; <a
-            href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html" target="_top">PSCB DEV Custom Reports</a> &gt;
-        <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_contacts_menu.html" target="_top">Contacts</a> &gt;
-        Contacts with Maiden Name ~[wc:admin_navigation_frame_css]
-
+        ~[wc:admin_header_css]<!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a>
+        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html" target="_top">PSCB DEV Custom Reports</a>
+        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_studentdataverify_menu.html" target="_top">Student
+            Data Verification</a> &gt;
+        Student Textbook Agreements
+        <!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
+        <!-- start of Options -->
+        <h1>Student Textbook Agreements</h1>
         <form name="searchform" action="#" method="POST">
-            <h1>Contacts with Maiden Name</h1>
             <div class="box-round" style="overflow: hidden;">
                 <h2>Report Filters</h2>
                 <table cellspacing="0" cellpadding="0" class="linkDescList">
                     <thead>
                         <tr>
                             <th style="white-space: nowrap;" width="180px">Student Selection</th>
+                            <th style="white-space: nowrap;" width="180px">Textbook Agree</th>
                             <th style="white-space: nowrap;">Grade Selection</th>
                         </tr>
                     </thead>
@@ -35,6 +38,13 @@
                                     <option value='' ~[if.~[gpv:ss]=]selected[/if]>All Students</option>
                                     <option value="cur" ~[if.~[gpv:ss]=cur]selected[/if]>Current Selection
                                         (~[x:studsinset])</option>
+                                </select>
+                            </td>
+                            <td>
+                                <select name="ta" id="ta">
+                                    <option value='' ~[if.~[gpv:ta]=]selected[/if]>Both</option>
+                                    <option value="1" ~[if.~[gpv:ta]=1]selected[/if]>Yes</option>
+                                    <option value="0" ~[if.~[gpv:ta]=0]selected[/if]>No</option>
                                 </select>
                             </td>
                             <td>
@@ -62,27 +72,27 @@
                     </tbody>
                 </table>
                 <div class="button-row left">
-                    <span style="color: red;">&nbsp;&nbsp;Select parameters and click submit</span>
+                    <span style="color:red">&nbsp;&nbsp;Select parameters and click submit</span>
                     <input type="hidden" name="showData" value="1">
                     <input type="hidden" name="ac" value="prim">~[submitbutton]
                 </div>
             </div>
         </form>
+        <!-- Start of Results -->
         ~[if#showData.~(gpv.showData;sqlText)=1]
         <div class="box-round">
-            <h2 class="pscbdevBkgColor">&nbsp;&nbsp;Contacts with Maiden Name</h2>
-            <table cellspacing="0" cellpadding="4" class="tablesorter grid center" id="pscbDevPro" groupRowsByCol="2"
-                color1="#ffffff" color2="#d7edfe">
+            <h2>Student Textbook Agreements</h2>
+            <table cellspacing="0" cellpadding="4" class="tablesorter grid center" id="pscbDevPro">
                 <thead>
                     <tr>
                         <th class="left">Student Number</th>
-                        <th class="left">Student Name</th>
+                        <th class="left">Name</th>
                         <th class="left filter-select">Grade Level</th>
-                        <th class="left">Contact Priority Order</th>
-                        <th class="left">Relationship</th>
-                        <th class="left">Contact Name</th>
-                        <th class="left">Maiden Name</th>
-                        <th class="left filter-select">School</th>
+                        <th class="left filter-select">Gender</th>
+                        <th class="left filter-select">Textbook Agree</th>
+                        <th class="left">Parent Digital Signature</th>
+                        <th class="left">Signature Date</th>
+                        ~[if.district.office]<th class="left filter-select">School</th>[/if]
                     </tr>
                 </thead>
                 <tbody>
@@ -98,60 +108,48 @@
                     WHEN TO_CHAR(s.grade_level) = 99 then 'Graduated'
                     ELSE TO_CHAR(s.grade_level)
                     END as PRETTY_GRADE,
-                    sca.contactpriorityorder as pcontactorder,
-                    cs.code Relationship,
-                    p.id,
-                    NVL(precs.code, '') || ' ' || p.firstname || ' ' || NVL(p.middlename, '') || ' ' || p.lastname || '
-                    ' ||
-                    NVL(sufcs.code, '') as
-                    person_name,
-                    u.PERSON_MAIDEN_NAME,
-                    sch.abbreviation
+                    CASE
+                    WHEN UPPER(s.gender) = 'M' THEN 'Male'
+                    WHEN UPPER(s.gender) = 'F' THEN 'Female'
+                    ELSE s.gender
+                    END as GENDER,
+                    DECODE(AD.TEXTBOOK_AGREE,1,'Yes',0,'No','No') AS TEXTBOOK_AGREE,
+                    DECODE(AD.TEXTBOOK_AGREE,1, AD.PARENT_SIG,0,'','') AS PARENT_SIG,
+                    DECODE(AD.TEXTBOOK_AGREE,1, to_char(AD.PARENT_SIG_date, 'mm/dd/yyyy'),0,'','') AS PARENT_SIG_date,
+                    sch.name
                     FROM Students s
                     ~[if#ss.~(gpv.ss;sqlText)=cur] INNER JOIN ~[temp.table.current.selection:students] temp ON (s.dcid =
-                    temp.dcid)[/if#ss]
+                    temp.dcid)
+                    [/if#ss]
                     JOIN schools sch ON (s.schoolid = sch.school_number)
-                    LEFT JOIN studentcontactassoc sca ON (s.dcid = sca.studentdcid)
-                    LEFT JOIN studentcontactdetail scd ON (sca.studentcontactassocid = scd.studentcontactassocid)
-                    LEFT JOIN u_studentcontactdetail_cdol uscd ON scd.studentcontactdetailid =
-                    uscd.studentcstudentcontactdetailid
-                    LEFT JOIN person p ON (sca.personid = p.ID)
-                    LEFT JOIN codeset cs ON (cs.codesetid = scd.relationshiptypecodesetid)
-                    LEFT JOIN codeset precs ON (precs.codesetid = p.PREFIXCODESETID)
-                    LEFT JOIN codeset sufcs ON (sufcs.codesetid = p.SUFFIXCODESETID)
-                    LEFT JOIN codeset gcs ON (gcs.codesetid = p.GENDERCODESETID)
-                    LEFT JOIN guardianpersonassoc gp ON (p.id = gp.personid)
-                    LEFT JOIN GUARDIAN g ON (gp.guardianid = g.guardianid)
-                    LEFT JOIN guardianstudent gs ON (s.dcid = gs.studentsdcid AND gp.guardianid = gs.guardianid)
-                    LEFT JOIN U_PERSON_ADDITIONAL_INFO U ON (p.ID = u.personid)
-                    WHERE cs.codesetid != 32
-                    AND s.enroll_status in (-1,0)
-                    AND gcs.displayvalue ='Female'
-                    AND u.PERSON_MAIDEN_NAME IS NOT NULL
+                    LEFT JOIN U_STUDENT_ADDITIONAL_INFO AD
+                    ON AD.STUDENTSDCID = s.DCID
+                    WHERE s.enroll_status in (-1,0)
                     ~[if.is.a.school] AND s.schoolid = ~(curschoolid) [/if.is.a.school]
                     ~[if#gr.~(gpv.gr;sqlText)#] AND s.grade_level = ~(gpv.gr) [/if#gr]
-                    ORDER BY sch.name, s.lastfirst, sca.contactpriorityorder
-                    ;alternatecolor;nonemessage=
-                    <tr>
-                        <td colspan="100%">No Records were found.</td>
+                    ~[if#ta.~(gpv.ta;sqlText)=1] AND AD.TEXTBOOK_AGREE = 1[/if#ta]
+                    ~[if#nta.~(gpv.ta;sqlText)=0] AND (AD.TEXTBOOK_AGREE = 0 OR AD.TEXTBOOK_AGREE IS NULL OR
+                    AD.TEXTBOOK_AGREE = '')[/if#nta]
+                    ORDER BY sch.abbreviation, s.lastfirst;alternatecolor;nonemessage=<tr nodata>
+                        <td colspan="100%">No Records Found.</td>
                     </tr>]
                     <tr class="Record" data-StudentID="~(dcid)">
-                        <td class="nowrap"><a href="/admin/students/contacts.html?frn=001~(dcid)"
-                                target="_blank">~(stunum)</a>
+                        <td class="nowrap"><a href="/admin/students/form.html?formid=184571&type=P&frn=001~(dcid)"
+                                target="_blank">~(studentnumb)</a>
                         </td>
-                        <td class="nowrap">~(stuname;t)</td>
+                        <td>~(name;t)</td>
                         <td class="center">~(grade_level)</td>
-                        <td class="nowrap center">~(porder)</td>
-                        <td>~(relationship;t)</td>
-                        <td class="nowrap"><a href="/admin/contacts/edit.html#?contactid=~(cid)"
-                                target="_blank">~(contact;t)</a></td>
-                        <td class="nowrap">~(maidenname;t)</td>
-                        <td class="nowrap">~(school;t)</td>
+                        <td class="center">~(gender;t)</td>
+                        <td class="center">~(tagree;t)</td>
+                        <td class="nowrap">~(sig;t)</td>
+                        <td class="nowrap">~(date)</td>
+                        ~[if.district.office]<td>~(school;t)</td>[/if]
                     </tr>
                     [/tlist_sql]
                 </tbody>
             </table>
         </div>
+        <!-- End of pscbDevPro -->
         <div style="clear: both;">
             <p class="center">Report generated at ~[time] on ~[date]</p>
         </div>
@@ -159,4 +157,4 @@
         ~[wc:admin_footer_frame_css]
     </body>
 
-</html>
+</html><!-- end right frame -->
