@@ -1,30 +1,26 @@
 <!DOCTYPE html>
-<html>
-    <!-- non framed -->
+<html lang="en">
 
     <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Receive Mail & Lives With</title>
         ~[wc:commonscripts]
         <link href="/images/css/screen.css" rel="stylesheet" media="screen">
         <link href="/images/css/print.css" rel="stylesheet" media="print">
-        ~[wc:pscb_init]
-        <script>
-            pscbToolButtons = { "copyData": "Yes", "csvFile": "Yes", "pdfFile": "Yes", "curSel": "Yes" };
-        </script>
+        ~[wc:pscbdevpro_init]
     </head>
 
     <body>
-        ~[wc:admin_header_frame_css] <!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a>
-        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html" target="_top">PSCB DEV Custom Reports</a>
-        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_contacts_menu.html" target="_top">Contacts</a> &gt;
-        Receive Mail & Lives With
-        <!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
-        <!-- start of Options -->
-        <h1>Receive Mail & Lives With</h1>
+        ~[wc:admin_header_css] <a href="/admin/home.html" target="_top">Start Page</a> &gt; <a
+            href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html" target="_top">PSCB DEV Custom Reports</a> &gt;
+        <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_contacts_menu.html" target="_top">Contacts</a> &gt;
+        Receive Mail & Lives With ~[wc:admin_navigation_frame_css]
         <form name="searchform" action="#" method="POST">
+            <h1>Receive Mail & Lives With</h1>
             <div class="box-round" style="overflow: hidden;">
                 <h2>Report Filters</h2>
-                <table border="0" cellspacing="0" cellpadding="0" class="linkDescList">
+                <table cellspacing="0" cellpadding="0" class="linkDescList">
                     <thead>
                         <tr>
                             <th style="white-space: nowrap;" width="180px">Student Selection</th>
@@ -64,18 +60,19 @@
                         </tr>
                     </tbody>
                 </table>
-                <div class="button-row" style="float: left;">
+                <div class="button-row left">
+                    <span style="color: red;">&nbsp;&nbsp;Select parameters and click submit</span>
                     <input type="hidden" name="showData" value="1">
-                    <span class="red">&nbsp;&nbsp;Select parameters and click submit</span>
                     <input type="hidden" name="ac" value="prim">~[submitbutton]
                 </div>
             </div>
         </form>
-        <!-- Start of Results -->
+
         ~[if#showData.~(gpv.showData;sqlText)=1]
         <div class="box-round">
-            <h2>Receive Mail & Lives With</h2>
-            <table border="0" cellspacing="0" cellpadding="4" align="center" class="tablesorter grid" id="results">
+            <h2 class="pscbdevBkgColor">&nbsp;&nbsp;Receive Mail & Lives With</h2>
+            <table cellspacing="0" cellpadding="4" class="tablesorter grid center" id="pscbDevPro" groupRowsByCol="2"
+                color1="#ffffff" color2="#d7edfe">
                 <thead>
                     <tr>
                         <th class="left">Student Number</th>
@@ -135,8 +132,10 @@
                     AND scd.liveswithflg = 1
                     ~[if.is.a.school] AND s.schoolid = ~(curschoolid) [/if.is.a.school]
                     ~[if#gr.~(gpv.gr;sqlText)#] AND s.grade_level = ~(gpv.gr) [/if#gr]
-                    ORDER BY sch.name, s.lastfirst, sca.contactpriorityorder;]
-                    <tr data-StudentID="~(dcid)">
+                    ORDER BY sch.name, s.lastfirst, sca.contactpriorityorder;alternatecolor;nonemessage=<tr>
+                        <td colspan="100%">No Records were found.</td>
+                    </tr>]
+                    <tr class="Record" data-StudentID="~(dcid)">
                         <td class="nowrap"><a href="/admin/students/contacts.html?frn=001~(dcid)"
                                 target="_blank">~(stunum)</a>
                         </td>
@@ -156,9 +155,11 @@
                 </tbody>
             </table>
         </div>
+        <div style="clear: both;">
+            <p class="center">Report generated at ~[time] on ~[date]</p>
+        </div>
         [/if#showData]
-        <!-- end of content of bounding box -->
         ~[wc:admin_footer_frame_css]
     </body>
 
-</html><!-- end right frame -->
+</html>
