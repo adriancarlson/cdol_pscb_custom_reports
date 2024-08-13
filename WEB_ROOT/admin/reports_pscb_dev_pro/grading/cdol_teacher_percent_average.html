@@ -1,29 +1,26 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
     <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Teacher - Percent Averages</title>
         ~[wc:commonscripts]
         <link href="/images/css/screen.css" rel="stylesheet" media="screen">
         <link href="/images/css/print.css" rel="stylesheet" media="print">
-        ~[wc:pscb_init]
-        <script>
-            pscbToolButtons = { "copyData": "Yes", "csvFile": "Yes", "pdfFile": "No", "curSel": "Yes" };
-        </script>
+        ~[wc:pscbdevpro_init]
     </head>
 
     <body>
-        ~[wc:admin_header_frame_css]<!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a>
-        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html" target="_top">PSCB DEV Custom Reports</a>
-        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_grading_menu.html" target="_top">Grading</a> &gt;
-        Teacher - Percent Averages
-        <!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
-        <!-- Begin report filters-->
-        <h1>Teacher - Percent Averages</h1>
-        <form name="rptFilters" action="#" method="POST">
+        ~[wc:admin_header_css] <a href="/admin/home.html" target="_top">Start Page</a> &gt; <a
+            href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html" target="_top">PSCB DEV Custom Reports</a> &gt;
+        <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_contacts_menu.html" target="_top">Contacts</a> &gt;
+        Teacher - Percent Averages ~[wc:admin_navigation_frame_css]
+        <form name="searchform" action="#" method="POST">
+            <h1>Teacher - Percent Averages</h1>
             <div class="box-round" style="overflow: hidden;">
                 <h2>Report Filters</h2>
-                <table border="0" cellspacing="0" cellpadding="0" class="linkDescList">
+                <table cellspacing="0" cellpadding="0" class="linkDescList">
                     <thead>
                         <tr>
                             <th width="100px">Year</th>
@@ -89,18 +86,18 @@
                         </tr>
                     </tbody>
                 </table>
-                <div class="button-row" style="float: left;">
+                <div class="button-row left">
+                    <span style="color: red;">&nbsp;&nbsp;Select parameters and click submit</span>
                     <input type="hidden" name="showData" value="1">
-                    <span class="red">&nbsp;&nbsp;Select parameters and click submit</span>
-                    <input type="hidden" name="ac" style="float: left;" value="prim">~[submitbutton]
+                    <input type="hidden" name="ac" value="prim">~[submitbutton]
                 </div>
             </div>
         </form>
-        <!-- End report parameters-->
         ~[if#showData.~(gpv.showData)=1]
         <div class="box-round">
-            <h2>Teacher - Percent Averages</h2>
-            <table border="0" cellspacing="0" cellpadding="4" class="tablesorter grid" id="results">
+            <h2 class="pscbdevBkgColor">&nbsp;&nbsp;Teacher - Percent Averages</h2>
+            <table cellspacing="0" cellpadding="4" class="tablesorter grid center" id="pscbDevPro" groupRowsByCol="2"
+                color1="#ffffff" color2="#d7edfe">
                 <thead>
                     <tr>
                         <th class="left filter-select">Year</th>
@@ -157,11 +154,10 @@
                     pgf.finalgradename
                     ORDER BY schools.name, crs.course_name, sec.section_number, pgf.finalgradename, t.name,
                     tch.lastfirst
-                    ;alternatecolor;nonemessage=
-                    <tr nodata>
-                        <td colspan="100%">No Records Found.</td>
+                    ;alternatecolor;nonemessage=<tr>
+                        <td colspan="100%">No Records were found.</td>
                     </tr>]
-                    <tr class="~[evenoddrow]">
+                    <tr class="Record">
                         <td class="left">~(year;t)</td>
                         <td class="center">~(rptterm;t)</td>
                         <td class="left">~(cnumb;t)</td>
@@ -177,11 +173,8 @@
                 </tbody>
             </table>
         </div>
-        <!-- End of results -->
-        <div>
-            <p>
-                <center>Report generated at ~[time] on ~[date]</center>
-            </p>
+        <div style="clear: both;">
+            <p class="center">Report generated at ~[time] on ~[date]</p>
         </div>
         [/if#showData]
         ~[wc:admin_footer_frame_css]
