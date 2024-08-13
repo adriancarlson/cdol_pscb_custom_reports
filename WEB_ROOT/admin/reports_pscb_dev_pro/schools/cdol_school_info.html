@@ -1,26 +1,26 @@
 <!DOCTYPE html>
-<html>
-    <!-- non framed -->
+<html lang="en">
 
     <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Schools - School Info</title>
         ~[wc:commonscripts]
         <link href="/images/css/screen.css" rel="stylesheet" media="screen">
         <link href="/images/css/print.css" rel="stylesheet" media="print">
-        ~[wc:pscb_init]
+        ~[wc:pscbdevpro_init]
     </head>
 
     <body>
-        ~[wc:admin_header_frame_css]<!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a>
-        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html" target="_top">PSCB DEV Custom Reports</a>
-        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_schools_menu.html" target="_top">Schools</a> &gt; Schools - School Info
-        <!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
-
-        <!-- Start of Results -->
-        <h1>Schools - School Info</h1>
+        ~[wc:admin_header_css] <a href="/admin/home.html" target="_top">Start Page</a> &gt; <a
+            href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html" target="_top">PSCB DEV Custom Reports</a> &gt;
+        <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_contacts_menu.html" target="_top">Contacts</a> &gt;
+        Schools - School Info ~[wc:admin_navigation_frame_css]
+        <h1 class="pscbdevBkgColor">&nbsp;&nbsp;Schools - School Info</h1>
         <div class="box-round">
             <h2>Schools - School Info</h2>
-            <table border="0" cellspacing="0" cellpadding="4" align="center" class="tablesorter grid" id="results">
+            <table cellspacing="0" cellpadding="4" class="tablesorter grid" id="pscbDevPro" groupRowsByCol="2"
+                color1="#ffffff" color2="#d7edfe">
                 <thead>
                     <tr>
                         <th class="left">Name</th>
@@ -161,13 +161,9 @@
                     [/tlist_sql]
                 </tbody>
             </table>
-            <!-- End of shaded content table -->
         </div>
-        <!-- End of results -->
         <div style="clear: both;">
-            <p>
-                <center>Report generated at ~[time] on ~[date]</center>
-            </p>
+            <p class="center">Report generated at ~[time] on ~[date]</p>
         </div>
         ~[wc:admin_footer_frame_css]
     </body>
