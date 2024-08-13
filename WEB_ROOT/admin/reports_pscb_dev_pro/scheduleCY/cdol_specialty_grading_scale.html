@@ -1,35 +1,30 @@
 <!DOCTYPE html>
-<html>
-	<!-- non framed -->
+<html lang="en">
 
 	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<title>Sections - Specialty Grading Scale</title>
 		~[wc:commonscripts]
 		<link href="/images/css/screen.css" rel="stylesheet" media="screen">
 		<link href="/images/css/print.css" rel="stylesheet" media="print">
-		~[wc:pscb_init]
+		~[wc:pscbdevpro_init]
 	</head>
 
 	<body>
-		~[wc:admin_header_frame_css]<!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a>
-		&gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html" target="_top">PSCB DEV Custom Reports</a>
-		&gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_scheduleCY_menu.html" target="_top">Scheduling
-			(Current Year)</a> &gt; Sections - Specialty
-		Grading Scale
-		<!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
-
-
-		<!-- start of Report Filters -->
-		<h1>Sections - Specialty Grading Scale</h1>
-		<form id="rptFilters" action="#" method="POST">
+		~[wc:admin_header_css] <a href="/admin/home.html" target="_top">Start Page</a> &gt; <a
+			href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html" target="_top">PSCB DEV Custom Reports</a> &gt;
+		<a href="/admin/reports_pscb_dev_pro/pdevpro_reports_contacts_menu.html" target="_top">Contacts</a> &gt;
+		Sections - Specialty Grading Scale ~[wc:admin_navigation_frame_css]
+		<form name="searchform" action="#" method="POST">
+			<h1>Sections - Specialty Grading Scale</h1>
 			<div class="box-round" style="overflow: hidden;">
 				<h2>Report Filters</h2>
-				<table border="0" cellspacing="0" cellpadding="0" class="linkDescList">
+				<table cellspacing="0" cellpadding="0" class="linkDescList">
 					<thead>
 						<tr>
 							<th class="left">Teacher</th>
 							<th class="left">Department</th>
-							<th class="left">Course Name</th>
 							<th width="100%">Term</th>
 						</tr>
 					</thead>
@@ -40,10 +35,14 @@
 							<td valign="top" nowrap>
 								<select id="teacher" name="teacher">
 									<option value="" ~[if.~(gpv.teacher)=]selected[/if]>All Teachers
-										~[tlist_sql;SELECT DISTINCT t.id, CASE WHEN t.id = '~(gpv.teacher;sqlText)' THEN
-										'selected' ELSE '' END AS isselected, t.lastfirst FROM ps.sections sect INNER
-										JOIN ps.teachers t ON t.id = sect.teacher AND t.schoolid = sect.schoolid WHERE
-										sect.schoolid = ~(curschoolid) AND sect.termid >= ~(curyearid)00 AND sect.termid
+										~[tlist_sql;SELECT DISTINCT t.id, CASE WHEN t.id = '~(gpv.teacher;sqlText)'
+										THEN
+										'selected' ELSE '' END AS isselected, t.lastfirst FROM ps.sections sect
+										INNER
+										JOIN ps.teachers t ON t.id = sect.teacher AND t.schoolid = sect.schoolid
+										WHERE
+										sect.schoolid = ~(curschoolid) AND sect.termid >= ~(curyearid)00 AND
+										sect.termid
 										< (~(curyearid)00 + 100) ORDER BY t.lastfirst] <option value="~(t.id)"
 											~(isselected;t)>~(t.lastfirst; t)
 											[/tlist_sql]
@@ -52,9 +51,11 @@
 							<td valign="top" nowrap>
 								<select id="cn" name="cn">
 									<option value="" ~[if.~(gpv.cn)=]selected[/if]>All Courses
-										~[tlist_sql;SELECT DISTINCT Upper(c.course_name) AS course_name_value, CASE WHEN
+										~[tlist_sql;SELECT DISTINCT Upper(c.course_name) AS course_name_value, CASE
+										WHEN
 										Upper(c.course_name) = '~(gpv.cn;sqlText)' THEN 'selected' ELSE '' END AS
-										isselected, Upper(c.course_name) AS course_name FROM ps.sections sect INNER JOIN
+										isselected, Upper(c.course_name) AS course_name FROM ps.sections sect INNER
+										JOIN
 										ps.courses c ON sect.course_number = c.course_number WHERE sect.schoolid =
 										~(curschoolid) AND sect.termid >= ~(curyearid)00 AND sect.termid <
 											(~(curyearid)00 + 100) ORDER BY Course_Name] <option
@@ -65,8 +66,10 @@
 							<td valign="top" nowrap>
 								<select id="term" name="term">
 									<option value="" ~[if.~(gpv.term)=]selected[/if]>All Terms
-										~[tlist_sql;SELECT id, CASE WHEN id = '~(gpv.term;sqlText)' THEN 'selected' ELSE
-										'' END AS isselected, Upper(Abbreviation) AS term FROM ps.terms WHERE schoolid =
+										~[tlist_sql;SELECT id, CASE WHEN id = '~(gpv.term;sqlText)' THEN 'selected'
+										ELSE
+										'' END AS isselected, Upper(Abbreviation) AS term FROM ps.terms WHERE
+										schoolid =
 										~(curschoolid) AND YearID = ~(v.ayearid) ORDER BY term]
 									<option value="~(id)" ~(isselected;t)>~(term)
 										[/tlist_sql]
@@ -75,21 +78,18 @@
 						</tr>
 					</tbody>
 				</table>
-				<div class="button-row" style="float: left;">
+				<div class="button-row left">
+					<span style="color: red;">&nbsp;&nbsp;Select parameters and click submit</span>
 					<input type="hidden" name="showData" value="1">
-					<button type="submit" id="btnSubmit" name="btnSubmit" onClick="actionChange()"
-						style="float: left;">Submit</button>
-					<font color="red">&nbsp;&nbsp;Select parameters and click submit</font>
+					<input type="hidden" name="ac" value="prim">~[submitbutton]
 				</div>
 			</div>
 		</form>
-		<!-- End  of Report Filters -->
-
-		<!-- Start of Results -->
 		~[if#showData.~(gpv.showData)=1]
 		<div class="box-round">
-			<h2>Sections List</h2>
-			<table border="0" cellspacing="0" cellpadding="0" class="tablesorter grid" id="results">
+			<h2 class="pscbdevBkgColor">&nbsp;&nbsp;Sections - Specialty Grading Scale</h2>
+			<table cellspacing="0" cellpadding="4" class="tablesorter grid center" id="pscbDevPro" groupRowsByCol="2"
+				color1="#ffffff" color2="#d7edfe">
 				<thead>
 					<tr>
 						<th class="left filter-select">Term</th>
@@ -121,7 +121,7 @@
 					~[if.~(gpv.cn)#] AND Upper(c.course_name) = Upper('~(gpv.cn;sqlText)')[/if]
 					~[if.~(gpv.term)#] AND sect.termid = ~(gpv.term;sqlText)[/if]
 					;alternatecolor;nonemessage=<tr>
-						<td colspan="100%">No records returned.</td>
+						<td colspan="100%">No Records were found.</td>
 					</tr>]
 					<tr class="Record">
 						<td>~(term;t)</td>
@@ -135,14 +135,11 @@
 				</tbody>
 			</table>
 		</div>
-		<!-- End of Results -->
 		<div style="clear: both;">
-			<p>
-				<center>Report generated at ~[time] on ~[date]</center>
-			</p>
+			<p class="center">Report generated at ~[time] on ~[date]</p>
 		</div>
 		[/if#showData]
 		~[wc:admin_footer_frame_css]
 	</body>
 
-</html><!-- end right frame -->
+</html>
