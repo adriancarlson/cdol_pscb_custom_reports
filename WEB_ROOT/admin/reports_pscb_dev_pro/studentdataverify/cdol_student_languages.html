@@ -1,31 +1,26 @@
 <!DOCTYPE html>
-<html>
-    <!-- non framed -->
+<html lang="en">
 
     <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Student Languages</title>
         ~[wc:commonscripts]
         <link href="/images/css/screen.css" rel="stylesheet" media="screen">
         <link href="/images/css/print.css" rel="stylesheet" media="print">
-        ~[wc:pscb_init]
-        <script>
-            pscbToolButtons = { "copyData": "Yes", "csvFile": "Yes", "pdfFile": "Yes", "curSel": "Yes" };
-        </script>
+        ~[wc:pscbdevpro_init]
     </head>
 
     <body>
-        ~[wc:admin_header_frame_css]<!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a>
-        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html" target="_top">PSCB DEV Custom Reports</a>
-        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_studentdataverify_menu.html" target="_top">Student
-            Data Verification</a> &gt;
-        Student Languages
-        <!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
-        <!-- start of Options -->
-        <h1>Student Languages</h1>
+        ~[wc:admin_header_css] <a href="/admin/home.html" target="_top">Start Page</a> &gt; <a
+            href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html" target="_top">PSCB DEV Custom Reports</a> &gt;
+        <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_contacts_menu.html" target="_top">Contacts</a> &gt;
+        Student Languages ~[wc:admin_navigation_frame_css]
         <form name="searchform" action="#" method="POST">
+            <h1>Student Languages</h1>
             <div class="box-round" style="overflow: hidden;">
                 <h2>Report Filters</h2>
-                <table border="0" cellspacing="0" cellpadding="0" class="linkDescList">
+                <table cellspacing="0" cellpadding="0" class="linkDescList">
                     <thead>
                         <tr>
                             <th style="white-space: nowrap;" width="180px">Student Selection</th>
@@ -65,18 +60,18 @@
                         </tr>
                     </tbody>
                 </table>
-                <div class="button-row" style="float: left;">
+                <div class="button-row left">
+                    <span style="color: red;">&nbsp;&nbsp;Select parameters and click submit</span>
                     <input type="hidden" name="showData" value="1">
-                    <span class="red">&nbsp;&nbsp;Select parameters and click submit</span>
                     <input type="hidden" name="ac" value="prim">~[submitbutton]
                 </div>
             </div>
         </form>
-        <!-- Start of Results -->
         ~[if#showData.~(gpv.showData;sqlText)=1]
         <div class="box-round">
-            <h2>Student Languages</h2>
-            <table border="0" cellspacing="0" cellpadding="4" align="center" class="tablesorter grid" id="results">
+            <h2 class="pscbdevBkgColor">&nbsp;&nbsp;Student Languages</h2>
+            <table cellspacing="0" cellpadding="4" class="tablesorter grid center" id="pscbDevPro" groupRowsByCol="2"
+                color1="#ffffff" color2="#d7edfe">
                 <thead>
                     <tr>
                         <th class="left">Student Number</th>
@@ -86,7 +81,7 @@
                         <th class="left filter-select">Home Language</th>
                         <th class="left filter-select">First Language</th>
                         <th class="left filter-select">Primary Language</th>
-                        <th class="left ">School</th>
+                        ~[if.district.office]<th class="left ">School</th>[/if]
                     </tr>
                 </thead>
                 <tbody>
@@ -112,7 +107,8 @@
                     AD.PRIMARY_LANGUAGE,
                     sch.abbreviation
                     FROM Students s
-                    ~[if#ss.~(gpv.ss;sqlText)=cur] INNER JOIN ~[temp.table.current.selection:students] temp ON (s.dcid =
+                    ~[if#ss.~(gpv.ss;sqlText)=cur] INNER JOIN ~[temp.table.current.selection:students] temp ON
+                    (s.dcid =
                     temp.dcid)
                     [/if#ss]
                     JOIN schools sch ON (s.schoolid = sch.school_number)
@@ -122,8 +118,10 @@
                     ~[if.is.a.school] AND s.schoolid = ~(curschoolid) [/if.is.a.school]
                     ~[if#gr.~(gpv.gr;sqlText)#] AND s.grade_level = ~(gpv.gr) [/if#gr]
                     ORDER BY sch.abbreviation, s.lastfirst
-                    ;]
-                    <tr data-StudentID="~(dcid)">
+                    ;alternatecolor;nonemessage=<tr>
+                        <td colspan="100%">No Records were found.</td>
+                    </tr>]
+                    <tr class="Record" data-StudentID="~(dcid)">
                         <td class="nowrap"><a href="/admin/students/studentpages/language.html?frn=001~(dcid)"
                                 target="_blank">~(studentnumb)</a>
                         </td>
@@ -133,15 +131,17 @@
                         <td class="nowrap">~(homel;t)</td>
                         <td class="nowrap">~(firstl;t)</td>
                         <td class="nowrap">~(primaryl;t)</td>
-                        <td>~(school;t)</td>
+                        ~[if.district.office]<td>~(school;t)</td>[/if]
                     </tr>
                     [/tlist_sql]
                 </tbody>
             </table>
         </div>
+        <div style="clear: both;">
+            <p class="center">Report generated at ~[time] on ~[date]</p>
+        </div>
         [/if#showData]
-        <!-- end of content of bounding box -->
         ~[wc:admin_footer_frame_css]
     </body>
 
-</html><!-- end right frame -->
+</html>
