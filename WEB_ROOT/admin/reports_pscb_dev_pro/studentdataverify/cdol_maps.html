@@ -1,25 +1,26 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
     <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>MAPS Report</title>
         ~[wc:commonscripts]
         <link href="/images/css/screen.css" rel="stylesheet" media="screen">
         <link href="/images/css/print.css" rel="stylesheet" media="print">
-        ~[wc:pscb_init]
+        ~[wc:pscbdevpro_init]
     </head>
 
     <body>
-        ~[wc:admin_header_frame_css]<!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a>
-        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html" target="_top">PSCB DEV Custom Reports</a>
-        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_studentdataverify_menu.html" target="_top">Student
-            Data Verification</a> &gt; MAPS Report
-        <!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
-        <h1>MAPS Report</h1>
+        ~[wc:admin_header_css] <a href="/admin/home.html" target="_top">Start Page</a> &gt; <a
+            href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html" target="_top">PSCB DEV Custom Reports</a> &gt;
+        <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_contacts_menu.html" target="_top">Contacts</a> &gt;
+        MAPS Report ~[wc:admin_navigation_frame_css]
         <form name="rptFilters" action="#" method="POST">
+            <h1>MAPS Report</h1>
             <div class="box-round" style="overflow: hidden;">
                 <h2>Report Filters</h2>
-                <table border="0" cellspacing="0" cellpadding="4" style="line-height: 25px">
+                <table cellspacing="0" cellpadding="4" style="line-height: 25px">
                     <tr>
                         <th style="white-space: nowrap;" width="180px">Student Selection</th>
                         <th style="white-space: nowrap;">Grade Selection</th>
@@ -55,21 +56,18 @@
                         </td>
                     </tr>
                 </table>
-                <div class="button-row" style="float: left;">
+                <div class="button-row left">
+                    <span style="color: red;">&nbsp;&nbsp;Select parameters and click submit</span>
                     <input type="hidden" name="showData" value="1">
                     <input type="hidden" name="pidList" id="pidList" value="~(gpv.pidList)">
-                    <span class="red">&nbsp;&nbsp;Select parameters and click submit</span>
                     <input type="hidden" name="ac" value="prim">~[submitbutton]
                 </div>
             </div>
         </form>
-        <!-- end of Options -->
-
-        <!-- Start of Results -->
         ~[if#showData.~(gpv.showData)=1]
         <div class="box-round">
-            <h2>MAPS report <span><label id="lblRecordCount"></label></span></h2>
-            <table border="0" cellspacing="0" cellpadding="0" class="tablesorter grid" id="results" groupRowsByCol="1"
+            <h2 class="pscbdevBkgColor">&nbsp;&nbsp;MAPS Report</h2>
+            <table cellspacing="0" cellpadding="4" class="tablesorter grid center" id="pscbDevPro" groupRowsByCol="1"
                 color1="#ffffff" color2="#d7edfe">
                 <thead>
                     <tr>
@@ -109,7 +107,11 @@
                     students.last_name,
                     students.first_name,
                     students.dob,
-                    students.gender,
+                    CASE
+                    WHEN UPPER(students.gender) = 'M' THEN 'Male'
+                    WHEN UPPER(students.gender) = 'F' THEN 'Female'
+                    ELSE students.gender
+                    END as GENDER,
                     CASE
                     WHEN TO_CHAR(students.grade_level) = -2 then 'PK3'
                     WHEN TO_CHAR(students.grade_level) = -1 then 'PK4'
@@ -147,23 +149,22 @@
                     ~[if.is.a.school] and STUDENTS.schoolid= ~(curschoolid) [/if]
                     ~[if#gr.~(gpv.gr;sqlText)#] AND STUDENTS.grade_level = ~(gpv.gr) [/if#gr]
                     ORDER BY students.grade_level, students.lastfirst
-                    ;alternatecolor;nonemessage=
-                    <tr>
-                        <td colspan="100%">No records returned.</td>
+                    ;alternatecolor;nonemessage=<tr>
+                        <td colspan="100%">No Records were found.</td>
                     </tr>]
-                    <tr class="Record" data-StudentID="~(dcid;t)">
-                        <td>~(schstatecode)</td>
+                    <tr class="Record" data-StudentID="~(dcid)">
+                        <td class="nowrap">~(schstatecode)</td>
                         <td class="nowrap">~(schname)</td>
                         <td>~(tid)</td>
-                        <td>~(tln;t)</td>
-                        <td>~(tfn;t)</td>
-                        <td>~(tun;t)</td>
+                        <td class="nowrap">~(tln;t)</td>
+                        <td class="nowrap">~(tfn;t)</td>
+                        <td class="nowrap">~(tun;t)</td>
                         <td class="nowrap">~(temail;t)</td>
                         <td>~(homeroom;t)</td>
                         <td>~(sid)</td>
                         <td>~(sstateid)</td>
-                        <td>~(sln;t)</td>
-                        <td>~(sfn;t)</td>
+                        <td class="nowrap">~(sln;t)</td>
+                        <td class="nowrap">~(sfn;t)</td>
                         <td>~(DOB;d)</td>
                         <td>~(gender;t)</td>
                         <td>~(grlvl;t)</td>
@@ -174,10 +175,11 @@
                 </tbody>
             </table>
         </div>
+        <div style="clear: both;">
+            <p class="center">Report generated at ~[time] on ~[date]</p>
+        </div>
         [/if#showData]
-        <br>
-        <!-- end of content of bounding box -->
         ~[wc:admin_footer_css]
     </body>
 
-</html><!-- non framed -->
+</html>
