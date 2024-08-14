@@ -1,28 +1,26 @@
 <!DOCTYPE html>
-<html>
-    <!-- non framed -->
+<html lang="en">
 
     <head>
-        <title>Race/Religion</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Students - Religion/Race</title>
         ~[wc:commonscripts]
         <link href="/images/css/screen.css" rel="stylesheet" media="screen">
         <link href="/images/css/print.css" rel="stylesheet" media="print">
-        ~[wc:pscb_init]
+        ~[wc:pscbdevpro_init]
     </head>
 
     <body>
-        ~[wc:admin_header_frame_css]<!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a>
-        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html" target="_top">PSCB DEV Custom Reports</a>
-        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_studentdataverify_menu.html" target="_top">Student
-            Data Verification</a> &gt;
-        Race/Religion
-        <!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
-        <!-- start of Options -->
-        <h1>Demographics</h1>
+        ~[wc:admin_header_css] <a href="/admin/home.html" target="_top">Start Page</a> &gt; <a
+            href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html" target="_top">PSCB DEV Custom Reports</a> &gt;
+        <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_contacts_menu.html" target="_top">Contacts</a> &gt;
+        Students - Religion/Race ~[wc:admin_navigation_frame_css]
         <form name="searchform" action="#" method="POST">
+            <h1>Students - Religion/Race </h1>
             <div class="box-round" style="overflow: hidden;">
                 <h2>Report Filters</h2>
-                <table border="0" cellspacing="0" cellpadding="0" class="linkDescList">
+                <table cellspacing="0" cellpadding="0" class="linkDescList">
                     <thead>
                         <tr>
                             <th width="180px">Student Selection</th>
@@ -63,20 +61,18 @@
                         </tr>
                     </tbody>
                 </table>
-                <div class="button-row" style="float: left;">
+                <div class="button-row left">
+                    <span style="color: red;">&nbsp;&nbsp;Select parameters and click submit</span>
                     <input type="hidden" name="showData" value="1">
-                    <span class="red">&nbsp;&nbsp;Select parameters and click submit</span>
                     <input type="hidden" name="ac" value="prim">~[submitbutton]
                 </div>
             </div>
         </form>
-
-        <!-- end of Options -->
         ~[if#showData.~[gpv:showData]=1]
-        <!-- Start of Results -->
         <div class="box-round">
-            <h2>Race/Religion</h2>
-            <table border="0" cellspacing="0" cellpadding="4" align="center" class="tablesorter grid" id="results">
+            <h2 class="pscbdevBkgColor">&nbsp;&nbsp;Students - Religion/Race</h2>
+            <table cellspacing="0" cellpadding="4" class="tablesorter grid center" id="pscbDevPro" groupRowsByCol="1"
+                color1="#ffffff" color2="#d7edfe">
                 <thead>
                     <tr>
                         <th class="left">Student Number</th>
@@ -91,37 +87,46 @@
                 <tbody>
                     ~[tlist_sql;
                     SELECT
-                    s.dcid
-                    ,s.Student_Number
-                    ,s.lastfirst
-                    ,s.dob
-                    ,CASE
+                    s.dcid,
+                    s.Student_Number,
+                    s.lastfirst,
+                    s.dob,
+                    CASE
                     WHEN grade_level = -2 THEN 'PK3'
                     WHEN grade_level = -1 THEN 'PK4'
                     WHEN grade_level = 0 THEN 'K'
                     WHEN grade_level = 99 THEN 'Gr'
                     ELSE TO_CHAR(grade_level)
-                    END pretty_grade
-                    ,CASE WHEN NCEA.RELIGIOUSAFFILIATION= 'C' THEN 'Catholic' WHEN NCEA.RELIGIOUSAFFILIATION= 'N' THEN
-                    'Non-Catholic'ELSE ''
-                    END AS Religion
-                    ,Decode(s.FedEthnicity,-2,'',1,'Hispanic/Latino','Not Hispanic/Latino') Hispanic,
-                    LISTAGG(r.racecd,', ') WITHIN GROUP (ORDER BY r.racecd) OVER (PARTITION BY s.dcid) racecodes
-                    FROM students s
-                    JOIN schools sch ON (s.schoolid = sch.school_number)
-                    JOIN StudentCoreFields scf ON (s.dcid = scf.studentsdcid)
-                    LEFT OUTER JOIN studentrace r ON (s.id = r.studentid)
-                    LEFT OUTER JOIN S_STU_NCEA_X NCEA on (s.dcid = NCEA.studentsdcid)
-                    WHERE s.enroll_status = 0
+                    END AS pretty_grade,
+                    CASE
+                    WHEN NCEA.RELIGIOUSAFFILIATION = 'C' THEN 'Catholic'
+                    WHEN NCEA.RELIGIOUSAFFILIATION = 'N' THEN 'Non-Catholic'
+                    ELSE ''
+                    END AS Religion,
+                    DECODE(s.FedEthnicity, -2, '', 1, 'Hispanic/Latino', 'Not Hispanic/Latino') AS Hispanic,
+                    LISTAGG(r.racecd, ', ') WITHIN GROUP (ORDER BY r.racecd) AS racecodes
+                    FROM
+                    students s
+                    JOIN
+                    schools sch ON (s.schoolid = sch.school_number)
+                    JOIN
+                    StudentCoreFields scf ON (s.dcid = scf.studentsdcid)
+                    LEFT OUTER JOIN
+                    studentrace r ON (s.id = r.studentid)
+                    LEFT OUTER JOIN
+                    S_STU_NCEA_X NCEA ON (s.dcid = NCEA.studentsdcid)
+                    WHERE
+                    s.enroll_status = 0
                     ~[if.is.a.school] AND s.schoolid = ~(curschoolid) [/if.is.a.school]
-
-                    ~[if#1.~(gpv.s;sqlText)#] AND S.dcid IN (SELECT dcid FROM ~[temp.table.current.selection:students])
+                    ~[if#1.~(gpv.s;sqlText)#] AND S.dcid IN (SELECT dcid FROM
+                    ~[temp.table.current.selection:students])
                     [else#1] AND S.Enroll_Status <= 0 [/if#1] ~[if#2.~(gpv.grlvl;sqlText)='' ] AND
-                        S.Grade_Level=~(gpv.grlvl) [else#2][/if#2] ORDER BY s.Grade_Level,s.lastfirst
-                        ;alternatecolor;nonemessage=<tr nodata>
-                        <td colspan="100%">No Records Found.</td>
+                        S.Grade_Level=~(gpv.grlvl) [else#2][/if#2] GROUP BY s.dcid, s.Student_Number, s.lastfirst,
+                        s.dob, s.grade_level, NCEA.RELIGIOUSAFFILIATION, s.FedEthnicity ORDER BY s.lastfirst
+                        ;alternatecolor;nonemessage=<tr>
+                        <td colspan="100%">No Records were found.</td>
                         </tr>]
-                        <tr class="Record" data-StudentID="~(dcid;t)">
+                        <tr class="Record" data-StudentID="~(dcid)">
                             <td>~(student_number;t)</td>
                             <td>~(LastFirst)</td>
                             <td>~(dob;d)</td>
@@ -134,10 +139,11 @@
                 </tbody>
             </table>
         </div>
+        <div style="clear: both;">
+            <p class="center">Report generated at ~[time] on ~[date]</p>
+        </div>
         [/if#showData]
-
-        <!-- end of content of bounding box -->
         ~[wc:admin_footer_frame_css]
     </body>
 
-</html><!-- end right frame -->
+</html>
