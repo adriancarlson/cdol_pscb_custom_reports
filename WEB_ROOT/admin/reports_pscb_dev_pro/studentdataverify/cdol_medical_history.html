@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Student Medical History</title>
+        ~[wc:commonscripts]
+        <link href="/images/css/screen.css" rel="stylesheet" media="screen">
+        <link href="/images/css/print.css" rel="stylesheet" media="print">
+        ~[wc:pscbdevpro_init]
+    </head>
+
+    <body>
+        ~[wc:admin_header_css] <a href="/admin/home.html" target="_top">Start Page</a> &gt; <a
+            href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html" target="_top">PSCB DEV Custom Reports</a> &gt;
+        <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_contacts_menu.html" target="_top">Contacts</a> &gt;
+        Student Medical History ~[wc:admin_navigation_frame_css]
+        <form name="searchform" action="#" method="POST">
+            <h1>Student Medical History</h1>
+            <div class="box-round" style="overflow: hidden;">
+                <h2>Report Filters</h2>
+                <table cellspacing="0" cellpadding="0" class="linkDescList">
+                    <thead>
+                        <tr>
+                            <th style="white-space: nowrap;" width="180px">Student Selection</th>
+                            <th style="white-space: nowrap;">Grade Selection</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <select name="ss" id="ss">
+                                    <option value='' ~[if.~[gpv:ss]=]selected[/if]>All Students</option>
+                                    <option value="cur" ~[if.~[gpv:ss]=cur]selected[/if]>Current Selection
+                                        (~[x:studsinset])</option>
+                                </select>
+                            </td>
+                            <td>
+                                <select name="gr" name="gr">
+                                    <option value='' ~[if.~[gpv:gr]=]selected[/if]>All Grades</option>
+                                    ~[tlist_sql;
+                                    SELECT DISTINCT GRADE_LEVEL,
+                                    CASE
+                                    WHEN TO_CHAR(grade_level) = -2 then 'PK3'
+                                    WHEN TO_CHAR(grade_level) = -1 then 'PK4'
+                                    WHEN TO_CHAR(grade_level) = 0 then 'K'
+                                    WHEN TO_CHAR(grade_level) = 99 then 'Graduated'
+                                    ELSE TO_CHAR(grade_level)
+                                    END as prettygrade
+                                    FROM STUDENTS
+                                    WHERE TO_CHAR(SCHOOLID) LIKE CASE WHEN TO_CHAR(~(curschoolid)) = '0'
+                                    THEN '%' ELSE TO_CHAR(~(curschoolid)) END
+                                    AND ENROLL_STATUS = 0
+                                    ORDER BY GRADE_LEVEL]
+                                    <option value="'~(gr)'">~(prettygrade)</option>
+                                    [/tlist_sql]
+                                </select>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="button-row left">
+                    <span style="color: red;">&nbsp;&nbsp;Select parameters and click submit</span>
+                    <input type="hidden" name="showData" value="1">
+                    <input type="hidden" name="ac" value="prim">~[submitbutton]
+                </div>
+            </div>
+        </form>
+        ~[if#showData.~(gpv.showData;sqlText)=1]
+        <div class="box-round">
+            <h2 class="pscbdevBkgColor">&nbsp;&nbsp;Student Medical History</h2>
+            <table cellspacing="0" cellpadding="4" class="tablesorter grid center" id="pscbDevPro" groupRowsByCol="1"
+                color1="#ffffff" color2="#d7edfe">
+                <thead>
+                    <tr>
+                        <th class="left">Student Number</th>
+                        <th class="left">Name</th>
+                        <th class="left filter-select">Grade Level</th>
+                        <th class="left filter-select">Gender</th>
+                        <th class="center filter-select">Medical Alert</th>
+                        <th class="left filter-select">Has Allergies?</th>
+                        <th class="left filter-select">Allergies</th>
+                        <th class="center filter-select">EpiPen</th>
+                        <th class="center filter-select">Has Glasses?</th>
+                        <th class="center filter-select">Has Diabetes?</th>
+                        <th class="center filter-select">Has Asthma?</th>
+                        <th class="center filter-select">Needs a Inhaler?</th>
+                        ~[if.district.office]<th class="left ">School</th>[/if]
+                    </tr>
+                </thead>
+                <tbody>
+                    ~[tlist_sql;
+                    SELECT
+                    students.dcid,
+                    students.student_number,
+                    students.lastfirst,
+                    CASE
+                    WHEN TO_CHAR(students.grade_level) = -2 THEN 'PK3'
+                    WHEN TO_CHAR(students.grade_level) = -1 THEN 'PK4'
+                    WHEN TO_CHAR(students.grade_level) = 0 THEN 'K'
+                    WHEN TO_CHAR(students.grade_level) = 99 THEN 'Graduated'
+                    ELSE TO_CHAR(students.grade_level)
+                    END AS pretty_grade,
+                    CASE
+                    WHEN UPPER(students.gender) = 'M' THEN 'Male'
+                    WHEN UPPER(students.gender) = 'F' THEN 'Female'
+                    ELSE students.gender
+                    END AS gender,
+                    students.alert_medical,
+                    DECODE(u_student_additional_info.allergy_agree, 1, 'Yes', 0, 'No', '') AS allergy_agree,
+                    studentcorefields.allergies,
+                    DECODE(u_student_additional_info.epipen, 1, 'Yes', 0, 'No', '') AS epipen,
+                    DECODE(u_student_additional_info.wears_glasses, 1, 'Yes', 0, 'No', '') AS glasses,
+                    DECODE(u_student_additional_info.diabetes, 1, 'Yes', 0, 'No', '') AS diabetes,
+                    DECODE(u_student_additional_info.asthma, 1, 'Yes', 0, 'No', '') AS asthma,
+                    DECODE(u_student_additional_info.inhaler, 1, 'Yes', 0, 'No', '') AS inhaler,
+                    schools.name AS school
+                    FROM
+                    students ~[if#ss.~(gpv.ss;sqlText)=cur]
+                    INNER JOIN ~[temp.table.current.selection:students] temp ON (students.dcid = temp.dcid) [/if#ss]
+                    JOIN schools ON (students.schoolid = schools.school_number)
+                    LEFT JOIN u_student_additional_info ON u_student_additional_info.studentsdcid = students.dcid
+                    LEFT JOIN studentcorefields ON studentcorefields.studentsdcid = students.dcid
+                    WHERE
+                    students.enroll_status IN (-1, 0) ~[if.is.a.school]
+                    AND students.schoolid = ~(curschoolid) [/if.is.a.school] ~[if#gr.~(gpv.gr;sqlText)#]
+                    AND students.grade_level = ~(gpv.gr) [/if#gr]
+                    ORDER BY
+                    schools.abbreviation,
+                    students.lastfirst
+                    ;alternatecolor;nonemessage=<tr>
+                        <td colspan="100%">No Records were found.</td>
+                    </tr>]
+                    <tr class="Record" data-StudentID="~(dcid)">
+                        <td class="nowrap"><a href="/admin/students/alerts.html?frn=001~(dcid)"
+                                target="_blank">~(studentnumb)</a>
+                        </td>
+                        <td class="nowrap">~(lastfirst;t)</td>
+                        <td class="center">~(grade_level)</td>
+                        <td>~(gender;t)</td>
+                        <td>~(medical;t)</td>
+                        <td>~(allergy_agree;t)</td>
+                        <td>~(allergy;t)</td>
+                        <td>~(epipen;t)</td>
+                        <td>~(glasses;t)</td>
+                        <td>~(diabetes;t)</td>
+                        <td>~(asthma;t)</td>
+                        <td>~(inhaler;t)</td>
+                        ~[if.district.office]<td>~(school;t)</td>[/if]
+                    </tr>
+                    [/tlist_sql]
+                </tbody>
+            </table>
+        </div>
+        <div style="clear: both;">
+            <p class="center">Report generated at ~[time] on ~[date]</p>
+        </div>
+        [/if#showData]
+        ~[wc:admin_footer_frame_css]
+    </body>
+
+</html>
