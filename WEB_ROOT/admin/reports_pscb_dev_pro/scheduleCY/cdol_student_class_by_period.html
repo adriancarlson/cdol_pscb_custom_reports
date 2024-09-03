@@ -9,6 +9,23 @@
 		<link href="/images/css/screen.css" rel="stylesheet" media="screen">
 		<link href="/images/css/print.css" rel="stylesheet" media="print">
 		~[wc:pscbdevpro_init]
+		<script>
+			$j(function () {
+				$j("select#pid").on("change", function () {
+					var pid = "'" + $j("select#pid option:selected").map(function () { return $j(this).val() }).get().join("','") + "'";
+					$j("#pidList").val(pid);
+					console.log(pid);
+				})
+
+				var pidList = $j("#pidList").val();
+				if (pidList != '') {
+					pidList = pidList.split(",");
+					for (var i = 0; i < pidList.length; i++) {
+						$j("#pid option[value=" + pidList[i] + "]").attr("selected", true);
+					}
+				}
+			})
+		</script>
 	</head>
 
 	<body>
@@ -130,6 +147,7 @@
 				<div class="button-row left">
 					<span style="color: red;">&nbsp;&nbsp;Select parameters and click submit</span>
 					<input type="hidden" name="showData" value="1">
+					<input type="hidden" name="pidList" id="pidList" value="~(gpv.pidList)">
 					<input type="hidden" name="ac" value="prim">~[submitbutton]
 				</div>
 			</div>
@@ -229,14 +247,6 @@
 		<div style="clear: both;">
 			<p class="center">Report generated at ~[time] on ~[date]</p>
 		</div>
-		<script>
-			$j(() => {
-				$j("select#pid").on("change", function () {
-					var pid = "'" + $j("select#pid option:selected").map(function () { return $j(this).val() }).get().join("','") + "'";
-					$j("#pidList").val(pid);
-				})
-			})
-		</script>
 		[/if#showData]
 		~[wc:admin_footer_css]
 	</body>
