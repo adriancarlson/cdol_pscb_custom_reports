@@ -23,11 +23,15 @@ WHERE s.dcid = '~(gpv.sdcid)'
             <tbody>
                 <tr>
                     <td><label>User Name:</label></td>
-                    <td>~(semail)</td>
+                    <td>~(semail)<button type="button" style="font-size: .95rem; margin-left: 5px;"
+                            onClick="navigator.clipboard.writeText('~(semail)').catch(err => console.error('Error copying text: ', err));">Copy</button>
+                    </td>
                 </tr>
                 <tr>
                     <td><label>Password:</label></td>
-                    <td>~(scode)</td>
+                    <td>~(scode) <button type="button" style="font-size: .95rem; margin-left: 5px;"
+                            onClick="navigator.clipboard.writeText('~(scode)').catch(err => console.error('Error copying text: ', err));">Copy</button>
+                    </td>
                 </tr>
             </tbody>
         </table>

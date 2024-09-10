@@ -64,7 +64,7 @@
                         <th class="left filter-select">Staff Type</th>
                         <th class="left filter-select">FTE</th>
                         <th class="left filter-select">Exclude from NCEA</th>
-                        <th class="left">School</th>
+                        ~[if.district.office]<th class="left">School</th>[/if]
                     </tr>
                 </thead>
                 <tbody>
@@ -176,7 +176,7 @@
                             <td style="background-color:~(staffHighlight;t);">~(stafftype;t)</td>
                             <td style="background-color:~(fteHighlight;t);">~(fte;t)</td>
                             <td style="background-color:~(excludeHighlight;t);">~(exclude;t)</td>
-                            <td>~(school;t)</td>
+                            ~[if.district.office]<td>~(school;t)</td>[/if]
                         </tr>
                         [/tlist_sql]
                 </tbody>

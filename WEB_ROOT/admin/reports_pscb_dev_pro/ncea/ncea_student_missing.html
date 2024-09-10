@@ -66,6 +66,7 @@
                         <th class="left filter-select">Ethnicity</th>
                         <th class="left filter-select">Race</th>
                         <th class="left filter-select">Religion</th>
+                        <th class="left filter-select">Has Diagnosed Disability?</th>
                         <th class="left filter-select">Diagnosed Disability</th>
                         <th class="left filter-select">Ungraded</th>
                         <th class="left filter-select">Receives Title 1</th>
@@ -75,7 +76,7 @@
                         <th class="left filter-select">Parent Choice Funded</th>
                         <th class="left filter-select">International Student</th>
                         <th class="left filter-select">Exclude from NCEA</th>
-                        <th class="left">School</th>
+                        ~[if.district.office]<th class="left">School</th>[/if]
                     </tr>
                 </thead>
                 <tbody>
@@ -96,6 +97,7 @@
                     END gender,
                     CASE
                     WHEN s.fedethnicity IS NULL THEN '#ffffba'
+                    WHEN TO_CHAR(s.fedethnicity) = '-1' THEN '#ffffba'
                     ELSE ''
                     END ethnicityHighlight,
                     CASE
@@ -122,6 +124,21 @@
                     WHEN TO_CHAR(s_stu_ncea_x.DIAGNOSEDDISABILITY_TF) = '1' then 'Yes'
                     WHEN TO_CHAR(s_stu_ncea_x.DIAGNOSEDDISABILITY_TF) = '0' then 'No'
                     ELSE TO_CHAR(s_stu_ncea_x.DIAGNOSEDDISABILITY_TF)
+                    END as has_disability,
+                    CASE
+                    WHEN TO_CHAR(s_stu_ncea_x.DIAGNOSEDDISABILITY_TF) = '1' and s_stu_ncea_x.DiagnosedDisability is NULL
+                    THEN '#ffb3ba'
+                    ELSE ''
+                    END sisorderHighlight,
+                    CASE
+                    WHEN TO_CHAR(s_stu_ncea_x.DiagnosedDisability) = 'ADHD' then 'Attention-Deficit Hyperactivity
+                    Disorder'
+                    WHEN TO_CHAR(s_stu_ncea_x.DiagnosedDisability) = 'ASD' then 'Autism Spectrum Disorder'
+                    WHEN TO_CHAR(s_stu_ncea_x.DiagnosedDisability) = 'SLD' then 'Specific Learning Disability'
+                    WHEN TO_CHAR(s_stu_ncea_x.DiagnosedDisability) = 'DD' then 'Intellectual or Development Disability'
+                    WHEN TO_CHAR(s_stu_ncea_x.DiagnosedDisability) = 'PD' then 'Physical Disability'
+                    WHEN TO_CHAR(s_stu_ncea_x.DiagnosedDisability) = 'O' then 'Other'
+                    ELSE TO_CHAR(s_stu_ncea_x.DiagnosedDisability)
                     END as disability,
                     CASE
                     WHEN TO_CHAR(s_stu_ncea_x.ungraded_tf) = '1' then 'Yes'
@@ -178,8 +195,13 @@
                     WHERE s.enroll_status = 0
                     ~[if.is.a.school] AND s.schoolid = ~(curschoolid) [/if.is.a.school]
                     ~[if#Mandatory.~(gpv.status;sqlText)=0]
-                    AND (s.gender is NULL OR s_stu_ncea_x.RELIGIOUSAFFILIATION is NULL OR r.racecd is NULL OR
-                    s.fedethnicity is NULL)
+                    AND (s.gender is NULL
+                    OR s_stu_ncea_x.RELIGIOUSAFFILIATION is NULL
+                    OR r.racecd is NULL
+                    OR s.fedethnicity is NULL
+                    OR TO_CHAR(s.fedethnicity) ='-1'
+                    OR (TO_CHAR(s_stu_ncea_x.DIAGNOSEDDISABILITY_TF) = '1' and s_stu_ncea_x.DiagnosedDisability is NULL)
+                    )
                     [/if#Mandatory]
                     ~[if#cursel.~(gpv.status;sqlText)=2] AND s.dcid IN (SELECT dcid FROM
                     ~[temp.table.current.selection:students])[/if#cursel]
@@ -200,7 +222,8 @@
                         <td style="background-color:~(ethnicityHighlight;t);">~(ethnicity;t)</td>
                         <td style="background-color:~(raceHighlight;t);">~(race;t)</td>
                         <td style="background-color:~(religionHlight;t);">~(religion;t)</td>
-                        <td>~(disability;t)</td>
+                        <td>~(has_disability;t)</td>
+                        <td style="background-color:~(disabilityHlight;t);">~(disability;t)</td>
                         <td>~(ungraded;t)</td>
                         <td>~(rectitle1;t)</td>
                         <td>~(eligtitle1;t)</td>
@@ -209,7 +232,7 @@
                         <td>~(parentchoice;t)</td>
                         <td>~(visa;t)</td>
                         <td style="background-color:~(excludeHighlight;t);">~(exclude;t)</td>
-                        <td>~(school;t)</td>
+                        ~[if.district.office]<td>~(school;t)</td>[/if]
                     </tr>
                     [/tlist_sql]
                 </tbody>
