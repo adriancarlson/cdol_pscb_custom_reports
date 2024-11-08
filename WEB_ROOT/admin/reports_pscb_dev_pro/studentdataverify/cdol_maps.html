@@ -88,10 +88,24 @@
                         <th class="left filter-select">Grade</th>
                         <th class="left">Ethnicity</th>
                         <th class="left">Race</th>
+                        <th class="left">Student User Name</th>
+                        <th class="left">Student Email</th>
                     </tr>
                 </thead>
                 <tbody>
                     ~[tlist_sql;
+                    WITH StuEmail AS (
+                    SELECT
+                    ssm.studentsdcid,
+                    psc.email
+                    FROM
+                    sync_studentmap ssm
+                    INNER JOIN PSM_StudentContact psc ON (ssm.studentid = psc.studentid)
+                    INNER JOIN PSM_StudentContactType psct ON (
+                    psc.studentcontacttypeid = psct.id
+                    AND psct.name = 'Self'
+                    )
+                    )
                     SELECT
                     students.dcid,
                     schools.countynbr || '-' || cst_subdistricts.subdistrict_number || '-000',
@@ -99,7 +113,11 @@
                     teachers.teachernumber,
                     teachers.last_name,
                     teachers.first_name,
-                    teachers.teacherloginid,
+                    SUBSTR(
+                    teachers.email_addr,
+                    1,
+                    INSTR(teachers.email_addr, '@') - 1
+                    ),
                     teachers.email_addr,
                     cc.section_number,
                     students.student_number,
@@ -111,14 +129,14 @@
                     WHEN UPPER(students.gender) = 'M' THEN 'Male'
                     WHEN UPPER(students.gender) = 'F' THEN 'Female'
                     ELSE students.gender
-                    END as GENDER,
+                    END AS GENDER,
                     CASE
-                    WHEN TO_CHAR(students.grade_level) = -2 then 'PK3'
-                    WHEN TO_CHAR(students.grade_level) = -1 then 'PK4'
-                    WHEN TO_CHAR(students.grade_level) = 0 then 'K'
-                    WHEN TO_CHAR(students.grade_level) = 99 then 'Graduated'
+                    WHEN TO_CHAR(students.grade_level) = -2 THEN 'PK3'
+                    WHEN TO_CHAR(students.grade_level) = -1 THEN 'PK4'
+                    WHEN TO_CHAR(students.grade_level) = 0 THEN 'K'
+                    WHEN TO_CHAR(students.grade_level) = 99 THEN 'Graduated'
                     ELSE TO_CHAR(students.grade_level)
-                    END as PRETTY_GRADE,
+                    END AS PRETTY_GRADE,
                     CASE
                     WHEN students.FEDETHNICITY = 1 THEN 'Hispanic / Latino'
                     WHEN students.FEDETHNICITY = 0 THEN 'Not Hispanic / Latino'
@@ -126,25 +144,29 @@
                     END AS "Fed_Ethnicity",
                     (
                     SELECT
-                    LISTAGG (RACECD, ', ') WITHIN GROUP (ORDER BY RACECD)
-                    FROM STUDENTRACE A2
-                    WHERE A2.STUDENTID = students.ID
-                    ) as "RACE"
-                    FROM cc
-                    INNER JOIN STUDENTS
-                    ON cc.STUDENTID = STUDENTS.ID
-                    ~[if.~(gpv.ss)=cur] INNER JOIN ~[temp.table.current.selection:students] stusel ON stusel.dcid =
-                    STUDENTS.dcid [/if]
-                    INNER JOIN teachers
-                    ON cc.Teacherid = teachers.id
-                    LEFT JOIN schools
-                    on students.schoolid = schools.school_number
-                    LEFT JOIN cst_schoolsubdistricts
-                    on schools.id = cst_schoolsubdistricts.schoolid
-                    LEFT JOIN cst_subdistricts
-                    on cst_schoolsubdistricts.subdistrictid = cst_subdistricts.id
+                    LISTAGG (RACECD, ', ') WITHIN GROUP (
+                    ORDER BY
+                    RACECD
+                    )
+                    FROM
+                    STUDENTRACE A2
                     WHERE
-                    cc.course_number IN ('541001','541K01')
+                    A2.STUDENTID = students.ID
+                    ) AS "RACE",
+                    se.email AS user_name,
+                    se.email
+                    FROM
+                    cc
+                    INNER JOIN STUDENTS
+                    LEFT OUTER JOIN stuemail se ON (STUDENTS.DCID = se.StudentsDCID) ON cc.STUDENTID = STUDENTS.ID
+                    ~[if.~(gpv.ss)=cur]
+                    INNER JOIN ~[temp.table.current.selection:students] stusel ON stusel.dcid = STUDENTS.dcid [/if]
+                    INNER JOIN teachers ON cc.Teacherid = teachers.id
+                    LEFT JOIN schools ON students.schoolid = schools.school_number
+                    LEFT JOIN cst_schoolsubdistricts ON schools.id = cst_schoolsubdistricts.schoolid
+                    LEFT JOIN cst_subdistricts ON cst_schoolsubdistricts.subdistrictid = cst_subdistricts.id
+                    WHERE
+                    cc.course_number IN ('541001', '541K01')
                     AND cc.TERMID LIKE '~(curyearid)__'
                     ~[if.is.a.school] and STUDENTS.schoolid= ~(curschoolid) [/if]
                     ~[if#gr.~(gpv.gr;sqlText)#] AND STUDENTS.grade_level = ~(gpv.gr) [/if#gr]
@@ -170,6 +192,8 @@
                         <td>~(grlvl;t)</td>
                         <td class="nowrap">~(ehnicity;t)</td>
                         <td>~(race;t)</td>
+                        <td class="nowrap">~(username;t)</td>
+                        <td class="nowrap">~(email;t)</td>
                     </tr>
                     [/tlist_sql]
                 </tbody>
