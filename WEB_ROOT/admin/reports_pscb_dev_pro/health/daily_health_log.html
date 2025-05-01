@@ -76,6 +76,7 @@
                         <th class="left filter-select">Destination</th>
                         <th class="left filter-select">Time Left</th>
                         <th class="left filter-select">Treatment Provider</th>
+                        <th style="width: 175px">Vitals</th>
                         <th class="left">Notes</th>
                     </tr>
                 </thead>
@@ -93,6 +94,19 @@
                     TO_CHAR(TO_DATE('1970-01-01', 'YYYY-MM-DD') + NUMTODSINTERVAL(u_cdol_health_log.left_time,
                     'SECOND'), 'HH' || CHR(58) || 'MI AM'),
                     users.lastfirst,
+                    NVL(TO_CHAR(u_cdol_health_log.temperature), 'hidden'),
+                    u_cdol_health_log.temperature,
+                    NVL(TO_CHAR(u_cdol_health_log.respiratoryrate), 'hidden'),
+                    u_cdol_health_log.respiratoryrate,
+                    NVL(TO_CHAR(u_cdol_health_log.pulserate), 'hidden'),
+                    u_cdol_health_log.pulserate,
+                    NVL(TO_CHAR(u_cdol_health_log.oxygensaturation), 'hidden'),
+                    u_cdol_health_log.oxygensaturation,
+                    NVL(TO_CHAR(u_cdol_health_log.bloodpressuresystolic), 'hidden'),
+                    u_cdol_health_log.bloodpressuresystolic,
+                    u_cdol_health_log.bloodpressurediastolic,
+                    NVL(TO_CHAR(u_cdol_health_log.bloodsugar), 'hidden'),
+                    u_cdol_health_log.bloodsugar,
                     u_cdol_health_log.notes
                     FROM students
                     ~[if#ss.~(gpv.ss;sqlText)=cur] INNER JOIN ~[temp.table.current.selection:students] temp ON
@@ -118,6 +132,13 @@
                         <td>~(destination;t)</td>
                         <td class="nowrap">~(left_time;t)</td>
                         <td>~(userlastfirst;t)</td>
+                        <td><span class="~(tempColor;t)">Temp: ~(temp;t)°F<br></span>
+                            <span class="~(rrColor;t)">Respiratory Rate: ~(rr;t)<br></span>
+                            <span class="~(phrColor;t)">Pulse/Heart Rate: ~(phr;t)<br></span>
+                            <span class="~(osColor;t)">Oxygen Saturation: ~(os;t)%<br></span>
+                            <span class="~(bpsColor;t)">Blood Pressure: ~(bps;t)/~(bpd;t)<br></span>
+                            <span class="~(bsColor;t)">Blood Sugar: ~(bs;t)<br></span>
+                        </td>
                         <td>~(notes;t)</td>
                         </tr>
                         [/tlist_sql]
