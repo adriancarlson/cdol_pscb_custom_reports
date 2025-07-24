@@ -12,10 +12,7 @@
     </head>
 
     <body>
-        ~[wc:admin_header_css] <a href="/admin/home.html" target="_top">Start Page</a> &gt; <a
-            href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html" target="_top">PSCB DEV Custom Reports</a> &gt;
-        <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_contacts_menu.html" target="_top">Contacts</a> &gt;
-        Student Medical History ~[wc:admin_navigation_frame_css]
+        ~[wc:admin_header_css] Student Medical History ~[wc:admin_navigation_frame_css]
         <form name="searchform" action="#" method="POST">
             <h1>Student Medical History</h1>
             <div class="box-round" style="overflow: hidden;">
@@ -24,7 +21,8 @@
                     <thead>
                         <tr>
                             <th style="white-space: nowrap;" width="180px">Student Selection</th>
-                            <th style="white-space: nowrap;">Grade Selection</th>
+                            <th style="white-space: nowrap;" width="130px">Grade Selection</th>
+                            <th style="white-space: nowrap;">Has Medical Alert?</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -57,6 +55,10 @@
                                     [/tlist_sql]
                                 </select>
                             </td>
+                            <td>
+                                <input type="checkbox" id="med_alert" name="med_alert"
+                                    ~[if.~[gpv:med_alert]=on]checked[/if]>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
@@ -86,6 +88,7 @@
                         <th class="center filter-select">Has Diabetes?</th>
                         <th class="center filter-select">Has Asthma?</th>
                         <th class="center filter-select">Needs a Inhaler?</th>
+                        <th class="center filter-select">Has Seizures?</th>
                         ~[if.district.office]<th class="left ">School</th>[/if]
                     </tr>
                 </thead>
@@ -115,6 +118,7 @@
                     DECODE(u_student_additional_info.diabetes, 1, 'Yes', 0, 'No', '') AS diabetes,
                     DECODE(u_student_additional_info.asthma, 1, 'Yes', 0, 'No', '') AS asthma,
                     DECODE(u_student_additional_info.inhaler, 1, 'Yes', 0, 'No', '') AS inhaler,
+                    DECODE(u_student_additional_info.seizure_agree, 1, 'Yes', 0, 'No', '') AS seizures,
                     schools.name AS school
                     FROM
                     students ~[if#ss.~(gpv.ss;sqlText)=cur]
@@ -126,6 +130,7 @@
                     students.enroll_status IN (-1, 0) ~[if.is.a.school]
                     AND students.schoolid = ~(curschoolid) [/if.is.a.school] ~[if#gr.~(gpv.gr;sqlText)#]
                     AND students.grade_level = ~(gpv.gr) [/if#gr]
+                    ~[if#med_alert.~(gpv.med_alert;sqlText)=on] AND students.alert_medical IS NOT NULL [/if#med_alert]
                     ORDER BY
                     schools.abbreviation,
                     students.lastfirst
@@ -147,6 +152,7 @@
                         <td>~(diabetes;t)</td>
                         <td>~(asthma;t)</td>
                         <td>~(inhaler;t)</td>
+                        <td>~(seizures;t)</td>
                         ~[if.district.office]<td>~(school;t)</td>[/if]
                     </tr>
                     [/tlist_sql]
