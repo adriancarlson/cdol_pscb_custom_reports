@@ -4,7 +4,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Prescribed Medications by Student</title>
+        <title>OTC Medications List</title>
         ~[wc:commonscripts]
         <link href="/images/css/screen.css" rel="stylesheet" media="screen">
         <link href="/images/css/print.css" rel="stylesheet" media="print">
@@ -12,12 +12,9 @@
     </head>
 
     <body>
-        ~[wc:admin_header_css] <a href="/admin/home.html" target="_top">Start Page</a> &gt; <a
-            href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html" target="_top">PSCB DEV Custom Reports</a> &gt;
-        <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_contacts_menu.html" target="_top">Contacts</a> &gt;
-        Prescribed Medications by Student ~[wc:admin_navigation_frame_css]
+        ~[wc:admin_header_css] ~[wc:admin_navigation_frame_css]
         <form name="searchform" action="#" method="POST">
-            <h1>Prescribed Medications by Student</h1>
+            <h1>OTC Medications List</h1>
             <div class="box-round" style="overflow: hidden;">
                 <h2>Report Filters</h2>
                 <table cellspacing="0" cellpadding="0" class="linkDescList">
@@ -37,11 +34,11 @@
                                 </select>
                             </td>
                             <td>
-                                <select name="prescribed">
-                                    <option value="1" ~[if.~[gpv:prescribed]=1]selected[/if]>Students with
-                                        Prescriptions
+                                <select name="otc">
+                                    <option value="1" ~[if.~[gpv:otc]=1]selected[/if]>Students with
+                                        OTC Medications
                                     </option>
-                                    <option value="0" ~[if.~[gpv:prescribed]=0]selected[/if]>All Students</option>
+                                    <option value="0" ~[if.~[gpv:otc]=0]selected[/if]>All Students</option>
                                 </select>
                             </td>
                         </tr>
@@ -56,7 +53,7 @@
         </form>
         ~[if#showData.~(gpv.showData;sqlText)=1]
         <div class="box-round">
-            <h2 class="pscbdevBkgColor">&nbsp;&nbsp;Prescribed Medications by Student</h2>
+            <h2 class="pscbdevBkgColor">&nbsp;&nbsp;OTC Medications List</h2>
             <table cellspacing="0" cellpadding="4" class="tablesorter grid center" id="pscbDevPro" groupRowsByCol="1"
                 color1="#ffffff" color2="#d7edfe">
                 <thead>
@@ -65,25 +62,17 @@
                         <th class="left filter-select">Student Name</th>
                         <th class="left filter-select">Gender</th>
                         <th class="center filter-select">Grade Level</th>
-                        <th class="center filter-select">Med. Count</th>
-                        <th class="left">Medications</th>
+                        <th class="left filter-select">Acetaminophen</th>
+                        <th class="left filter-select">Ibuprofen</th>
+                        <th class="left filter-select">Antihistamine</th>
+                        <th class="left filter-select">Antacid</th>
+                        <th class="left filter-select">Antibiotic</th>
+                        <th class="left filter-select">Hydrocortisone</th>
+                        <th class="left filter-select">Cough Drop</th>
                     </tr>
                 </thead>
                 <tbody>
                     ~[tlist_sql;
-                    WITH stuRx as (
-                    SELECT
-                    u_fb_medications.studentsdcid,
-                    Count(u_fb_medications.name) cnt,
-                    '<ul>' || listagg('<li>' || u_fb_medications.name || CASE WHEN u_fb_medications.prescribed =
-                            'Yes'
-                            THEN '*' ELSE '' END || ' - ' || u_fb_medications.dosage || ' ' ||
-                            u_fb_medications.dosage_units || ' | ' || u_fb_medications.frequency_taken || '</li>',
-                        '')
-                        WITHIN GROUP (ORDER BY u_fb_medications.name desc) || '</ul>' Rxs
-                    FROM u_fb_medications
-                    GROUP BY u_fb_medications.studentsdcid
-                    )
                     SELECT
                     students.dcid,
                     students.student_number,
@@ -100,18 +89,29 @@
                     WHEN TO_CHAR(students.grade_level) = 99 then 'Graduated'
                     ELSE TO_CHAR(students.grade_level)
                     END as PRETTY_GRADE,
-                    stuRx.cnt,
-                    stuRx.Rxs
+                    CASE WHEN u_student_additional_info.acetaminophen = 1 THEN 'Yes' ELSE 'No' END as acetaminophen,
+                    CASE WHEN u_student_additional_info.ibuprofen = 1 THEN 'Yes' ELSE 'No' END as ibuprofen,
+                    CASE WHEN u_student_additional_info.antihistamine = 1 THEN 'Yes' ELSE 'No' END as antihistamine,
+                    CASE WHEN u_student_additional_info.antacid = 1 THEN 'Yes' ELSE 'No' END as antacid,
+                    CASE WHEN u_student_additional_info.antibiotic = 1 THEN 'Yes' ELSE 'No' END as antibiotic,
+                    CASE WHEN u_student_additional_info.hydrocortisone = 1 THEN 'Yes' ELSE 'No' END as hydrocortisone,
+                    CASE WHEN u_student_additional_info.cough_drop = 1 THEN 'Yes' ELSE 'No' END as cough_drop
                     FROM students
-                    LEFT JOIN stuRx
-                    on students.dcid =stuRx.studentsdcid
                     ~[if#ss.~(gpv.ss;sqlText)=cur] INNER JOIN ~[temp.table.current.selection:students] temp ON
                     (students.dcid = temp.dcid) [/if#ss]
+                    LEFT JOIN u_student_additional_info
+                    ON students.dcid = u_student_additional_info.studentsdcid
                     WHERE students.enroll_status in (-1, 0)
                     ~[if.is.a.school] AND students.schoolid = ~(curschoolid) [/if.is.a.school]
-                    ~[if#prescribed.~(gpv.prescribed;sqlText)=1]
-                    AND stuRx.cnt > 0
-                    [/if#prescribed]
+                    ~[if#otc.~(gpv.otc;sqlText)=1]
+                    AND (u_student_additional_info.acetaminophen = 1
+                    OR u_student_additional_info.ibuprofen = 1
+                    OR u_student_additional_info.antihistamine = 1
+                    OR u_student_additional_info.antacid = 1
+                    OR u_student_additional_info.antibiotic = 1
+                    OR u_student_additional_info.hydrocortisone = 1
+                    OR u_student_additional_info.cough_drop = 1)
+                    [/if#otc]
                     ORDER BY students.lastfirst ;alternatecolor;nonemessage=<tr>
                         <td colspan="100%">No Records were found.</td>
                     </tr>]
@@ -120,8 +120,13 @@
                         <td class="nowrap">~(lastfirst;t)</td>
                         <td>~(gender;t)</td>
                         <td class="center">~(grade_level;t)</td>
-                        <td class="center">~(medcount;t)</td>
-                        <td class="nowrap">~(medication;t)</td>
+                        <td>~(acetaminophen;t)</td>
+                        <td>~(ibuprofen;t)</td>
+                        <td>~(antihistamine;t)</td>
+                        <td>~(antacid;t)</td>
+                        <td>~(antibiotic;t)</td>
+                        <td>~(hydrocortisone;t)</td>
+                        <td>~(cough_drop;t)</td>
                     </tr>
                     [/tlist_sql]
                 </tbody>
@@ -130,14 +135,6 @@
         <div style="clear: both;">
             <p class="center">Report generated at ~[time] on ~[date]</p>
         </div>
-        <script>
-            $j(() => {
-                setTimeout(
-                    function () {
-                        $j('#btnTools').parent().after(`<div style="float: right; margin-right:20px"><span class="red">&nbsp;&nbsp;* Indicates Medication Requires a Perscription </span></div>`);
-                    }, 750);
-            });
-        </script>
         [/if#showData]
         ~[wc:admin_footer_frame_css]
     </body>

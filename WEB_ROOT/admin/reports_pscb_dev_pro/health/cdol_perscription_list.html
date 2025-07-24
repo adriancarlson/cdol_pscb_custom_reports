@@ -98,7 +98,7 @@
                     (students.dcid = temp.dcid) [/if#ss]
                     LEFT JOIN u_fb_medications
                     ON students.dcid = u_fb_medications.studentsdcid
-                    WHERE 0=0
+                    WHERE students.enroll_status in (-1, 0)
                     ~[if.is.a.school] AND students.schoolid = ~(curschoolid) [/if.is.a.school]
                     ~[if#prescribed.~(gpv.prescribed;sqlText)=1]
                     AND u_fb_medications.name IS NOT NULL
