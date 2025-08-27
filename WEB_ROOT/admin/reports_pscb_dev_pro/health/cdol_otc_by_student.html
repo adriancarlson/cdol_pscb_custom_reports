@@ -78,7 +78,8 @@
                         CASE WHEN u_student_additional_info.antihistamine = 1 THEN '<li>Antihistamine</li>' ELSE '' END
                         ||
                         CASE WHEN u_student_additional_info.antacid = 1 THEN '<li>Antacid</li>' ELSE '' END ||
-                        CASE WHEN u_student_additional_info.antibiotic = 1 THEN '<li>Antibiotic</li>' ELSE '' END ||
+                        CASE WHEN u_student_additional_info.antibiotic = 1 THEN '<li>Antibiotic Ointment</li>' ELSE ''
+                        END ||
                         CASE WHEN u_student_additional_info.hydrocortisone = 1 THEN '<li>Hydrocortisone</li>' ELSE ''
                         END ||
                         CASE WHEN u_student_additional_info.cough_drop = 1 THEN '<li>Cough Drop</li>' ELSE '' END ||
