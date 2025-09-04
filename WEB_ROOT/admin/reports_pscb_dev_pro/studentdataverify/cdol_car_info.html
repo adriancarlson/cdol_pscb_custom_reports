@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Student Car Information</title>
+        ~[wc:commonscripts]
+        <link href="/images/css/screen.css" rel="stylesheet" media="screen">
+        <link href="/images/css/print.css" rel="stylesheet" media="print">
+    </head>
+
+    <body>
+        ~[wc:admin_header_css] ~[wc:admin_navigation_frame_css]
+
+        <!-- start of Options -->
+        <form id="rptFilters" action="#" method="POST">
+            <h1>Student Car Information</h1>
+            <div class="box-round">
+                <h2>Report Filters</h2>
+                <table cellspacing="0" cellpadding="0" class="linkDescList">
+                    <thead>
+                        <tr>
+                            <th width="10px">Student Selection</th>
+                            <th width="100%">Car Info</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td valign="top" nowrap>
+                                <select name="cursel">
+                                    <option value="0" ~[if.~(gpv.cursel)=0]selected="selected" [/if]>All Students
+                                    </option>
+                                    <option value="1" ~[if.~(gpv.cursel)=1]selected="selected" [/if]>Current Selection
+                                        (~[x:studsinset])</option>
+                                </select>
+                            </td>
+                            <td>
+                                <select name="car">
+                                    <option value="1" ~[if.~(gpv.car)=1]selected[/if]>Students with Car Info</option>
+                                    <option value="0" ~[if.~(gpv.car)=0]selected[/if]>All Students</option>
+                                    [/tlist_sql]
+                                </select>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div style="float: left;">
+                    <span style="color: red;">&nbsp;&nbsp;Select parameters and click submit</span>
+                    <input type="hidden" name="showData" value="1">
+                    <input type="hidden" name="ac" value="prim">~[submitbutton]
+                </div><br><br>
+            </div>
+        </form>
+        <!-- end of Options -->
+
+        ~[wc:pscbdevpro2_init]
+        ~[if#showData.~[gpv:showData]=1]
+        <!-- Start of Results -->
+        <script>
+            function pscbFormatter(cell, formatterParams) {
+                // var obj = cell.getValue();
+                let obj = cell.getData();
+                return `<a target="_blank" href="/admin/students/misc.html?frn=001${obj.studentsdcid}">${obj.student}</a>`;
+            }
+
+            var tableColumns = [
+                { 'title': 'Student<br>Number', 'field': 'student_number', 'sorter': 'string', 'headerFilter': 'input' },
+                { 'title': 'Student', 'field': 'student', 'sorter': 'string', 'headerFilter': 'input', 'formatter': pscbFormatter },
+                { 'title': 'Grade', 'field': 'grade_level', 'sorter': 'string', 'headerFilter': 'input' },
+                { 'title': 'Gender', 'field': 'gender', 'sorter': 'string', 'headerFilter': 'input' },
+                { 'title': 'Car<br>Make', 'field': 'carmake', 'sorter': 'string', 'headerFilter': 'input' },
+                { 'title': 'Car<br>Model', 'field': 'carmodel', 'sorter': 'string', 'headerFilter': 'input' },
+                { 'title': 'Car<br>Color', 'field': 'carcolor', 'sorter': 'string', 'headerFilter': 'input' },
+                { 'title': 'License Plate<br>Number', 'field': 'licenseplate', 'sorter': 'string', 'headerFilter': 'input' },
+            ];
+
+            var tableData = ~[tlist_sql;
+                WITH finalData AS(
+                SELECT
+                        students.dcid studentsdcid,
+                students.LastFirst student,
+                students.student_number,
+                students.gender,
+                students.grade_Level,
+                u_student_additional_info.car_make carmake,
+                u_student_additional_info.car_model carmodel,
+                u_student_additional_info.car_color carcolor,
+                u_student_additional_info.license_plate_number licenseplate
+                    FROM
+                        students
+                        LEFT JOIN u_student_additional_info ON students.dcid = u_student_additional_info.studentsdcid
+                        ~[if#cursel.~(gpv.cursel)=1] INNER JOIN ~[temp.table.current.selection: students] temp ON(students.dcid = temp.dcid)[/if#cursel]
+            WHERE
+            students.enroll_status IN(-1, 0)
+            ~[if.is.a.school]AND students.schoolid = ~(curschoolid)[/if.is.a.school]
+            ~[if#car.~(gpv.car)=1]AND(u_student_additional_info.car_make IS NOT NULL OR u_student_additional_info.car_model IS NOT NULL OR u_student_additional_info.car_color IS NOT NULL OR u_student_additional_info.license_plate_number IS NOT NULL)[/if#car] 
+                )
+            SELECT
+            COALESCE(
+                JSON_ARRAYAGG(
+                    JSON_OBJECT(
+                        studentsdcid,
+                        student_number,
+                        student,
+                        grade_level,
+                        gender,
+                        carmake,
+                        carmodel,
+                        carcolor,
+                        licenseplate
+                    )
+                        ORDER BY
+                            student RETURNING CLOB
+                ),
+                TO_CLOB(CHR(91) || CHR(93))
+            )
+            FROM
+            finalData;]~(1)[/tlist_sql];
+        </script>
+        <!-- End of pscbDevPro -->
+        [/if#showData]
+        ~[wc:admin_footer_frame_css]
+    </body>
+
+</html>
