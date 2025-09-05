@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Pius Photographer Export</title>
+        <link href="/images/css/screen.css" rel="stylesheet" media="screen">
+        <link href="/images/css/print.css" rel="stylesheet" media="print">
+        ~[wc:commonscripts]
+        ~[SetPostValue:pid=5(A)]
+        ~[SetPostValue:showData=1]
+    </head>
+
+    <body>
+        ~[wc:admin_header_css] ~[wc:admin_navigation_frame_css]
+
+        <!-- start of Options -->
+        <form id="rptFilters" action="#" method="POST">
+            <h1>Pius Photographer Export</h1>
+            <div class="box-round">
+                <h2>Report Filters</h2>
+                <table cellspacing="0" cellpadding="0" class="linkDescList">
+                    <thead>
+                        <tr>
+                            <th width="10px">Student Selection</th>
+                            <th width="100%">Period Room #</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td valign="top" nowrap>
+                                <select name="cursel">
+                                    <option value="0" ~[if.~(gpv.cursel)=0]selected="selected" [/if]>All Students
+                                    </option>
+                                    <option value="1" ~[if.~(gpv.cursel)=1]selected="selected" [/if]>Current Selection
+                                        (~[x:studsinset])</option>
+                                </select>
+                            </td>
+                            <td>
+                                <select name="pid" id="pid" size="5">
+                                    ~[tlist_sql;
+                                    SELECT DISTINCT cc.expression, CASE WHEN cc.expression = '~(gpv.pid)' THEN
+                                    'selected'
+                                    END isSelected
+                                    FROM cc
+                                    WHERE cc.SchoolID = ~(curschoolid) AND cc.termid like '~(curyearid)__'
+                                    ORDER BY to_number(NVL(SUBSTR(cc.expression, 0, INSTR(cc.expression, '(')-1),
+                                    cc.expression)), cc.expression]
+                                    <option value="~(expression;t)" ~(isSelected)>~(expression;t;externalExpression)
+                                    </option>
+                                    [/tlist_sql]
+                                </select>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div style="float: left;">
+                    <span style="color: red;">&nbsp;&nbsp;Select parameters and click submit</span>
+                    <input type="hidden" name="showData" value="1">
+                    <input type="hidden" name="ac" value="prim">~[submitbutton]
+                </div><br><br>
+            </div>
+        </form>
+        <!-- end of Options -->
+
+        ~[wc:pscbdevpro2_init]
+        ~[if#showData.~[gpv:showData]=1]
+        <!-- Start of Results -->
+        <script>
+            function pscbFormatter(cell, formatterParams) {
+                // var obj = cell.getValue();
+                let obj = cell.getData();
+                return `<a target="_blank" href="/admin/students/scheduleplusreq.html?frn=001${obj.studentsdcid}&schedulerequestyearid=~(curyearid)00" target="_blank">${obj.student_number}</a>`;
+            }
+
+            var tableColumns = [
+                { 'title': 'Student<br>Number', 'field': 'student_number', 'sorter': 'string', 'headerFilter': 'input', 'formatter': pscbFormatter },
+                { 'title': 'Last<br>Name', 'field': 'last_name', 'sorter': 'string', 'headerFilter': 'input' },
+                { 'title': 'First<br>Name', 'field': 'first_name', 'sorter': 'string', 'headerFilter': 'input' },
+                { 'title': 'Grade', 'field': 'grade_level', 'sorter': 'string', 'headerFilter': 'input' },
+                { 'title': 'Room', 'field': 'room', 'sorter': 'string', 'headerFilter': 'input' },
+                { 'title': 'Contact 1<br>Relationship', 'field': 'contact1_relationship', 'sorter': 'string', 'headerFilter': 'input' },
+                { 'title': 'Contact 1<br>Email', 'field': 'contact1_email', 'sorter': 'string', 'headerFilter': 'input' },
+                { 'title': 'Contact 2<br>Relationship', 'field': 'contact2_relationship', 'sorter': 'string', 'headerFilter': 'input' },
+                { 'title': 'Contact 2<br>Email', 'field': 'contact2_email', 'sorter': 'string', 'headerFilter': 'input' },
+                { 'title': 'Contact 3<br>Relationship', 'field': 'contact3_relationship', 'sorter': 'string', 'headerFilter': 'input' },
+                { 'title': 'Contact 3<br>Email', 'field': 'contact3_email', 'sorter': 'string', 'headerFilter': 'input' },
+                { 'title': 'Contact 4<br>Relationship', 'field': 'contact4_relationship', 'sorter': 'string', 'headerFilter': 'input' },
+                { 'title': 'Contact 4<br>Email', 'field': 'contact4_email', 'sorter': 'string', 'headerFilter': 'input' },
+            ];
+
+            var tableData = ~[tlist_sql;
+                WITH email_first AS(
+                SELECT
+        personemailaddressassoc.personid,
+                MIN(emailaddress.emailaddress)
+            KEEP(
+                    DENSE_RANK FIRST
+                ORDER BY NVL(personemailaddressassoc.emailaddresspriorityorder, 999999),
+                    emailaddress.emailaddress
+                ) AS email_address
+    FROM personemailaddressassoc
+    JOIN emailaddress
+        ON personemailaddressassoc.emailaddressid = emailaddress.emailaddressid
+    GROUP BY personemailaddressassoc.personid
+            ),
+                contacts AS(
+                    SELECT
+        studentcontactassoc.studentdcid AS student_dcid,
+                    studentcontactassoc.contactpriorityorder AS contactpriorityorder,
+                    codeset.code AS relationship,
+                    email_first.email_address AS email_address
+    FROM studentcontactassoc
+    JOIN studentcontactdetail
+        ON studentcontactassoc.studentcontactassocid = studentcontactdetail.studentcontactassocid
+    JOIN person
+        ON studentcontactassoc.personid = person.id
+    LEFT JOIN codeset
+        ON codeset.codesetid = studentcontactdetail.relationshiptypecodesetid
+    LEFT JOIN email_first
+        ON email_first.personid = person.id
+    WHERE studentcontactdetail.receivesmailflg = 1
+                ),
+                    ranked AS(
+                        SELECT
+        students.dcid,
+                        students.student_number,
+                        students.last_name,
+                        students.first_name,
+                        students.grade_level,
+                        sections.room,
+                        contacts.relationship,
+                        contacts.email_address,
+                        ROW_NUMBER() OVER(
+                            PARTITION BY students.dcid
+            ORDER BY
+                contacts.contactpriorityorder,
+                            contacts.relationship,
+                            contacts.email_address
+                        ) AS rn
+    FROM students
+    LEFT JOIN contacts
+        ON contacts.student_dcid = students.dcid
+    LEFT OUTER JOIN cc
+        ON students.id = cc.studentid
+        AND cc.termid = ~(curyearid)01
+    LEFT OUTER JOIN sections
+        ON cc.sectionid = sections.id
+    LEFT OUTER JOIN teachers
+        ON sections.teacher = teachers.id
+    LEFT OUTER JOIN courses
+        ON cc.course_number = courses.course_number
+    LEFT OUTER JOIN terms
+        ON sections.termid = terms.id
+        AND sections.schoolid = terms.schoolid
+    ~[if#cursel.~(gpv.cursel)=1] INNER JOIN ~[temp.table.current.selection: students] temp ON(students.dcid = temp.dcid)[/if#cursel]
+    WHERE students.enroll_status = 0
+      AND sections.termid LIKE ~(curyearid)01
+            ~[if#pid.~(gpv.pid)#]AND cc.expression = '~(gpv.pid)'[/if#pid]
+            ~[if.is.a.school]
+      AND students.schoolid = ~(curschoolid)
+            [/if.is.a.school]
+),
+finalData AS(
+                SELECT
+        ranked.dcid AS studentsdcid,
+                ranked.student_number AS student_number,
+                ranked.last_name AS last_name,
+                ranked.first_name AS first_name,
+                ranked.grade_level AS grade_level,
+                ranked.room AS room,
+                MAX(CASE WHEN ranked.rn = 1 THEN ranked.relationship END) AS contact1_relationship,
+                MAX(CASE WHEN ranked.rn = 1 THEN ranked.email_address END) AS contact1_email,
+                MAX(CASE WHEN ranked.rn = 2 THEN ranked.relationship END) AS contact2_relationship,
+                MAX(CASE WHEN ranked.rn = 2 THEN ranked.email_address END) AS contact2_email,
+                MAX(CASE WHEN ranked.rn = 3 THEN ranked.relationship END) AS contact3_relationship,
+                MAX(CASE WHEN ranked.rn = 3 THEN ranked.email_address END) AS contact3_email,
+                MAX(CASE WHEN ranked.rn = 4 THEN ranked.relationship END) AS contact4_relationship,
+                MAX(CASE WHEN ranked.rn = 4 THEN ranked.email_address END) AS contact4_email
+    FROM ranked
+    GROUP BY
+        ranked.dcid,
+                ranked.student_number,
+                ranked.last_name,
+                ranked.first_name,
+                ranked.grade_level,
+                ranked.room
+            )
+            SELECT
+            COALESCE(
+                JSON_ARRAYAGG(
+                    JSON_OBJECT(
+                        studentsdcid,
+                        student_number,
+                        last_name,
+                        first_name,
+                        grade_level,
+                        room,
+                        contact1_relationship,
+                        contact1_email,
+                        contact2_relationship,
+                        contact2_email,
+                        contact3_relationship,
+                        contact3_email,
+                        contact4_relationship,
+                        contact4_email
+                    )
+            ORDER BY last_name, first_name RETURNING CLOB
+                ),
+                TO_CLOB(CHR(91) || CHR(93))
+            ) AS json_result
+            FROM finalData;]~(1)[/tlist_sql];
+        </script>
+        <!-- End of pscbDevPro -->
+        [/if#showData]
+        ~[wc:admin_footer_frame_css]
+    </body>
+
+</html>
