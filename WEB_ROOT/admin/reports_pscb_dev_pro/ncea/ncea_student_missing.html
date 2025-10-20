@@ -1,62 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
+    ~[SetPostValue:showData=1]
 
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>NCEA - Students Missing Info</title>
+        <title>NCEA Student Info</title>
         ~[wc:commonscripts]
         <link href="/images/css/screen.css" rel="stylesheet" media="screen">
         <link href="/images/css/print.css" rel="stylesheet" media="print">
+        <link href="/images/css/cdol.css" rel="stylesheet">
         ~[wc:pscbdevpro_init]
     </head>
 
     <body>
-        ~[wc:admin_header_css]<!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a>
-        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html" target="_top">PSCB DEV Custom Reports</a>
-        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_ncea_menu.html" target="_top">NCEA</a> &gt; NCEA -
-        Students Missing Info
-        <!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
-
-        <!-- Start of Results -->
-        <h1>NCEA - Students Missing Info</h1>
-        <form name="searchform" action="#" method="POST">
-            <div class="box-round" style="overflow: hidden;">
-                <h2>Report Filters</h2>
-                <table cellspacing="0" cellpadding="0" class="linkDescList">
-                    <thead>
-                        <tr>
-                            <th style="white-space: nowrap;">Student Selection</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>
-                                <select name="status">
-                                    <option value="0" ~[if.~[gpv:status]=0]selected[/if]>Students Missing Mandatory NCEA
-                                        Data</option>
-                                    <option value="1" ~[if.~[gpv:status]=1]selected[/if]>All Students</option>
-                                    <option value="2" ~[if.~[gpv:status]=2]selected[/if]>Current Selection
-                                        (~[x:studsinset])
-                                    </option>
-                                </select>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                <div class="button-row left">
-                    <span style="color:red">&nbsp;&nbsp;Select parameters and click submit</span>
-                    <input type="hidden" name="showData" value="1">
-                    <input type="hidden" name="ac" value="prim">~[submitbutton]
-                </div>
-            </div>
-        </form>
-
-        <!-- end of Options -->
-        ~[if#showData.~[gpv:showData]=1]
+        ~[wc:admin_header_css]
+        ~[wc:admin_navigation_frame_css]
+        <h1>NCEA Student Info</h1>
         <div class="box-round">
-            <h2 class="pscbdevBkgColor">&nbsp;&nbsp;NCEA - Students Missing Info</h2>
-            <table cellspacing="0" cellpadding="4" class="center" class="tablesorter grid" id="pscbDevPro">
+            <h2 class="pscbdevBkgColor">&nbsp;&nbsp;NCEA Student Info</h2>
+            <table cellspacing="0" cellpadding="4" class="center tablesorter grid" id="pscbDevPro">
                 <thead>
                     <tr>
                         <th class="left">Stu #</th>
@@ -70,7 +33,6 @@
                         <th class="left filter-select">Diagnosed Disability</th>
                         <th class="left filter-select">Ungraded</th>
                         <th class="left filter-select">Receives Title 1</th>
-                        <th class="left filter-select">Eligible for Title 1</th>
                         <th class="left filter-select">Receives Free/Reduced</th>
                         <th class="left filter-select">Eligible for Free/Reduced</th>
                         <th class="left filter-select">Parent Choice Funded</th>
@@ -87,7 +49,7 @@
                     s.lastfirst,
                     s.grade_level,
                     CASE
-                    WHEN s.gender IS NULL THEN '#ffdfba'
+                    WHEN s.gender IS NULL THEN 'cell-highlight-orange'
                     ELSE ''
                     END genderHighlight,
                     CASE
@@ -96,8 +58,8 @@
                     ELSE s.gender
                     END gender,
                     CASE
-                    WHEN s.fedethnicity IS NULL THEN '#ffffba'
-                    WHEN TO_CHAR(s.fedethnicity) = '-1' THEN '#ffffba'
+                    WHEN s.fedethnicity IS NULL THEN 'cell-highlight-yellow'
+                    WHEN TO_CHAR(s.fedethnicity) = '-1' THEN 'cell-highlight-yellow'
                     ELSE ''
                     END ethnicityHighlight,
                     CASE
@@ -107,12 +69,12 @@
                     ELSE TO_CHAR(s.fedethnicity)
                     END as ETHNICITY,
                     CASE
-                    WHEN r.racecd IS NULL THEN '#baffc9'
+                    WHEN r.racecd IS NULL THEN 'cell-highlight-green'
                     ELSE ''
                     END raceHighlight,
                     LISTAGG(r.racecd,', ') WITHIN GROUP (ORDER BY r.racecd) OVER (PARTITION BY s.dcid) racecodes,
                     CASE
-                    WHEN s_stu_ncea_x.RELIGIOUSAFFILIATION IS NULL THEN '#bae1ff'
+                    WHEN s_stu_ncea_x.RELIGIOUSAFFILIATION IS NULL THEN 'cell-highlight-blue'
                     ELSE ''
                     END religiousaffiliationHighlight,
                     CASE
@@ -127,7 +89,7 @@
                     END as has_disability,
                     CASE
                     WHEN TO_CHAR(s_stu_ncea_x.DIAGNOSEDDISABILITY_TF) = '1' and s_stu_ncea_x.DiagnosedDisability is NULL
-                    THEN '#ffb3ba'
+                    THEN 'cell-highlight-red'
                     ELSE ''
                     END sisorderHighlight,
                     CASE
@@ -151,11 +113,6 @@
                     ELSE TO_CHAR(s_stu_ncea_x.TITLEI_TF)
                     END as rectitle1,
                     CASE
-                    WHEN TO_CHAR(s_stu_ncea_x.TitleI_Elig_TF) = '1' then 'Yes'
-                    WHEN TO_CHAR(s_stu_ncea_x.TitleI_Elig_TF) = '0' then 'No'
-                    ELSE TO_CHAR(s_stu_ncea_x.TitleI_Elig_TF)
-                    END as eligtitle1,
-                    CASE
                     WHEN TO_CHAR(s_stu_ncea_x.FederalNutrition_TF) = '1' then 'Yes'
                     WHEN TO_CHAR(s_stu_ncea_x.FederalNutrition_TF) = '0' then 'No'
                     ELSE TO_CHAR(s_stu_ncea_x.FederalNutrition_TF)
@@ -176,7 +133,7 @@
                     ELSE TO_CHAR(s_stu_ncea_x.Intl_Visa_TF)
                     END as visa,
                     CASE
-                    WHEN s_stu_ncea_x.EXCLUDEFROMNCEA_TF ='1' THEN '#ffb3ba'
+                    WHEN s_stu_ncea_x.EXCLUDEFROMNCEA_TF ='1' THEN 'cell-highlight-red'
                     ELSE ''
                     END excludeHighlight,
                     CASE
@@ -209,8 +166,7 @@
                     schools.name, s.lastfirst
                     ;alternatecolor;nonemessage=
                     <tr>
-                        <td colspan="100%">All Students have Mandatory NCEA values set. Optional values will still need
-                            to be checked. </td>
+                        <td colspan="100%">No records returned</td>
                     </tr>]
                     <tr class="Record" data-StudentID="~(dcid;t)">
                         <td>~(stunumb;t)</td>
@@ -218,20 +174,19 @@
                                 target="_blank">~(studname;t)</a>
                         </td>
                         <td>~(grlvl;t)</td>
-                        <td style="background-color:~(genderHighlight;t);">~(gender;t)</td>
-                        <td style="background-color:~(ethnicityHighlight;t);">~(ethnicity;t)</td>
-                        <td style="background-color:~(raceHighlight;t);">~(race;t)</td>
-                        <td style="background-color:~(religionHlight;t);">~(religion;t)</td>
+                        <td class="~(genderHighlight;t)">~(gender;t)</td>
+                        <td class="~(ethnicityHighlight;t)">~(ethnicity;t)</td>
+                        <td class="~(raceHighlight;t)">~(race;t)</td>
+                        <td class="~(religionHighlight;t)">~(religion;t)</td>
                         <td>~(has_disability;t)</td>
-                        <td style="background-color:~(disabilityHlight;t);">~(disability;t)</td>
+                        <td class="~(disabilityHighlight;t)">~(disability;t)</td>
                         <td>~(ungraded;t)</td>
                         <td>~(rectitle1;t)</td>
-                        <td>~(eligtitle1;t)</td>
                         <td>~(recFREERdc;t)</td>
                         <td>~(eligFREERdc;t)</td>
                         <td>~(parentchoice;t)</td>
                         <td>~(visa;t)</td>
-                        <td style="background-color:~(excludeHighlight;t);">~(exclude;t)</td>
+                        <td class="~(excludeHighlight;t)">~(exclude;t)</td>
                         ~[if.district.office]<td>~(school;t)</td>[/if]
                     </tr>
                     [/tlist_sql]
@@ -242,7 +197,6 @@
         <div style="clear: both;">
             <p class="center">Report generated at ~[time] on ~[date]</p>
         </div>
-        [/if#showData]
         ~[wc:admin_footer_frame_css]
     </body>
 

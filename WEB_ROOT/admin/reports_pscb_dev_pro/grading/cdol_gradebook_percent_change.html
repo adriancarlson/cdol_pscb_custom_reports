@@ -8,14 +8,13 @@
         ~[wc:commonscripts]
         <link href="/images/css/screen.css" rel="stylesheet" media="screen">
         <link href="/images/css/print.css" rel="stylesheet" media="print">
+        <link href="/images/css/cdol.css" rel="stylesheet">
         ~[wc:pscbdevpro_init]
     </head>
 
     <body>
-        ~[wc:admin_header_css] <a href="/admin/home.html" target="_top">Start Page</a> &gt; <a
-            href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html" target="_top">PSCB DEV Custom Reports</a> &gt;
-        <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_contacts_menu.html" target="_top">Contacts</a> &gt;
-        Gradebook - Percent Change ~[wc:admin_navigation_frame_css]
+        ~[wc:admin_header_css]
+        ~[wc:admin_navigation_frame_css]
         <form name="searchform" action="#" method="POST">
             <form name="searchform" action="#" method="POST">
                 <h1>Gradebook - Percent Change</h1>
@@ -170,8 +169,8 @@
                             RPT2,
                             --(RPT2 - RPT1) as increase,
                             CASE
-                            WHEN (RPT2 - RPT1)> 0 THEN '#baffc9'
-                            WHEN (RPT2 - RPT1) < 0 THEN '#ffb3ba' ELSE '' END color, ROUND((((RPT2 - RPT1) /
+                            WHEN (RPT2 - RPT1)> 0 THEN 'cell-highlight-green'
+                            WHEN (RPT2 - RPT1) < 0 THEN 'cell-highlight-red' ELSE '' END color, ROUND((((RPT2 - RPT1) /
                                 RPT1)*100),2) || '%' as PERCENT_CHANGE, --ROUND((RPT2 / (RPT1 * 100)),2) || '%' as
                                 PERCENT_CHANGE, -- % increase=Increase ÷ Original Number × 100. CLASS_TERM, SCHOOL_NAME
                                 FROM PivotData WHERE ABS(TO_NUMBER(ROUND((((RPT2 - RPT1) / RPT1)*100),2)))>
@@ -193,7 +192,7 @@
                                         <td class="nowrap">~(tchr;t)</td>
                                         <td class="center">~(rpt1;t)</td>
                                         <td class="center">~(rpt2;t)</td>
-                                        <td class="center" style="background-color:~(color;t)">~(prctchng;t)</td>
+                                        <td class="center ~(color;t)">~(prctchng;t)</td>
                                         <td class="center">~(term;t)</td>
                                         <td class="nowrap">~(school)</td>
                                     </tr>

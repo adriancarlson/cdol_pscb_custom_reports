@@ -1,58 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
+    ~[SetPostValue:showData=1]
 
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>NCEA - Staff Missing Info</title>
+        <title>NCEA Staff Info</title>
         ~[wc:commonscripts]
         <link href="/images/css/screen.css" rel="stylesheet" media="screen">
         <link href="/images/css/print.css" rel="stylesheet" media="print">
+        <link href="/images/css/cdol.css" rel="stylesheet">
         ~[wc:pscbdevpro_init]
     </head>
 
     <body>
-        ~[wc:admin_header_css]<!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a>
-        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html" target="_top">PSCB DEV Custom Reports</a>
-        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_ncea_menu.html" target="_top">NCEA</a> &gt; NCEA -
-        Staff Missing Info
-        <!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
-
-        <!-- Start of Results -->
-        <h1>NCEA - Staff Missing Info</h1>
-        <form name="searchform" action="#" method="POST">
-            <div class="box-round" style="overflow: hidden;">
-                <h2>Report Filters</h2>
-                <table cellspacing="0" cellpadding="0" class="linkDescList">
-                    <thead>
-                        <tr>
-                            <th style="white-space: nowrap;">Staff Selection</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>
-                                <select name="status">
-                                    <option value="0" ~[if.~[gpv:status]=0]selected[/if]>Staff Missing Mandatory NCEA
-                                        Data</option>
-                                    <option value="1" ~[if.~[gpv:status]=1]selected[/if]>All Staff</option>
-                                </select>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                <div class="button-row left">
-                    <span style="color:red">&nbsp;&nbsp;Select parameters and click submit</span>
-                    <input type="hidden" name="showData" value="1">
-                    <input type="hidden" name="ac" value="prim">~[submitbutton]
-                </div>
-            </div>
-        </form>
-
-        <!-- end of Options -->
-        ~[if#showData.~[gpv:showData]=1]
+        ~[wc:admin_header_css]
+        ~[wc:admin_navigation_frame_css]
+        <h1>NCEA - Staff Info</h1>
         <div class="box-round">
-            <h2 class="pscbdevBkgColor">&nbsp;&nbsp;NCEA - Staff Missing Info</h2>
+            <h2 class="pscbdevBkgColor">&nbsp;&nbsp;NCEA Staff Info</h2>
             <table cellspacing="0" cellpadding="4" class="center" class="tablesorter grid" id="pscbDevPro">
                 <thead>
                     <tr>
@@ -73,7 +39,7 @@
                     schoolstaff.dcid,
                     users.lastfirst,
                     CASE
-                    WHEN userscorefields.gender IS NULL THEN '#ffdfba'
+                    WHEN userscorefields.gender IS NULL THEN 'cell-highlight-orange'
                     ELSE ''
                     END genderHighlight,
                     CASE
@@ -82,7 +48,7 @@
                     ELSE userscorefields.gender
                     END as GENDER,
                     CASE
-                    WHEN users.fedethnicity IS NULL THEN '#ffffba'
+                    WHEN users.fedethnicity IS NULL THEN 'cell-highlight-yellow'
                     ELSE ''
                     END ETHNICITYHighlight,
                     CASE
@@ -91,13 +57,13 @@
                     ELSE TO_CHAR(users.fedethnicity)
                     END as ETHNICITY,
                     CASE
-                    WHEN teacherrace.racecd IS NULL THEN '#baffc9'
+                    WHEN teacherrace.racecd IS NULL THEN 'cell-highlight-green'
                     ELSE ''
                     END raceHighlight,
                     LISTAGG(teacherrace.racecd,', ') WITHIN GROUP (ORDER BY teacherrace.racecd) OVER (PARTITION BY
                     schoolstaff.dcid) RACE,
                     CASE
-                    WHEN s_usr_ncea_x.religiousaffiliation IS NULL THEN '#bae1ff'
+                    WHEN s_usr_ncea_x.religiousaffiliation IS NULL THEN 'cell-highlight-blue'
                     ELSE ''
                     END religiousaffiliationHighlight,
                     CASE
@@ -106,7 +72,7 @@
                     ELSE s_usr_ncea_x.religiousaffiliation
                     END as religiousaffiliation,
                     CASE
-                    WHEN s_usr_ncea_x.religiousclergylay IS NULL THEN '#ffb3ba'
+                    WHEN s_usr_ncea_x.religiousclergylay IS NULL THEN 'cell-highlight-red'
                     ELSE ''
                     END STAFF_TYPEHighlight,
                     CASE
@@ -116,7 +82,7 @@
                     ELSE s_usr_ncea_x.religiousclergylay
                     END as STAFF_TYPE,
                     CASE
-                    WHEN S_SSF_NCEA_X.FTE_CODE IS NULL THEN '#ffdfba'
+                    WHEN S_SSF_NCEA_X.FTE_CODE IS NULL THEN 'cell-highlight-orange'
                     ELSE ''
                     END FTEHighlight,
                     CASE
@@ -125,7 +91,7 @@
                     ELSE S_SSF_NCEA_X.FTE_CODE
                     END as FTE,
                     CASE
-                    WHEN s_ssf_ncea_x.excludefromncea_tf IS NULL THEN '#ffb3ba'
+                    WHEN s_ssf_ncea_x.excludefromncea_tf IS NULL THEN 'cell-highlight-red'
                     ELSE ''
                     END excludeHighlight,
                     CASE
@@ -164,18 +130,18 @@
                         ORDER BY schools.name, users.lastfirst
                         ;alternatecolor; nonemessage=
                         <tr>
-                            <td colspan="100%">All staff have NCEA values.</td>
+                            <td colspan="100%">No records returned</td>
                         </tr>]
                         <tr class="Record">
                             <td><a href="/admin/faculty/facultyNCEA.html?frn=005~(dcid;t)"
                                     target="_blank">~(staffname;t)</a>
-                            <td style="background-color:~(genderHighlight;t);">~(gender;t)</td>
-                            <td style="background-color:~(ethnicityHighlight;t);">~(ethnicity;t)</td>
-                            <td style="background-color:~(raceHighlight;t);">~(race;t)</td>
-                            <td style="background-color:~(religionHlight;t);">~(religion;t)</td>
-                            <td style="background-color:~(staffHighlight;t);">~(stafftype;t)</td>
-                            <td style="background-color:~(fteHighlight;t);">~(fte;t)</td>
-                            <td style="background-color:~(excludeHighlight;t);">~(exclude;t)</td>
+                            <td class="~(genderHighlight;t)">~(gender;t)</td>
+                            <td class="~(ethnicityHighlight;t)">~(ethnicity;t)</td>
+                            <td class="~(raceHighlight;t)">~(race;t)</td>
+                            <td class="~(religionHighlight;t)">~(religion;t)</td>
+                            <td class="~(staffHighlight;t)">~(stafftype;t)</td>
+                            <td class="~(fteHighlight;t)">~(fte;t)</td>
+                            <td class="~(excludeHighlight;t)">~(exclude;t)</td>
                             ~[if.district.office]<td>~(school;t)</td>[/if]
                         </tr>
                         [/tlist_sql]
@@ -186,7 +152,6 @@
         <div style="clear: both;">
             <p class="center">Report generated at ~[time] on ~[date]</p>
         </div>
-        [/if#showData]
         ~[wc:admin_footer_frame_css]
     </body>
 
