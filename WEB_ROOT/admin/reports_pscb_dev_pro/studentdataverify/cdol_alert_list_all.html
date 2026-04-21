@@ -82,6 +82,8 @@
                         <th class="center filter-select">Medical Alert</th>
                         <th class="center filter-select">Medication?</th>
                         <th class="center filter-select">Asthma?</th>
+                        <th class="center filter-select">IHP</th>
+                        <th class="center filter-select">Concussion</th>
                         <th class="left">Modified Curriculum</th>
                         <th class="center filter-select">IEP</th>
                         <th class="center filter-select">504</th>
@@ -114,7 +116,10 @@
                     s.alert_medical,
                     DECODE(AD.STUDENT_MEDICATION,1,'Yes',0,'No','') AS Medication,
                     DECODE(AD.asthma,1,'Yes',0,'No','') AS Asthma,
+                    DECODE(AD.IHP_ALERT,1,'Yes',0,'No','') AS IHP,
+                    DECODE(AD.CONCUSSION_ALERT,1,'Yes',0,'No','') AS Concussion,
                     ad.modcur,
+                    DECODE(ad.STUDENT_IEP,1,'Yes',0,'No','') AS iep,
                     DECODE(ad.STUDENT_IEP,1,'Yes',0,'No','') AS iep,
                     DECODE(ad.STUDENT_504,1,'Yes',0,'No','') AS s504,
                     ad.STUDENT_SPECIAL_SERVICES_OTHER,
@@ -150,6 +155,8 @@
                         <td>~(medical;t)</td>
                         <td class="nowrap center">~(medication;t)</td>
                         <td class="nowrap center">~(asthma;t)</td>
+                        <td class="nowrap center">~(ihp;t)</td>
+                        <td class="nowrap center">~(concussion;t)</td>
                         <td>~(modcur;t)</td>
                         <td class="nowrap center">~(iep;t)</td>
                         <td class="nowrap center">~(504;t)</td>
