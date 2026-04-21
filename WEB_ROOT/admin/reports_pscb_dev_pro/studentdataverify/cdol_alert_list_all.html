@@ -87,6 +87,7 @@
                         <th class="left">Modified Curriculum</th>
                         <th class="center filter-select">IEP</th>
                         <th class="center filter-select">504</th>
+                        <th class="center filter-select">MTSS</th>
                         <th class="left">Other SPED Services</th>
                         <th class="left">Discipline Alert</th>
                         <th class="left">Guardian Alert</th>
@@ -121,6 +122,7 @@
                     ad.modcur,
                     DECODE(ad.student_iep,1,'Yes',0,'No','') AS iep,
                     DECODE(ad.student_504,1,'Yes',0,'No','') AS s504,
+                    DECODE(ad.student_mtss,1,'Yes',0,'No','') AS mtss,
                     ad.student_special_services_other,
                     s.Alert_Discipline,
                     s.Alert_Guardian,
@@ -159,6 +161,7 @@
                         <td>~(modcur;t)</td>
                         <td class="nowrap center">~(iep;t)</td>
                         <td class="nowrap center">~(504;t)</td>
+                        <td class="nowrap center">~(mtss;t)</td>
                         <td>~(othersped;t)</td>
                         <td>~(disc;t)</td>
                         <td>~(guard;t)</td>
