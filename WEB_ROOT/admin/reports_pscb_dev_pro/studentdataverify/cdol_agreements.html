@@ -82,14 +82,15 @@
                         <th class="left filter-select">Grade Level</th>
                         <th class="left filter-select">Gender</th>
                         <th class="left filter-select">Allergies</th>
-                        <th class="center filter-select">Asthma?</th>
-                        <th class="center filter-select">Medication?</th>
-                        <th class="center filter-select">Agreed to Handbook?</th>
-                        <th class="center filter-select">Agreed to AUP?</th>
-                        <th class="center filter-select">Agreed Media Consent and Release?</th>
-                        <th class="center filter-select">Agreed to Lunch Policy?</th>
-                        <th class="center filter-select">Agreed to Late Policy?</th>
-                        <th class="center filter-select">Agreed to Field Trip?</th>
+                        <th class="center filter-select">Asthma</th>
+                        <th class="center filter-select">Medication</th>
+                        <th class="center filter-select">Handbook</th>
+                        <th class="center filter-select">AUP</th>
+                        <th class="center filter-select">Media Consent</th>
+                        <th class="center filter-select">NSAA</th>
+                        <th class="center filter-select">Lunch Policy</th>
+                        <th class="center filter-select">Late Policy</th>
+                        <th class="center filter-select">Field Trip</th>
                         <th class="center filter-select">Early Dismissal</th>
                         <th class="left ">School</th>
                     </tr>
@@ -115,12 +116,13 @@
                     SCF.allergies,
                     DECODE(AD.asthma,1,'Yes',0,'No','TBD') AS Asthma,
                     DECODE(AD.STUDENT_MEDICATION,1,'Yes',0,'No','TBD') AS Medication,
-                    DECODE(AD.HANDBOOK_AGREE,1,'Yes',0,'No','TBD') AS "Agreed to Handbook",
-                    DECODE(AD.APU_AGREE,1,'Yes',0,'No','TBD') AS "Agreed to AUP",
-                    DECODE(AD.PRINT_PUBLICITY,1,'Yes',0,'No','TBD') AS "Agreed to Print Release",
-                    DECODE(AD.LUNCH_POLICY_AGREE,1,'Yes',0,'No','TBD') AS "Agreed to Lunch Policy",
-                    DECODE(AD.LATE_POLICY_AGREE,1,'Yes',0,'No','TBD') AS "Agreed to Late Policy",
-                    DECODE(AD.FIELD_TRIP_PERMISSION,1,'Yes',0,'No','TBD') AS "Agreed to Field Trip",
+                    DECODE(AD.HANDBOOK_AGREE,1,'Yes',0,'No','TBD') AS Handbook,
+                    DECODE(AD.APU_AGREE,1,'Yes',0,'No','TBD') AS AUP,
+                    DECODE(AD.PRINT_PUBLICITY,1,'Yes',0,'No','TBD') AS media,
+                    DECODE(AD.NSAA,1,'Yes',0,'No','TBD') AS NSAA,
+                    DECODE(AD.LUNCH_POLICY_AGREE,1,'Yes',0,'No','TBD') AS "Lunch Policy",
+                    DECODE(AD.LATE_POLICY_AGREE,1,'Yes',0,'No','TBD') AS "Late Policy",
+                    DECODE(AD.FIELD_TRIP_PERMISSION,1,'Yes',0,'No','TBD') AS "Field Trip",
                     AD.STUDENT_EARLY_DISMISSAL,
                     sch.abbreviation
                     FROM Students s
@@ -131,7 +133,7 @@
                     LEFT JOIN U_STUDENT_ADDITIONAL_INFO AD
                     ON AD.STUDENTSDCID = s.DCID
                     LEFT JOIN studentcorefields SCF
-                    ON SCF.STUDENTSDCID =S.DCID
+                    ON SCF.STUDENTSDCID = S.DCID
                     WHERE s.enroll_status in (-1,0)
                     ~[if.is.a.school] AND s.schoolid = ~(curschoolid) [/if.is.a.school]
                     ~[if#gr.~(gpv.gr;sqlText)#] AND s.grade_level = ~(gpv.gr) [/if#gr]
@@ -150,7 +152,8 @@
                         <td class="nowrap center">~(medication;t)</td>
                         <td class="nowrap center">~(handbook;t)</td>
                         <td class="nowrap center">~(APU;t)</td>
-                        <td class="nowrap center">~(mr;t)</td>
+                        <td class="nowrap center">~(media;t)</td>
+                        <td class="nowrap center">~(nsaa;t)</td>
                         <td class="nowrap center">~(lur;t)</td>
                         <td class="nowrap center">~(lar;t)</td>
                         <td class="nowrap center">~(ft;t)</td>
