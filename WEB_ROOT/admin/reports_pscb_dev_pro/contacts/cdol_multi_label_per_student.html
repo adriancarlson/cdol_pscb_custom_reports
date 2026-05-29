@@ -71,7 +71,7 @@
         <div class="box-round">
             <h2 class="pscbdevBkgColor">&nbsp;&nbsp;Multiple Mailing Labels Per</h2>
             <table cellspacing="0" cellpadding="4" class="tablesorter grid center" id="pscbDevPro" groupRowsByCol="1"
-                color1="#ffffff" color2="#d7edfe">
+                style="display: inline-table; width: auto; table-layout: auto;" color1="#ffffff" color2="#d7edfe">
                 <thead>
                     <tr>
                         <th class="left">Student Number</th>
@@ -80,148 +80,149 @@
                         <th class="left">Student Address</th>
                         <th class="left">Contacts</th>
                         <th class="left">Relationship</th>
-                        <th class="left">AddressID</th>
                         <th class="left filter-select">Address Type</th>
                         <th class="left">Contact Address</th>
                         <th class="left filter-select">Has Custody</th>
                         <th class="left filter-select">Receives Mail</th>
                         <th class="left filter-select">Lives With</th>
-                        <th class="left filter-select">School</th>
+                        ~[if.district.office]<th class="left filter-select">School</th>[/if]
                     </tr>
                 </thead>
                 <tbody>
                     ~[tlist_sql;
-                    WITH ASSOC AS (
+                    WITH CONTACTS AS (
                     SELECT DISTINCT
-                    PERSONADDRESSASSOC.PERSONADDRESSID,
-                    PERSON.ID AS PERSON_ID,
-                    PERSON.FIRSTNAME || ' ' || PERSON.LASTNAME as PERSON,
-                    STUDENTS.ID AS STUDENT_ID,
-                    STUDENTS.STUDENT_NUMBER,
-                    STUDENTS.GRADE_LEVEL,
-                    STUDENTS.LASTFIRST,
-                    STUDENTCONTACTDETAIL.ISCUSTODIAL,
-                    STUDENTCONTACTDETAIL.RECEIVESMAILFLG,
-                    STUDENTCONTACTDETAIL.liveswithflg,
-                    ROW_NUMBER() OVER( PARTITION BY PERSON.ID ORDER BY GRADE_LEVEL DESC) AS STUCONTACTORDER
-                    FROM STUDENTS
-                    ~[if#ss.~(gpv.ss;sqlText)=cur] INNER JOIN ~[temp.table.current.selection:students] temp ON (s.dcid =
-                    temp.dcid)[/if#ss]
-                    INNER JOIN SCHOOLS
-                    ON STUDENTS.SCHOOLID = SCHOOLS.SCHOOL_NUMBER
-                    ~[if.is.a.school] and STUDENTS.schoolid=~(curschoolid) [/if]
-                    INNER JOIN STUDENTCONTACTASSOC
-                    ON STUDENTCONTACTASSOC.STUDENTDCID = STUDENTS.DCID
-                    INNER JOIN PERSON
-                    ON PERSON.ID = STUDENTCONTACTASSOC.PERSONID
+                    s.DCID AS STUDENT_DCID,
+                    s.STUDENT_NUMBER,
+                    s.LASTFIRST,
+                    CASE
+                    WHEN TO_CHAR(s.grade_level) = -2 then 'PK3'
+                    WHEN TO_CHAR(s.grade_level) = -1 then 'PK4'
+                    WHEN TO_CHAR(s.grade_level) = 0 then 'K'
+                    WHEN TO_CHAR(s.grade_level) = 99 then 'Graduated'
+                    ELSE TO_CHAR(s.grade_level)
+                    END as PRETTY_GRADE,
+                    Nvl(s.mailing_street,'-') || ', ' || Nvl(s.mailing_city,'-') || ' ' ||
+                    Nvl(s.mailing_state,'') || ' ' || Nvl(s.mailing_zip,'') as Student_mailing,
+                    p.ID AS PERSON_ID,
+                    p.FIRSTNAME || ' ' || p.LASTNAME as PERSON,
+                    CONTACT_REL.DESCRIPTION,
+                    sca.CONTACTPRIORITYORDER,
+                    paa.PERSONADDRESSID,
+                    ROW_NUMBER() OVER(
+                    PARTITION BY s.STUDENT_NUMBER, p.ID
+                    ORDER BY Nvl(paa.STARTDATE, TO_DATE('01/01/1900','MM/DD/YYYY')) DESC, paa.PERSONADDRESSID DESC
+                    ) AS CONTACT_ADDRESS_ORDER,
+                    acs.code Address_type,
+                    Nvl(pa.STREET,'-') || ', ' || Nvl(pa.CITY,'-') || ' ' ||
+                    Nvl(scs.code,'') || ' ' || Nvl(pa.POSTALCODE,'') AS PERSON_address,
+                    DECODE(scd.ISCUSTODIAL, 1, 'Yes','No') ISCUSTODIAL,
+                    DECODE(scd.RECEIVESMAILFLG, 1, 'Yes','No') RECEIVESMAILFLG,
+                    DECODE(scd.liveswithflg, 1, 'Yes','No') liveswithflg,
+                    sch.abbreviation,
+                    sch.name,
+                    CASE
+                    WHEN paa.PERSONADDRESSID IS NOT NULL
+                    AND NULLIF(TRIM(Nvl(pa.STREET,'-')), '-') IS NOT NULL
+                    AND NULLIF(TRIM(Nvl(pa.CITY,'-')), '-') IS NOT NULL
+                    THEN 1 ELSE 0 END AS HAS_CONTACT_ADDRESS,
+                    UPPER(TRIM(Nvl(pa.STREET,'') || ' ' || Nvl(pa.LINETWO,'') || ' ' ||
+                    Nvl(pa.UNIT,'') || ' ' ||
+                    CASE
+                    WHEN pa.CITY IS NOT NULL
+                    AND SUBSTR(UPPER(TRIM(Nvl(pa.STREET,''))), -LENGTH(UPPER(TRIM(pa.CITY)))) =
+                    UPPER(TRIM(pa.CITY))
+                    THEN ''
+                    ELSE Nvl(pa.CITY,'')
+                    END)) AS CONTACT_ADDRESS_BASE
+                    FROM STUDENTS s
+                    ~[if#ss.~(gpv.ss;sqlText)=cur] INNER JOIN ~[temp.table.current.selection:students] temp ON
+                    (s.dcid = temp.dcid)[/if#ss]
+                    INNER JOIN SCHOOLS sch
+                    ON s.SCHOOLID = sch.SCHOOL_NUMBER
+                    ~[if.is.a.school] and s.schoolid=~(curschoolid) [/if]
+                    INNER JOIN STUDENTCONTACTASSOC sca
+                    ON sca.STUDENTDCID = s.DCID
+                    INNER JOIN PERSON p
+                    ON p.ID = sca.PERSONID
                     LEFT JOIN CODESET CONTACT_REL
-                    ON STUDENTCONTACTASSOC.CURRRELTYPECODESETID = CONTACT_REL.CODESETID
-                    INNER JOIN STUDENTCONTACTDETAIL
-                    ON STUDENTCONTACTASSOC.STUDENTCONTACTASSOCID = STUDENTCONTACTDETAIL.STUDENTCONTACTASSOCID
-                    AND (CURRENT_DATE < STUDENTCONTACTDETAIL.ENDDATE OR STUDENTCONTACTDETAIL.ENDDATE IS NULL) AND
-                        (CURRENT_DATE>
-                        STUDENTCONTACTDETAIL.STARTDATE OR STUDENTCONTACTDETAIL.STARTDATE IS NULL)
-                        --~[if#cursel.%param2%=Yes] AND STUDENTCONTACTDETAIL.ISCUSTODIAL = 1 [/if]
-                        --~[if#cursel.%param3%=Yes] AND STUDENTCONTACTDETAIL.RECEIVESMAILFLG = 1 [/if]
-                        LEFT JOIN PERSONADDRESSASSOC
-                        ON PERSONADDRESSASSOC.PERSONID = PERSON.ID
-                        --AND PERSONADDRESSASSOC.ADDRESSTYPECODESETID = 19
-                        AND (CURRENT_DATE < PERSONADDRESSASSOC.ENDDATE OR PERSONADDRESSASSOC.ENDDATE IS NULL) AND
-                            (CURRENT_DATE>
-                            PERSONADDRESSASSOC.STARTDATE OR PERSONADDRESSASSOC.STARTDATE IS NULL)
-                            WHERE
-                            STUDENTS.ENROLL_STATUS IN (-1,0)
-                            ~[if.is.a.school] and STUDENTS.schoolid=~(curschoolid) [/if]
-                            )
-                            SELECT DISTINCT
-                            STUDENTS.DCID AS STUDENT_DCID,
-                            STUDENTS.STUDENT_NUMBER,
-                            STUDENTS.LASTFIRST,
-                            CASE
-                            WHEN TO_CHAR(STUDENTS.grade_level) = -2 then 'PK3'
-                            WHEN TO_CHAR(STUDENTS.grade_level) = -1 then 'PK4'
-                            WHEN TO_CHAR(STUDENTS.grade_level) = 0 then 'K'
-                            WHEN TO_CHAR(STUDENTS.grade_level) = 99 then 'Graduated'
-                            ELSE TO_CHAR(STUDENTS.grade_level)
-                            END as PRETTY_GRADE,
-                            Nvl(STUDENTS.mailing_street,'-') || ', ' || Nvl(STUDENTS.mailing_city,'-') || ' ' ||
-                            Nvl(STUDENTS.mailing_state,'') || ' ' || Nvl(STUDENTS.mailing_zip,'') as Student_mailing,
-                            --ROW_NUMBER() OVER( PARTITION BY PERSON.ID ORDER BY GRADE_LEVEL DESC) AS STUCONTACTORDER,
-                            PERSON.ID AS PERSON_ID,
-                            PERSON.FIRSTNAME || ' ' || PERSON.LASTNAME as PERSON,
-                            CONTACT_REL.DESCRIPTION,
-                            PERSONADDRESSASSOC.PERSONADDRESSID,
-                            acs.code Address_type,
-                            Nvl(PERSONADDRESS.STREET,'-') || ', ' || Nvl(PERSONADDRESS.CITY,'-') || ' ' ||
-                            Nvl(scs.code,'') || ' ' || Nvl(PERSONADDRESS.POSTALCODE,'') AS PERSON_address,
-                            DECODE(STUDENTCONTACTDETAIL.ISCUSTODIAL, 1, 'Yes','No') ISCUSTODIAL,
-                            DECODE(STUDENTCONTACTDETAIL.RECEIVESMAILFLG, 1, 'Yes','No') RECEIVESMAILFLG,
-                            DECODE(STUDENTCONTACTDETAIL.liveswithflg, 1, 'Yes','No') liveswithflg,
-                            SCHOOLS.abbreviation,
-                            SCHOOLS.name
-                            FROM STUDENTS
-                            ~[if#ss.~(gpv.ss;sqlText)=cur] INNER JOIN ~[temp.table.current.selection:students] temp ON
-                            (s.dcid = temp.dcid)[/if#ss]
-                            INNER JOIN SCHOOLS
-                            ON STUDENTS.SCHOOLID = SCHOOLS.SCHOOL_NUMBER
-                            ~[if.is.a.school] and STUDENTS.schoolid=~(curschoolid) [/if]
-                            INNER JOIN STUDENTCONTACTASSOC
-                            ON STUDENTCONTACTASSOC.STUDENTDCID = STUDENTS.DCID
-                            INNER JOIN PERSON
-                            ON PERSON.ID = STUDENTCONTACTASSOC.PERSONID
-                            LEFT JOIN CODESET CONTACT_REL
-                            ON STUDENTCONTACTASSOC.CURRRELTYPECODESETID = CONTACT_REL.CODESETID
-                            INNER JOIN STUDENTCONTACTDETAIL
-                            ON STUDENTCONTACTASSOC.STUDENTCONTACTASSOCID = STUDENTCONTACTDETAIL.STUDENTCONTACTASSOCID
-                            AND (CURRENT_DATE < STUDENTCONTACTDETAIL.ENDDATE OR STUDENTCONTACTDETAIL.ENDDATE IS NULL)
-                                AND (CURRENT_DATE>
-                                STUDENTCONTACTDETAIL.STARTDATE OR STUDENTCONTACTDETAIL.STARTDATE IS NULL)
-                                --~[if#cursel.%param2%=Yes] AND STUDENTCONTACTDETAIL.ISCUSTODIAL = 1 [/if]
-                                --~[if#cursel.%param3%=Yes] AND STUDENTCONTACTDETAIL.RECEIVESMAILFLG = 1 [/if]
-                                LEFT JOIN PERSONADDRESSASSOC
-                                ON PERSONADDRESSASSOC.PERSONID = PERSON.ID
-                                AND PERSONADDRESSASSOC.ADDRESSTYPECODESETID = 19
-                                AND (CURRENT_DATE < PERSONADDRESSASSOC.ENDDATE OR PERSONADDRESSASSOC.ENDDATE IS NULL)
-                                    AND (CURRENT_DATE>
-                                    PERSONADDRESSASSOC.STARTDATE OR PERSONADDRESSASSOC.STARTDATE IS NULL)
-                                    LEFT JOIN PERSONADDRESS
-                                    ON PERSONADDRESS.PERSONADDRESSID = PERSONADDRESSASSOC.PERSONADDRESSID
-                                    LEFT JOIN codeset scs ON (PERSONADDRESS.statescodesetid = scs.codesetid)
-                                    LEFT JOIN codeset acs on (PERSONADDRESSASSOC.AddressTypeCodeSetID = acs.codesetid)
-                                    WHERE
-                                    (
-                                    STUDENTCONTACTDETAIL.ISCUSTODIAL = 1
-                                    OR STUDENTCONTACTDETAIL.RECEIVESMAILFLG = 1
-                                    OR STUDENTCONTACTDETAIL.liveswithflg = 1
-                                    )
-                                    AND STUDENTS.ENROLL_STATUS IN (-1,0)
-                                    ~[if.is.a.school] and STUDENTS.schoolid=~(curschoolid) [/if]
-                                    ~[if#gr.~(gpv.gr;sqlText)#] AND STUDENTS.grade_level = ~(gpv.gr) [/if#gr]
-                                    AND STUDENTS.STUDENT_NUMBER IN (
-                                    SELECT STUDENT_NUMBER
-                                    FROM
-                                    (
-                                    SELECT DISTINCT
-                                    STUDENTS.STUDENT_NUMBER,
-                                    STUDENTS.LASTFIRST,
-                                    ASSOC.PERSONADDRESSID
-                                    FROM ASSOC
-                                    LEFT JOIN STUDENTS
-                                    ON ASSOC.STUDENT_ID = STUDENTS.ID
-                                    AND STUDENTS.ENROLL_STATUS = 0
-                                    ~[if.is.a.school] and STUDENTS.schoolid=~(curschoolid) [/if]
-                                    LEFT JOIN PERSON
-                                    ON PERSON.ID = ASSOC.PERSON_ID
-                                    WHERE
-                                    ASSOC.ISCUSTODIAL = 1
-                                    OR ASSOC.RECEIVESMAILFLG = 1
-                                    AND STUDENTS.ENROLL_STATUS in (-1,0)
-                                    ~[if.is.a.school] and STUDENTS.schoolid=~(curschoolid) [/if]
-                                    )
-                                    GROUP BY STUDENT_NUMBER
-                                    HAVING COUNT(*) > 1
-                                    )
-                                    ORDER BY SCHOOLS.NAME , STUDENTS.LASTFIRST
+                    ON sca.CURRRELTYPECODESETID = CONTACT_REL.CODESETID
+                    INNER JOIN STUDENTCONTACTDETAIL scd
+                    ON sca.STUDENTCONTACTASSOCID = scd.STUDENTCONTACTASSOCID
+                    AND (CURRENT_DATE < scd.ENDDATE OR scd.ENDDATE IS NULL)
+                    AND (CURRENT_DATE > scd.STARTDATE OR scd.STARTDATE IS NULL)
+                    LEFT JOIN PERSONADDRESSASSOC paa
+                    ON paa.PERSONID = p.ID
+                    AND paa.ADDRESSTYPECODESETID = 19
+                    AND (CURRENT_DATE < paa.ENDDATE OR paa.ENDDATE IS NULL)
+                    AND (CURRENT_DATE > paa.STARTDATE OR paa.STARTDATE IS NULL)
+                    LEFT JOIN PERSONADDRESS pa
+                    ON pa.PERSONADDRESSID = paa.PERSONADDRESSID
+                    LEFT JOIN codeset scs ON (pa.statescodesetid = scs.codesetid)
+                    LEFT JOIN codeset acs on (paa.AddressTypeCodeSetID = acs.codesetid)
+                    WHERE scd.RECEIVESMAILFLG = 1
+                    AND s.ENROLL_STATUS IN (-1,0)
+                    ~[if.is.a.school] and s.schoolid=~(curschoolid) [/if]
+                    ~[if#gr.~(gpv.gr;sqlText)#] AND s.grade_level = ~(gpv.gr) [/if#gr]
+                    ),
+                    NORMALIZED AS (
+                    SELECT
+                    CONTACTS.*,
+                    REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                    REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                    REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                    REPLACE(REPLACE(' ' || CONTACT_ADDRESS_BASE || ' ',
+                    '.', ' '), ',', ' '), '#', ' '), '-', ' '), '/', ' '), '&', ' '),
+                    ' NORTH ', ' N '), ' SOUTH ', ' S '), ' SO ', ' S '), ' EAST ', ' E '), ' WEST ', ' W '),
+                    ' AVENUE ', ' '), ' AVE ', ' '), ' STREET ', ' '), ' ST ', ' '),
+                    ' ROAD ', ' '), ' RD ', ' '), ' DRIVE ', ' '), ' DR ', ' '),
+                    ' COURT ', ' '), ' CT ', ' '), ' CIRCLE ', ' '), ' CIR ', ' '),
+                    ' LANE ', ' '), ' LN ', ' '), ' BOULEVARD ', ' '), ' BLVD ', ' '),
+                    ' HIGHWAY ', ' '), ' HWY ', ' '), ' PARKWAY ', ' '), ' PKWY ', ' '),
+                    ' ', '') AS CONTACT_ADDRESS_KEY
+                    FROM CONTACTS
+                    ),
+                    QUALIFIED_STUDENTS AS (
+                    SELECT STUDENT_NUMBER
+                    FROM NORMALIZED
+                    WHERE HAS_CONTACT_ADDRESS = 1
+                    AND CONTACT_ADDRESS_ORDER = 1
+                    AND CONTACT_ADDRESS_KEY IS NOT NULL
+                    GROUP BY STUDENT_NUMBER
+                    HAVING COUNT(DISTINCT PERSON_ID) > 1
+                    AND COUNT(DISTINCT CONTACT_ADDRESS_KEY) > 1
+                    )
+                    SELECT
+                    MIN(STUDENT_DCID) AS STUDENT_DCID,
+                    STUDENT_NUMBER,
+                    LASTFIRST,
+                    PRETTY_GRADE,
+                    Student_mailing,
+                    LISTAGG('<a href="/admin/contacts/edit.html#?contactid=' || PERSON_ID ||
+                    '" target="_blank">' || PERSON || '</a>', ', ')
+                    WITHIN GROUP(ORDER BY CONTACTPRIORITYORDER, PERSON) AS PERSON,
+                    LISTAGG(DESCRIPTION, ', ') WITHIN GROUP(ORDER BY CONTACTPRIORITYORDER, PERSON) AS DESCRIPTION,
+                    MIN(Address_type) AS Address_type,
+                    MIN(PERSON_address) AS PERSON_address,
+                    LISTAGG(ISCUSTODIAL, ', ') WITHIN GROUP(ORDER BY CONTACTPRIORITYORDER, PERSON) AS ISCUSTODIAL,
+                    'Yes' AS RECEIVESMAILFLG,
+                    LISTAGG(liveswithflg, ', ') WITHIN GROUP(ORDER BY CONTACTPRIORITYORDER, PERSON) AS liveswithflg,
+                    abbreviation,
+                    name
+                    FROM NORMALIZED
+                    WHERE HAS_CONTACT_ADDRESS = 1
+                    AND CONTACT_ADDRESS_ORDER = 1
+                    AND CONTACT_ADDRESS_KEY IS NOT NULL
+                    AND STUDENT_NUMBER IN (SELECT STUDENT_NUMBER FROM QUALIFIED_STUDENTS)
+                    GROUP BY
+                    STUDENT_NUMBER,
+                    LASTFIRST,
+                    PRETTY_GRADE,
+                    Student_mailing,
+                    CONTACT_ADDRESS_KEY,
+                    abbreviation,
+                    name
+                    ORDER BY name, LASTFIRST, PERSON_address
                                     ;alternatecolor;nonemessage=<tr>
                                         <td colspan="100%">No Records were found.</td>
                                     </tr>]
@@ -232,16 +233,14 @@
                                         <td class="nowrap">~(stuname;t)</td>
                                         <td class="center">~(grade_level)</td>
                                         <td class="nowrap">~(StuAddress;t)</td>
-                                        <td class="nowrap"><a href="/admin/contacts/edit.html#?contactid=~(cid)"
-                                                target="_blank">~(contact;t)</a></td>
+                                        <td class="nowrap">~(contact)</td>
                                         <td>~(relationship;t)</td>
-                                        <td>~(addressid)</td>
                                         <td>~(addresstype;t)</td>
                                         <td class="nowrap">~(contactaddress;t)</td>
                                         <td>~(custody;t)</td>
                                         <td>~(mail;t)</td>
                                         <td>~(liveswith;t)</td>
-                                        <td class="nowrap">~(school;t)</td>
+                                        ~[if.district.office]<td class="nowrap">~(school;t)</td>[/if]
                                     </tr>
                                     [/tlist_sql]
                 </tbody>
