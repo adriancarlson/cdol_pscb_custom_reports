@@ -39,8 +39,7 @@
                                 ~[tlist_sql;
                                 SELECT DISTINCT GRADE_LEVEL,
                                 CASE
-                                WHEN TO_CHAR(grade_level) = -2 then 'PK3'
-                                WHEN TO_CHAR(grade_level) = -1 then 'PK4'
+                                WHEN TO_CHAR(grade_level) = -1 then 'PK'
                                 WHEN TO_CHAR(grade_level) = 0 then 'K'
                                 WHEN TO_CHAR(grade_level) = 99 then 'Graduated'
                                 ELSE TO_CHAR(grade_level)
@@ -131,8 +130,7 @@
                     ELSE students.gender
                     END AS GENDER,
                     CASE
-                    WHEN TO_CHAR(students.grade_level) = -2 THEN 'PK3'
-                    WHEN TO_CHAR(students.grade_level) = -1 THEN 'PK4'
+                    WHEN TO_CHAR(students.grade_level) = -1 THEN 'PK'
                     WHEN TO_CHAR(students.grade_level) = 0 THEN 'K'
                     WHEN TO_CHAR(students.grade_level) = 99 THEN 'Graduated'
                     ELSE TO_CHAR(students.grade_level)

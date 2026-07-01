@@ -117,7 +117,7 @@
                             AttTotal.abs, AttTotal.tars, AttTotal.schoolname FROM AttTotal WHERE
                             AttTotal.enroll_status=0 ~[if.is.a.school] AND AttTotal.schoolid=~(curschoolid)
                             [/if.is.a.school] ~[if#includepk.~(gpv.includepk;sqlText)=n] AND AttTotal.grade_level NOT IN
-                            (-2,-1) [/if#includepk] AND AttTotal.abs <=TO_NUMBER(~(gpv.abscnt)) AND AttTotal.tars
+                            (-1) [/if#includepk] AND AttTotal.abs <=TO_NUMBER(~(gpv.abscnt)) AND AttTotal.tars
                             <=TO_NUMBER(~(gpv.tarcnt)) ORDER BY AttTotal.grade_level DESC, AttTotal.abs, AttTotal.tars
                             ;alternatecolor;nonemessage=<tr nodata>
                             <td colspan="100%">No Records Found.</td>

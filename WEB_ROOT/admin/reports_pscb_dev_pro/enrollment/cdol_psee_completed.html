@@ -60,15 +60,13 @@
                     END AS gender,
                     students.dob,
                     CASE
-                    WHEN TO_CHAR(students.grade_level) = -2 THEN 'PK3'
-                    WHEN TO_CHAR(students.grade_level) = -1 THEN 'PK4'
+                    WHEN TO_CHAR(students.grade_level) = -1 THEN 'PK'
                     WHEN TO_CHAR(students.grade_level) = 0 THEN 'K'
                     WHEN TO_CHAR(students.grade_level) = 99 THEN 'Graduated'
                     ELSE TO_CHAR(students.grade_level)
                     END AS current_grade,
                     CASE
-                    WHEN TO_CHAR(students.Sched_NextYearGrade) = -2 THEN 'PK3'
-                    WHEN TO_CHAR(students.Sched_NextYearGrade) = -1 THEN 'PK4'
+                    WHEN TO_CHAR(students.Sched_NextYearGrade) = -1 THEN 'PK'
                     WHEN TO_CHAR(students.Sched_NextYearGrade) = 0 THEN 'K'
                     WHEN TO_CHAR(students.Sched_NextYearGrade) = 99 THEN 'Graduated'
                     ELSE TO_CHAR(students.Sched_NextYearGrade)
@@ -76,7 +74,7 @@
                     students.schoolid AS current_school,
                     students.next_school AS next_school,
                     CASE
-                    WHEN students.Sched_NextYearGrade IN (-2,-1) THEN
+                    WHEN students.Sched_NextYearGrade IN (-1) THEN
                     CASE
                     WHEN preschool.approval = 0 THEN 'Pending'
                     WHEN preschool.approval = 1 THEN 'Approved'

@@ -42,8 +42,7 @@
                                     ~[tlist_sql;
                                     SELECT DISTINCT GRADE_LEVEL,
                                     CASE
-                                    WHEN TO_CHAR(grade_level) = -2 then 'PK3'
-                                    WHEN TO_CHAR(grade_level) = -1 then 'PK4'
+                                    WHEN TO_CHAR(grade_level) = -1 then 'PK'
                                     WHEN TO_CHAR(grade_level) = 0 then 'K'
                                     WHEN TO_CHAR(grade_level) = 99 then 'Graduated'
                                     ELSE TO_CHAR(grade_level)
@@ -96,8 +95,7 @@
                     s.STUDENT_NUMBER,
                     s.LASTFIRST,
                     CASE
-                    WHEN TO_CHAR(s.grade_level) = -2 then 'PK3'
-                    WHEN TO_CHAR(s.grade_level) = -1 then 'PK4'
+                    WHEN TO_CHAR(s.grade_level) = -1 then 'PK'
                     WHEN TO_CHAR(s.grade_level) = 0 then 'K'
                     WHEN TO_CHAR(s.grade_level) = 99 then 'Graduated'
                     ELSE TO_CHAR(s.grade_level)
@@ -149,100 +147,103 @@
                     ON sca.CURRRELTYPECODESETID = CONTACT_REL.CODESETID
                     INNER JOIN STUDENTCONTACTDETAIL scd
                     ON sca.STUDENTCONTACTASSOCID = scd.STUDENTCONTACTASSOCID
-                    AND (CURRENT_DATE < scd.ENDDATE OR scd.ENDDATE IS NULL)
-                    AND (CURRENT_DATE > scd.STARTDATE OR scd.STARTDATE IS NULL)
-                    LEFT JOIN PERSONADDRESSASSOC paa
-                    ON paa.PERSONID = p.ID
-                    AND paa.ADDRESSTYPECODESETID = 19
-                    AND (CURRENT_DATE < paa.ENDDATE OR paa.ENDDATE IS NULL)
-                    AND (CURRENT_DATE > paa.STARTDATE OR paa.STARTDATE IS NULL)
-                    LEFT JOIN PERSONADDRESS pa
-                    ON pa.PERSONADDRESSID = paa.PERSONADDRESSID
-                    LEFT JOIN codeset scs ON (pa.statescodesetid = scs.codesetid)
-                    LEFT JOIN codeset acs on (paa.AddressTypeCodeSetID = acs.codesetid)
-                    WHERE scd.RECEIVESMAILFLG = 1
-                    AND s.ENROLL_STATUS IN (-1,0)
-                    ~[if.is.a.school] and s.schoolid=~(curschoolid) [/if]
-                    ~[if#gr.~(gpv.gr;sqlText)#] AND s.grade_level = ~(gpv.gr) [/if#gr]
-                    ),
-                    NORMALIZED AS (
-                    SELECT
-                    CONTACTS.*,
-                    REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
-                    REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
-                    REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
-                    REPLACE(REPLACE(' ' || CONTACT_ADDRESS_BASE || ' ',
-                    '.', ' '), ',', ' '), '#', ' '), '-', ' '), '/', ' '), '&', ' '),
-                    ' NORTH ', ' N '), ' SOUTH ', ' S '), ' SO ', ' S '), ' EAST ', ' E '), ' WEST ', ' W '),
-                    ' AVENUE ', ' '), ' AVE ', ' '), ' STREET ', ' '), ' ST ', ' '),
-                    ' ROAD ', ' '), ' RD ', ' '), ' DRIVE ', ' '), ' DR ', ' '),
-                    ' COURT ', ' '), ' CT ', ' '), ' CIRCLE ', ' '), ' CIR ', ' '),
-                    ' LANE ', ' '), ' LN ', ' '), ' BOULEVARD ', ' '), ' BLVD ', ' '),
-                    ' HIGHWAY ', ' '), ' HWY ', ' '), ' PARKWAY ', ' '), ' PKWY ', ' '),
-                    ' ', '') AS CONTACT_ADDRESS_KEY
-                    FROM CONTACTS
-                    ),
-                    QUALIFIED_STUDENTS AS (
-                    SELECT STUDENT_NUMBER
-                    FROM NORMALIZED
-                    WHERE HAS_CONTACT_ADDRESS = 1
-                    AND CONTACT_ADDRESS_ORDER = 1
-                    AND CONTACT_ADDRESS_KEY IS NOT NULL
-                    GROUP BY STUDENT_NUMBER
-                    HAVING COUNT(DISTINCT PERSON_ID) > 1
-                    AND COUNT(DISTINCT CONTACT_ADDRESS_KEY) > 1
-                    )
-                    SELECT
-                    MIN(STUDENT_DCID) AS STUDENT_DCID,
-                    STUDENT_NUMBER,
-                    LASTFIRST,
-                    PRETTY_GRADE,
-                    Student_mailing,
-                    LISTAGG('<a href="/admin/contacts/edit.html#?contactid=' || PERSON_ID ||
+                    AND (CURRENT_DATE < scd.ENDDATE OR scd.ENDDATE IS NULL) AND (CURRENT_DATE> scd.STARTDATE OR
+                        scd.STARTDATE IS NULL)
+                        LEFT JOIN PERSONADDRESSASSOC paa
+                        ON paa.PERSONID = p.ID
+                        AND paa.ADDRESSTYPECODESETID = 19
+                        AND (CURRENT_DATE < paa.ENDDATE OR paa.ENDDATE IS NULL) AND (CURRENT_DATE> paa.STARTDATE OR
+                            paa.STARTDATE IS NULL)
+                            LEFT JOIN PERSONADDRESS pa
+                            ON pa.PERSONADDRESSID = paa.PERSONADDRESSID
+                            LEFT JOIN codeset scs ON (pa.statescodesetid = scs.codesetid)
+                            LEFT JOIN codeset acs on (paa.AddressTypeCodeSetID = acs.codesetid)
+                            WHERE scd.RECEIVESMAILFLG = 1
+                            AND s.ENROLL_STATUS IN (-1,0)
+                            ~[if.is.a.school] and s.schoolid=~(curschoolid) [/if]
+                            ~[if#gr.~(gpv.gr;sqlText)#] AND s.grade_level = ~(gpv.gr) [/if#gr]
+                            ),
+                            NORMALIZED AS (
+                            SELECT
+                            CONTACTS.*,
+                            REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                            REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                            REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                            REPLACE(REPLACE(' ' || CONTACT_ADDRESS_BASE || ' ',
+                            '.', ' '), ',', ' '), '#', ' '), '-', ' '), '/', ' '), '&', ' '),
+                            ' NORTH ', ' N '), ' SOUTH ', ' S '), ' SO ', ' S '), ' EAST ', ' E '), ' WEST ', ' W '),
+                            ' AVENUE ', ' '), ' AVE ', ' '), ' STREET ', ' '), ' ST ', ' '),
+                            ' ROAD ', ' '), ' RD ', ' '), ' DRIVE ', ' '), ' DR ', ' '),
+                            ' COURT ', ' '), ' CT ', ' '), ' CIRCLE ', ' '), ' CIR ', ' '),
+                            ' LANE ', ' '), ' LN ', ' '), ' BOULEVARD ', ' '), ' BLVD ', ' '),
+                            ' HIGHWAY ', ' '), ' HWY ', ' '), ' PARKWAY ', ' '), ' PKWY ', ' '),
+                            ' ', '') AS CONTACT_ADDRESS_KEY
+                            FROM CONTACTS
+                            ),
+                            QUALIFIED_STUDENTS AS (
+                            SELECT STUDENT_NUMBER
+                            FROM NORMALIZED
+                            WHERE HAS_CONTACT_ADDRESS = 1
+                            AND CONTACT_ADDRESS_ORDER = 1
+                            AND CONTACT_ADDRESS_KEY IS NOT NULL
+                            GROUP BY STUDENT_NUMBER
+                            HAVING COUNT(DISTINCT PERSON_ID) > 1
+                            AND COUNT(DISTINCT CONTACT_ADDRESS_KEY) > 1
+                            )
+                            SELECT
+                            MIN(STUDENT_DCID) AS STUDENT_DCID,
+                            STUDENT_NUMBER,
+                            LASTFIRST,
+                            PRETTY_GRADE,
+                            Student_mailing,
+                            LISTAGG('<a href="/admin/contacts/edit.html#?contactid=' || PERSON_ID ||
                     '" target="_blank">' || PERSON || '</a>', ', ')
-                    WITHIN GROUP(ORDER BY CONTACTPRIORITYORDER, PERSON) AS PERSON,
-                    LISTAGG(DESCRIPTION, ', ') WITHIN GROUP(ORDER BY CONTACTPRIORITYORDER, PERSON) AS DESCRIPTION,
-                    MIN(Address_type) AS Address_type,
-                    MIN(PERSON_address) AS PERSON_address,
-                    LISTAGG(ISCUSTODIAL, ', ') WITHIN GROUP(ORDER BY CONTACTPRIORITYORDER, PERSON) AS ISCUSTODIAL,
-                    'Yes' AS RECEIVESMAILFLG,
-                    LISTAGG(liveswithflg, ', ') WITHIN GROUP(ORDER BY CONTACTPRIORITYORDER, PERSON) AS liveswithflg,
-                    abbreviation,
-                    name
-                    FROM NORMALIZED
-                    WHERE HAS_CONTACT_ADDRESS = 1
-                    AND CONTACT_ADDRESS_ORDER = 1
-                    AND CONTACT_ADDRESS_KEY IS NOT NULL
-                    AND STUDENT_NUMBER IN (SELECT STUDENT_NUMBER FROM QUALIFIED_STUDENTS)
-                    GROUP BY
-                    STUDENT_NUMBER,
-                    LASTFIRST,
-                    PRETTY_GRADE,
-                    Student_mailing,
-                    CONTACT_ADDRESS_KEY,
-                    abbreviation,
-                    name
-                    ORDER BY name, LASTFIRST, PERSON_address
-                                    ;alternatecolor;nonemessage=<tr>
-                                        <td colspan="100%">No Records were found.</td>
-                                    </tr>]
-                                    <tr class="Record" data-StudentID="~(dcid)">
-                                        <td class="nowrap"><a href="/admin/students/contacts.html?frn=001~(dcid)"
-                                                target="_blank">~(stunum)</a>
-                                        </td>
-                                        <td class="nowrap">~(stuname;t)</td>
-                                        <td class="center">~(grade_level)</td>
-                                        <td class="nowrap">~(StuAddress;t)</td>
-                                        <td class="nowrap">~(contact)</td>
-                                        <td>~(relationship;t)</td>
-                                        <td>~(addresstype;t)</td>
-                                        <td class="nowrap">~(contactaddress;t)</td>
-                                        <td>~(custody;t)</td>
-                                        <td>~(mail;t)</td>
-                                        <td>~(liveswith;t)</td>
-                                        ~[if.district.office]<td class="nowrap">~(school;t)</td>[/if]
-                                    </tr>
-                                    [/tlist_sql]
+                            WITHIN GROUP(ORDER BY CONTACTPRIORITYORDER, PERSON) AS PERSON,
+                            LISTAGG(DESCRIPTION, ', ') WITHIN GROUP(ORDER BY CONTACTPRIORITYORDER, PERSON) AS
+                            DESCRIPTION,
+                            MIN(Address_type) AS Address_type,
+                            MIN(PERSON_address) AS PERSON_address,
+                            LISTAGG(ISCUSTODIAL, ', ') WITHIN GROUP(ORDER BY CONTACTPRIORITYORDER, PERSON) AS
+                            ISCUSTODIAL,
+                            'Yes' AS RECEIVESMAILFLG,
+                            LISTAGG(liveswithflg, ', ') WITHIN GROUP(ORDER BY CONTACTPRIORITYORDER, PERSON) AS
+                            liveswithflg,
+                            abbreviation,
+                            name
+                            FROM NORMALIZED
+                            WHERE HAS_CONTACT_ADDRESS = 1
+                            AND CONTACT_ADDRESS_ORDER = 1
+                            AND CONTACT_ADDRESS_KEY IS NOT NULL
+                            AND STUDENT_NUMBER IN (SELECT STUDENT_NUMBER FROM QUALIFIED_STUDENTS)
+                            GROUP BY
+                            STUDENT_NUMBER,
+                            LASTFIRST,
+                            PRETTY_GRADE,
+                            Student_mailing,
+                            CONTACT_ADDRESS_KEY,
+                            abbreviation,
+                            name
+                            ORDER BY name, LASTFIRST, PERSON_address
+                            ;alternatecolor;nonemessage=<tr>
+                                <td colspan="100%">No Records were found.</td>
+                            </tr>]
+                            <tr class="Record" data-StudentID="~(dcid)">
+                                <td class="nowrap"><a href="/admin/students/contacts.html?frn=001~(dcid)"
+                                        target="_blank">~(stunum)</a>
+                                </td>
+                                <td class="nowrap">~(stuname;t)</td>
+                                <td class="center">~(grade_level)</td>
+                                <td class="nowrap">~(StuAddress;t)</td>
+                                <td class="nowrap">~(contact)</td>
+                                <td>~(relationship;t)</td>
+                                <td>~(addresstype;t)</td>
+                                <td class="nowrap">~(contactaddress;t)</td>
+                                <td>~(custody;t)</td>
+                                <td>~(mail;t)</td>
+                                <td>~(liveswith;t)</td>
+                                ~[if.district.office]<td class="nowrap">~(school;t)</td>[/if]
+                            </tr>
+                            [/tlist_sql]
                 </tbody>
             </table>
         </div>

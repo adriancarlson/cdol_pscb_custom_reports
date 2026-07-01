@@ -43,8 +43,7 @@
                                     SELECT DISTINCT GRADE_LEVEL, DECODE('~[gpv:grlvl]', GRADE_LEVEL, 'SELECTED', '')
                                     isselected,
                                     CASE
-                                    WHEN grade_level = -2 THEN 'PK3'
-                                    WHEN grade_level = -1 THEN 'PK4'
+                                    WHEN grade_level = -1 THEN 'PK'
                                     WHEN grade_level = 0 THEN 'K'
                                     WHEN grade_level = 99 THEN 'Gr'
                                     ELSE TO_CHAR(grade_level)
@@ -92,8 +91,7 @@
                     s.lastfirst,
                     s.dob,
                     CASE
-                    WHEN grade_level = -2 THEN 'PK3'
-                    WHEN grade_level = -1 THEN 'PK4'
+                    WHEN grade_level = -1 THEN 'PK'
                     WHEN grade_level = 0 THEN 'K'
                     WHEN grade_level = 99 THEN 'Gr'
                     ELSE TO_CHAR(grade_level)
