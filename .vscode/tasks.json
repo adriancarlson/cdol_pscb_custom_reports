@@ -4,7 +4,7 @@
         {
             "label": "buildplugin",
             "type": "shell",
-            "command": "py ../../pluginpack.py --with-version",
+            "command": "py ../../pluginpack.py --with-version --mask \"(?:cdol-custom-pscb-report-navigation\\.json|README\\.md)$\"",
             "problemMatcher": [],
             "group": {
                 "kind": "build",
