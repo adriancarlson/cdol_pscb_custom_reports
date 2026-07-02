@@ -10,6 +10,13 @@
 		</td>
 		<td>List Students Mother and Father with Addresses, Phone Numbers, and Emails</td>
 	</tr>
+	~[if#shirtSize.~(curschoolid)=120]
+	<tr id="studentShirtSize">
+		<td><a href="/admin/reports_pscb_dev_pro/studentdataverify/cdol_student_tshirt_size.html">Student T-shirt
+				Size</a></td>
+		<td>List students and their T-shirt sizes</td>
+	</tr>
+	[/if#shirtSize]
 	<tr>
 		<td><a href="/admin/reports_pscb_dev_pro/misc/activityparticipants.html">Student Activities</a></td>
 		<td>View membership list for a selected school activity.</td>
