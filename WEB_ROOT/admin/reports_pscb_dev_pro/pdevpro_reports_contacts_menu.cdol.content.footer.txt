@@ -94,6 +94,12 @@
 		<td>List students and any contacts that have an Maiden Name
 		</td>
 	</tr>
+	<tr id="familyRep">
+		<td><a href="/admin/reports_pscb_dev_pro/studentdataverify/cdol_student_family_rep.html?contact=yes">Family Rep</a>
+		</td>
+		<td>List students and whether they are a family representative
+		</td>
+	</tr>
 </table>
 
 

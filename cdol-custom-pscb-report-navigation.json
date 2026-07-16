@@ -296,6 +296,21 @@
 									"sortOrder": 210,
 									"parentHTMLID": "navPSCBDevProContacts",
 									"districtLevelContext": 0
+								},
+								{
+									"htmlID": "navPSCBDevProContacts-cdol-familyRep",
+									"title": "Family Rep🔹",
+									"pageURL": "/admin/reports_pscb_dev_pro/studentdataverify/cdol_student_family_rep.html?contact=yes",
+									"version": "26.7.0.2",
+									"contextType": "main",
+									"isNewTab": null,
+									"isLandingPage": null,
+									"iconName": null,
+									"requiredContext": null,
+									"checkParams": true,
+									"sortOrder": 220,
+									"parentHTMLID": "navPSCBDevProContacts",
+									"districtLevelContext": 0
 								}
 							]
 						}
@@ -1182,6 +1197,21 @@
 									"iconName": null,
 									"requiredContext": null,
 									"sortOrder": 162,
+									"parentHTMLID": "navPSCBDevProSubMenuStudentDataVerification-cdol",
+									"districtLevelContext": 0
+								},
+								{
+									"htmlID": "cdol_student_family_rep",
+									"title": "Family Rep🔹",
+									"pageURL": "/admin/reports_pscb_dev_pro/studentdataverify/cdol_student_family_rep.html",
+									"version": "26.7.0.2",
+									"contextType": "main",
+									"isNewTab": null,
+									"isLandingPage": null,
+									"iconName": null,
+									"requiredContext": null,
+									"checkParams": true,
+									"sortOrder": 163,
 									"parentHTMLID": "navPSCBDevProSubMenuStudentDataVerification-cdol",
 									"districtLevelContext": 0
 								},

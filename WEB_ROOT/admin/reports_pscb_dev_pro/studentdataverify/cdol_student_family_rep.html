@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Family Rep</title>
+        ~[wc:commonscripts]
+        <link href="/images/css/screen.css" rel="stylesheet" media="screen">
+        <link href="/images/css/print.css" rel="stylesheet" media="print">
+        ~[wc:pscbdevpro_init]
+    </head>
+
+    <body>
+        ~[wc:admin_header_css]<!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a>
+        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html" target="_top">PSCB DEV Custom Reports</a>
+        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_studentdataverify_menu.html" target="_top">Student
+            Data Verification</a> &gt;
+        Family Rep
+        <!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
+        <!-- start of Options -->
+        <h1>Family Rep</h1>
+        <form name="searchform" action="#" method="POST">
+            <div class="box-round" style="overflow: hidden;">
+                <h2>Report Filters</h2>
+                <table cellspacing="0" cellpadding="0" class="linkDescList">
+                    <thead>
+                        <tr>
+                            <th style="white-space: nowrap;" width="180px">Student Selection</th>
+                            <th style="white-space: nowrap;" width="180px">Grade Selection</th>
+                            <th style="white-space: nowrap;" width="180px">Is Family Rep</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <select name="ss" id="ss">
+                                    <option value='' ~[if.~[gpv:ss]=]selected[/if]>All Students</option>
+                                    <option value="cur" ~[if.~[gpv:ss]=cur]selected[/if]>Current Selection
+                                        (~[x:studsinset])</option>
+                                </select>
+                            </td>
+                            <td>
+                                <select name="gr" id="gr">
+                                    <option value='' ~[if.~[gpv:gr]=]selected[/if]>All Grades</option>
+                                    ~[tlist_sql;
+                                    SELECT DISTINCT GRADE_LEVEL,
+                                    CASE
+                                    WHEN TO_CHAR(grade_level) = -1 then 'PK'
+                                    WHEN TO_CHAR(grade_level) = 0 then 'K'
+                                    WHEN TO_CHAR(grade_level) = 99 then 'Graduated'
+                                    ELSE TO_CHAR(grade_level)
+                                    END as prettygrade
+                                    FROM STUDENTS
+                                    WHERE TO_CHAR(SCHOOLID) LIKE CASE WHEN TO_CHAR(~(curschoolid)) = '0'
+                                    THEN '%' ELSE TO_CHAR(~(curschoolid)) END
+                                    AND ENROLL_STATUS IN (-1, 0)
+                                    ORDER BY GRADE_LEVEL]
+                                    <option value="'~(gr)'">~(prettygrade)</option>
+                                    [/tlist_sql]
+                                </select>
+                            </td>
+                            <td>
+                                <select name="fr" id="fr">
+                                    <option value='' ~[if.~[gpv:fr]=]selected[/if]>Both</option>
+                                    <option value="1" ~[if.~[gpv:fr]=1]selected[/if]>Yes</option>
+                                    <option value="0" ~[if.~[gpv:fr]=0]selected[/if]>No</option>
+                                </select>
+                            </td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="button-row left">
+                    <span style="color:red">&nbsp;&nbsp;Select parameters and click submit</span>
+                    <input type="hidden" name="showData" value="1">
+                    <input type="hidden" name="ac" value="prim">~[submitbutton]
+                </div>
+            </div>
+        </form>
+        <!-- Start of Results -->
+        ~[if#showData.~(gpv.showData;sqlText)=1]
+        <div class="box-round">
+            <h2>Family Rep</h2>
+            <table cellspacing="0" cellpadding="4" class="tablesorter grid center" id="pscbDevPro">
+                <thead>
+                    <tr>
+                        <th class="left">Student Number</th>
+                        <th class="left">Name</th>
+                        <th class="left filter-select">Grade Level</th>
+                        <th class="left filter-select">Gender</th>
+                        <th class="left filter-select">Family Rep</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ~[tlist_sql;
+                    SELECT
+                    Students.dcid,
+                    Students.student_number,
+                    Students.lastfirst,
+                    CASE
+                    WHEN TO_CHAR(Students.grade_level) = -1 THEN 'PK'
+                    WHEN TO_CHAR(Students.grade_level) = 0 THEN 'K'
+                    WHEN TO_CHAR(Students.grade_level) = 99 THEN 'Graduated'
+                    ELSE TO_CHAR(Students.grade_level)
+                    END AS pretty_grade,
+                    CASE
+                    WHEN UPPER(Students.gender) = 'M' THEN 'Male'
+                    WHEN UPPER(Students.gender) = 'F' THEN 'Female'
+                    ELSE Students.gender
+                    END AS gender,
+                    DECODE(StudentCoreFields.family_rep, 1, 'Yes', 0, 'No', 'No') AS family_rep
+                    FROM
+                    Students ~[if#ss.~(gpv.ss;sqlText)=cur]
+                    INNER JOIN ~[temp.table.current.selection:students] ON Students.dcid =
+                    ~[temp.table.current.selection:students].dcid
+                    [/if#ss]
+                    LEFT JOIN StudentCoreFields ON StudentCoreFields.STUDENTSDCID = Students.DCID
+                    WHERE
+                    Students.enroll_status IN (-1, 0) ~[if.is.a.school]
+                    AND (
+                    Students.next_school = ~(curschoolid)
+                    OR Students.schoolid = ~(curschoolid)
+                    )
+                    [/if.is.a.school] ~[if#gr.~(gpv.gr;sqlText)#]
+                    AND Students.grade_level = ~(gpv.gr) [/if#gr]
+                    ~[if#familyRepYes.~(gpv.fr;sqlText)=1]
+                    AND StudentCoreFields.family_rep = 1 [/if#familyRepYes]
+                    ~[if#familyRepNo.~(gpv.fr;sqlText)=0]
+                    AND (StudentCoreFields.family_rep = 0 OR StudentCoreFields.family_rep IS NULL) [/if#familyRepNo]
+                    ORDER BY
+
+                    Students.lastfirst ;alternatecolor;nonemessage=<tr nodata>
+                        <td colspan="100%">No Records Found.</td>
+                    </tr>]
+                    <tr class="Record" data-StudentID="~(dcid)">
+                        <td class="nowrap"><a href="/admin/students/modifydata.html?frn=001~(dcid)"
+                                target="_blank">~(studentnumb)</a>
+                        </td>
+                        <td>~(name;t)</td>
+                        <td class="center">~(grade_level)</td>
+                        <td>~(gender;t)</td>
+                        <td class="nowrap center">~(family_rep;t)</td>
+                    </tr>
+                    [/tlist_sql]
+                </tbody>
+            </table>
+        </div>
+        <!-- End of pscbDevPro -->
+        <div style="clear: both;">
+            <p class="center">Report generated at ~[time] on ~[date]</p>
+        </div>
+        [/if#showData]
+        ~[wc:admin_footer_frame_css]
+    </body>
+
+</html><!-- end right frame -->

@@ -17,6 +17,11 @@
 		<td>List students and their T-shirt sizes</td>
 	</tr>
 	[/if#shirtSize]
+	<tr id="studentFamilyRep">
+		<td><a href="/admin/reports_pscb_dev_pro/studentdataverify/cdol_student_family_rep.html">Family Rep</a>
+		</td>
+		<td>List students and whether they are a family representative</td>
+	</tr>
 	<tr>
 		<td><a href="/admin/reports_pscb_dev_pro/misc/activityparticipants.html">Student Activities</a></td>
 		<td>View membership list for a selected school activity.</td>
