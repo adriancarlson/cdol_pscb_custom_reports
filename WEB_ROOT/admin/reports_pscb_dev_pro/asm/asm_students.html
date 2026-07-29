@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Apple School Manager - Students</title>
+        ~[wc:commonscripts]
+        <link href="/images/css/screen.css" rel="stylesheet" media="screen">
+        <link href="/images/css/print.css" rel="stylesheet" media="print">
+        ~[wc:pscbdevpro_init]
+        <script>
+            pscbToolButtons = { "copyData": "No", "csvFile": "Yes", "pdfFile": "No", "curSel": "Yes" };
+        </script>
+
+    </head>
+
+    <body>
+        ~[wc:admin_header_css]~[wc:admin_navigation_frame_css]
+
+        <form name="searchform" action="#" method="POST">
+            <h1>Apple School Manager - Students</h1>
+            <div class="box-round" style="overflow: hidden;">
+                <h2>Report Filters</h2>
+                <table cellspacing="0" cellpadding="0" class="linkDescList">
+                    <thead>
+                        <tr>
+                            <th style="white-space: nowrap;" width="180px">Student Selection</th>
+                            <th style="white-space: nowrap;">Grade Selection</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <select name="ss" id="ss">
+                                    <option value="" ~[if.~[gpv:ss]=]selected[/if]>All Students</option>
+                                    <option value="cur" ~[if.~[gpv:ss]=cur]selected[/if]>Current Selection
+                                        (~[x:studsinset])</option>
+                                </select>
+                            </td>
+                            <td>
+                                <select name="gr" id="gr">
+                                    <option value="" ~[if.~[gpv:gr]=]selected[/if]>All Grades</option>
+                                    ~[tlist_sql;
+                                    SELECT DISTINCT grade_level,
+                                    CASE
+                                    WHEN TO_CHAR(grade_level) = -1 THEN 'PK'
+                                    WHEN TO_CHAR(grade_level) = 0 THEN 'K'
+                                    WHEN TO_CHAR(grade_level) = 99 THEN 'Graduated'
+                                    ELSE TO_CHAR(grade_level)
+                                    END AS prettygrade
+                                    FROM students
+                                    WHERE TO_CHAR(schoolid) LIKE CASE WHEN TO_CHAR(~(curschoolid)) = '0'
+                                    THEN '%' ELSE TO_CHAR(~(curschoolid)) END
+                                    AND enroll_status = 0
+                                    ORDER BY grade_level]
+                                    <option value="'~(gr)'">~(prettygrade)</option>
+                                    [/tlist_sql]
+                                </select>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="button-row left">
+                    <span style="color: red;">&nbsp;&nbsp;Select parameters and click submit</span>
+                    <input type="hidden" name="showData" value="1">
+                    <input type="hidden" name="ac" value="prim">~[submitbutton]
+                </div>
+            </div>
+        </form>
+        <!-- Start of Results -->
+        ~[if#showData.~(gpv.showData;sqlText)=1]
+        <div class="box-round">
+            <h2 class="pscbdevBkgColor">&nbsp;&nbsp;Apple School Manager - Students</h2>
+            <table cellspacing="0" cellpadding="4" class="tablesorter grid center" id="pscbDevPro" groupRowsByCol="4"
+                color1="#ffffff" color2="#d7edfe">
+                <thead>
+                    <tr>
+                        <th class="left">person_id</th>
+                        <th class="left">person_number</th>
+                        <th class="left">first_name</th>
+                        <th class="left">middle_name</th>
+                        <th class="left">last_name</th>
+                        <th class="left filter-select">grade_level</th>
+                        <th class="left">email_address</th>
+                        <th class="left">sis_username</th>
+                        <th class="left">password_policy</th>
+                        <th class="left">location_id</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ~[tlist_sql;
+                    WITH normalization_map AS (
+                    SELECT
+                    UNISTR('\00EB\00E9\00E8\00EA\00E4\00E1\00E0\00E2\00E3\00E5\00F6\00F3\00F2\00F4\00F5\00FC\00FA\00F9\00FB\00EF\00ED\00EC\00EE\00E7\00F1\00FF\00CB\00C9\00C8\00CA\00C4\00C1\00C0\00C2\00C3\00C5\00D6\00D3\00D2\00D4\00D5\00DC\00DA\00D9\00DB\00CF\00CD\00CC\00CE\00C7\00D1\0178')
+                    AS foreign_chars,
+                    'eeeeaaaaaaooooouuuuiiiicnyEEEEAAAAAAOOOOOUUUUIIIICNY' AS ascii_chars,
+                    UNISTR('\2018\2019\02BC\FF07') AS unicode_apostrophes,
+                    CHR(39) || CHR(39) || CHR(39) || CHR(39) AS ascii_apostrophes
+                    FROM dual
+                    ),
+                    student_data AS (
+                    SELECT
+                    students.dcid AS student_dcid,
+                    students.student_number,
+                    students.first_name,
+                    students.middle_name,
+                    students.last_name,
+                    students.classof,
+                    PSM_StudentContact.email AS email_address,
+                    students.schoolid,
+                    students.lastfirst
+                    FROM PSM_StudentContact
+                    INNER JOIN PSM_StudentContactType
+                    ON PSM_StudentContact.studentcontacttypeid = PSM_StudentContactType.id
+                    AND PSM_StudentContactType.name = 'Self'
+                    INNER JOIN sync_studentmap
+                    ON PSM_StudentContact.studentid = sync_studentmap.studentid
+                    INNER JOIN students ON sync_studentmap.studentsdcid = students.dcid
+                    ~[if#ss.~(gpv.ss;sqlText)=cur] INNER JOIN ~[temp.table.current.selection:students]
+                    ON students.dcid = ~[temp.table.current.selection:students].dcid
+                    [/if#ss]
+                    WHERE students.enroll_status IN (-1,0)
+                    ~[if.is.a.school] AND students.schoolid = ~(curschoolid) [/if.is.a.school]
+                    ~[if#gr.~(gpv.gr;sqlText)#] AND students.grade_level = ~(gpv.gr) [/if#gr]
+                    ),
+                    normalized_students AS (
+                    SELECT
+                    student_data.student_dcid,
+                    student_data.student_number,
+                    TRANSLATE(
+                    TRANSLATE(student_data.first_name, normalization_map.foreign_chars,
+                    normalization_map.ascii_chars),
+                    normalization_map.unicode_apostrophes, normalization_map.ascii_apostrophes
+                    ) AS first_name,
+                    TRANSLATE(
+                    TRANSLATE(student_data.middle_name, normalization_map.foreign_chars,
+                    normalization_map.ascii_chars),
+                    normalization_map.unicode_apostrophes, normalization_map.ascii_apostrophes
+                    ) AS middle_name,
+                    TRANSLATE(
+                    TRANSLATE(student_data.last_name, normalization_map.foreign_chars,
+                    normalization_map.ascii_chars),
+                    normalization_map.unicode_apostrophes, normalization_map.ascii_apostrophes
+                    ) AS last_name,
+                    student_data.classof,
+                    LOWER(REPLACE(
+                    TRANSLATE(
+                    TRANSLATE(student_data.email_address, normalization_map.foreign_chars,
+                    normalization_map.ascii_chars),
+                    normalization_map.unicode_apostrophes, normalization_map.ascii_apostrophes
+                    ),
+                    CHR(39), ''
+                    )) AS email_address,
+                    student_data.schoolid,
+                    student_data.lastfirst
+                    FROM student_data
+                    CROSS JOIN normalization_map
+                    )
+                    SELECT
+                    normalized_students.student_dcid AS student_dcid,
+                    normalized_students.student_number AS person_id,
+                    normalized_students.student_number AS person_num,
+                    normalized_students.first_name AS first_name,
+                    normalized_students.middle_name AS middle_name,
+                    normalized_students.last_name AS last_name,
+                    normalized_students.classof AS grad_year,
+                    normalized_students.email_address AS email_addr,
+                    CASE
+                    WHEN INSTR(normalized_students.email_address, '@') > 0
+                    THEN SUBSTR(normalized_students.email_address, 1,
+                    INSTR(normalized_students.email_address, '@') - 1)
+                    ELSE normalized_students.email_address
+                    END AS sis_user,
+                    '4' AS password_pol,
+                    normalized_students.schoolid AS location_id
+                    FROM normalized_students
+                    ORDER BY normalized_students.schoolid, normalized_students.lastfirst
+                    ;alternatecolor;nonemessage=<tr>
+                        <td colspan="100%">No Records were found.</td>
+                    </tr>]
+                    <tr class="Record" data-StudentID="~(student_dcid)">
+                        <td class="nowrap">~(person_id;t)</td>
+                        <td class="nowrap">~(person_num;t)</td>
+                        <td>~(first_name;t)</td>
+                        <td>~(middle_name;t)</td>
+                        <td>~(last_name;t)</td>
+                        <td class="center">~(grad_year;t)</td>
+                        <td class="nowrap">~(email_addr;t)</td>
+                        <td>~(sis_user;t)</td>
+                        <td class="center">~(password_pol;t)</td>
+                        <td>~(location_id;t)</td>
+                    </tr>
+                    [/tlist_sql]
+                </tbody>
+            </table>
+        </div>
+        <div style="clear: both;">
+            <p class="center">Report generated at ~[time] on ~[date]</p>
+        </div>
+        [/if#showData]
+        ~[wc:admin_footer_frame_css]
+    </body>
+
+</html>

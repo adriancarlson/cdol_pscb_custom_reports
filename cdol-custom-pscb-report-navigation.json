@@ -74,6 +74,52 @@
 					]
 				},
 				{
+					"htmlID": "navPSCBDevProSubMenuASM",
+					"title": "Apple School Manager",
+					"pageURL": null,
+					"version": "26.7.0.2",
+					"contextType": "main",
+					"isNewTab": null,
+					"isLandingPage": null,
+					"iconName": null,
+					"requiredContext": null,
+					"sortOrder": 15,
+					"parentHTMLID": "navPSCBDevProReportsMenu",
+					"districtLevelContext": 0,
+					"children": [
+						{
+							"htmlID": "navPSCBDevProASM",
+							"title": "Apple School Manager",
+							"pageURL": null,
+							"version": "26.7.0.2",
+							"contextType": "main",
+							"isNewTab": null,
+							"isLandingPage": null,
+							"iconName": null,
+							"requiredContext": null,
+							"sortOrder": 10,
+							"parentHTMLID": "navPSCBDevProSubMenuASM",
+							"districtLevelContext": 0,
+							"children": [
+								{
+									"htmlID": "asm_students",
+									"title": "ASM - Students🔹",
+									"pageURL": "/admin/reports_pscb_dev_pro/asm/asm_students.html",
+									"version": "26.7.0.2",
+									"contextType": "main",
+									"isNewTab": null,
+									"isLandingPage": null,
+									"iconName": null,
+									"requiredContext": null,
+									"sortOrder": 10,
+									"parentHTMLID": "navPSCBDevProASM",
+									"districtLevelContext": 0
+								}
+							]
+						}
+					]
+				},
+				{
 					"htmlID": "navPSCBDevProSubMenuContacts",
 					"title": "Contacts",
 					"pageURL": null,
