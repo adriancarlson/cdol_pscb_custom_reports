@@ -1,0 +1,118 @@
+{
+	"pages": [
+		{
+			"htmlID": "navCdolPscbDevProCspAttDaily",
+			"parentHTMLID": "navStudentAttendanceSection",
+			"title": "Attendance Daily (PSCB)",
+			"version": "26.8",
+			"contextType": "student",
+			"requiredContext": "student",
+			"sortOrder": 125,
+			"checkParams": true,
+			"pageURL": "~[if.~(decode;~(curschoolid);0;disp;101;disp;115;disp;130;disp;160;disp;189;disp;210;disp;nodisp)=nodisp]/admin/students/pscb_pro_attendance_daily.html?frn=~(studentfrn)&pscb=false[/if]"
+		},
+		{
+			"htmlID": "navCdolPscbDevProCspAttMeeting",
+			"parentHTMLID": "navStudentAttendanceSection",
+			"title": "Attendance Meeting (PSCB)",
+			"version": "26.8",
+			"contextType": "student",
+			"requiredContext": "student",
+			"sortOrder": 125,
+			"checkParams": true,
+			"pageURL": "~[if.~(decode;~(curschoolid);0;disp;101;disp;115;disp;130;disp;160;disp;189;disp;210;disp;nodisp)=disp]/admin/students/pscb_pro_attendance_meeting.html?frn=~(studentfrn)&pscb=false[/if]"
+		},
+		{
+			"htmlID": "navCdolPscbDevProCspAttHistory",
+			"parentHTMLID": "navStudentAttendanceSection",
+			"title": "Attendance History (PSCB)",
+			"version": "26.8",
+			"contextType": "student",
+			"requiredContext": "student",
+			"sortOrder": 175,
+			"checkParams": true,
+			"pageURL": "/admin/students/pscb_pro_attendance_daily_history.html?frn=~(studentfrn)&pscb=false"
+		},
+		{
+			"htmlID": "navCdolPscbDevProCspClassEnrollments",
+			"parentHTMLID": "navStudentCourseScheduleSection",
+			"title": "Class Enrollments History (PSCB)",
+			"version": "26.8",
+			"districtLevelContext": 1,
+			"contextType": "student",
+			"requiredContext": "student",
+			"sortOrder": 502,
+			"checkParams": true,
+			"pageURL": "/admin/students/pscb_pro_class_enrollments_history.html?frn=~(studentfrn)&pscb=false"
+		},
+		{
+			"htmlID": "navCdolPscbDevProCspGradesCurYr",
+			"parentHTMLID": "navStudentHonorRoll",
+			"title": "Current Grades (PSCB)",
+			"version": "26.8",
+			"districtLevelContext": 1,
+			"contextType": "student",
+			"requiredContext": "student",
+			"sortOrder": 250,
+			"checkParams": true,
+			"pageURL": "/admin/students/pscb_pro_current_grades_summary.html?frn=~(studentfrn)&pscb=false"
+		},
+		{
+			"htmlID": "navCdolPscbDevProCspGradesHistory",
+			"parentHTMLID": "navStudentAcademicPerformanceSection",
+			"title": "Grades History (PSCB)",
+			"version": "26.8",
+			"districtLevelContext": 1,
+			"contextType": "student",
+			"requiredContext": "student",
+			"sortOrder": 225,
+			"checkParams": true,
+			"pageURL": "/admin/students/pscb_pro_grades_history_summary.html?frn=~(studentfrn)&pscb=false"
+		},
+		{
+			"htmlID": "navCdolPscbDevProCspLogEntriesSummary",
+			"parentHTMLID": "navStudentBehaviorSection",
+			"title": "Log Entries Summary (PSCB)",
+			"version": "26.8",
+			"contextType": "student",
+			"requiredContext": "student",
+			"sortOrder": 250,
+			"checkParams": true,
+			"pageURL": "/admin/students/pscb_pro_log_summary.html?frn=~(studentfrn)&pscb=false"
+		},
+		{
+			"htmlID": "navCdolPscbDevProCspStdRequestsFY",
+			"parentHTMLID": "navStudentRegistrationSection",
+			"title": "Requests Future Year (PSCB)",
+			"version": "26.8",
+			"districtLevelContext": 1,
+			"contextType": "student",
+			"requiredContext": "student",
+			"sortOrder": 150,
+			"checkParams": true,
+			"pageURL": "/admin/students/pscb_pro_requests_FY.html?frn=~(studentfrn)&pscb=false"
+		},
+		{
+			"htmlID": "navCdolPscbDevProCspScheduleViews",
+			"parentHTMLID": "navStudentCourseScheduleSection",
+			"title": "Schedule Views (PSCB)",
+			"version": "26.8",
+			"contextType": "student",
+			"requiredContext": "student",
+			"sortOrder": 501,
+			"checkParams": true,
+			"pageURL": "/admin/students/pscb_pro_schedule_list_view.html?frn=~(studentfrn)&pscb=false"
+		},
+		{
+			"htmlID": "navCdolPscbDevProCspTestScoresSummary",
+			"parentHTMLID": "navStudentAcademicPerformanceSection",
+			"title": "Test Scores Summary (PSCB)",
+			"version": "26.8",
+			"contextType": "student",
+			"requiredContext": "student",
+			"sortOrder": 700,
+			"checkParams": true,
+			"pageURL": "/admin/students/pscb_pro_test_scores_summary.html?frn=~(studentfrn)&pscb=false"
+		}
+	]
+}
