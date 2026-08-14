@@ -106,8 +106,7 @@
                     END as GENDER,
                     s.home_phone,
                     s.street || ' ' || s.city || ' ' || s.state || ' ' || s.zip as ADDRESS,
-                    CASE WHEN p.firstname IS NULL AND p.lastname IS NULL THEN '-No Name-' ELSE p.firstname||'
-                    '||p.lastname ||' - '|| cs.code
+                    CASE WHEN p.firstname IS NULL AND p.lastname IS NULL THEN '-No Name-' ELSE p.firstname||' '||p.lastname ||' - '|| cs.code
                     END as Contact,
                     sca.contactpriorityorder contactpriorityorder,
                     s.schoolid

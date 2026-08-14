@@ -89,6 +89,7 @@
                         <th class="left">Student Number</th>
                         <th class="left">Name</th>
                         <th class="left filter-select">Grade Level</th>
+                        <th class="left filter-select">Home Room</th>
                         <th class="left filter-select">Gender</th>
                         <th class="left filter-select">Family Rep</th>
                     </tr>
@@ -105,6 +106,7 @@
                     WHEN TO_CHAR(Students.grade_level) = 99 THEN 'Graduated'
                     ELSE TO_CHAR(Students.grade_level)
                     END AS pretty_grade,
+                    Students.Home_Room AS home_room,
                     CASE
                     WHEN UPPER(Students.gender) = 'M' THEN 'Male'
                     WHEN UPPER(Students.gender) = 'F' THEN 'Female'
@@ -140,6 +142,7 @@
                         </td>
                         <td>~(name;t)</td>
                         <td class="center">~(grade_level)</td>
+                        <td class="center">~(home_room;t)</td>
                         <td>~(gender;t)</td>
                         <td class="nowrap center">~(family_rep;t)</td>
                     </tr>
