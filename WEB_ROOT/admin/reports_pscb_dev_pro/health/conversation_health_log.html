@@ -76,6 +76,68 @@
                 </thead>
                 <tbody>
                     ~[tlist_sql;
+                    WITH health_option_matches AS (
+                    SELECT
+                    stored_identity,
+                    displayvalue,
+                    ROW_NUMBER() OVER (
+                    PARTITION BY stored_identity
+                    ORDER BY match_priority, option_id
+                    ) AS match_rank
+                    FROM (
+                    SELECT
+                    health_option.id AS option_id,
+                    LOWER(TRIM(health_option.code)) AS stored_identity,
+                    health_option.displayvalue,
+                    1 AS match_priority
+                    FROM u_cdol_health_option health_option
+                    WHERE health_option.codetype = 'HEALTH_CONVERSATION'
+                    UNION ALL
+                    SELECT
+                    health_option.id AS option_id,
+                    LOWER(TRIM(health_option.displayvalue)) AS stored_identity,
+                    health_option.displayvalue,
+                    2 AS match_priority
+                    FROM u_cdol_health_option health_option
+                    WHERE health_option.codetype = 'HEALTH_CONVERSATION'
+                    )
+                    ),
+                    conversation_segments AS (
+                    SELECT
+                    conversation_log.health_log_id,
+                    LEVEL AS segment_number,
+                    TRIM(REGEXP_SUBSTR(conversation_log.conversation_type, '[^,]+', 1, LEVEL)) AS stored_value
+                    FROM (
+                    SELECT
+                    health_log.id AS health_log_id,
+                    health_log.conversation_type
+                    FROM u_cdol_health_log health_log
+                    WHERE health_log.log_type = 'Conversation'
+                    AND INSTR(health_log.conversation_type, ',') > 0
+                    ) conversation_log
+                    CONNECT BY REGEXP_SUBSTR(conversation_log.conversation_type, '[^,]+', 1, LEVEL) IS NOT NULL
+                    AND PRIOR conversation_log.health_log_id = conversation_log.health_log_id
+                    AND PRIOR SYS_GUID() IS NOT NULL
+                    ),
+                    conversation_segment_resolution AS (
+                    SELECT
+                    conversation_segments.health_log_id,
+                    conversation_segments.segment_number,
+                    health_option_matches.displayvalue
+                    FROM conversation_segments
+                    LEFT JOIN health_option_matches
+                    ON health_option_matches.stored_identity = LOWER(TRIM(conversation_segments.stored_value))
+                    AND health_option_matches.match_rank = 1
+                    ),
+                    conversation_resolved_lists AS (
+                    SELECT
+                    health_log_id,
+                    COUNT(*) AS segment_count,
+                    COUNT(displayvalue) AS matched_segment_count,
+                    LISTAGG(displayvalue, ', ') WITHIN GROUP (ORDER BY segment_number) AS display_values
+                    FROM conversation_segment_resolution
+                    GROUP BY health_log_id
+                    )
                     SELECT
                     u_cdol_health_log.studentsdcid,
                     to_char(u_cdol_health_log.log_date, 'MM/DD/YYYY')|| ' ' || TO_CHAR(TO_DATE('1970-01-01',
@@ -83,7 +145,14 @@
                     students.lastfirst,
                     students.grade_level,
                     u_cdol_health_log.contact,
-                    u_cdol_health_log.conversation_type,
+                    CASE
+                    WHEN exact_conversation_option.displayvalue IS NOT NULL
+                    THEN exact_conversation_option.displayvalue
+                    WHEN conversation_resolved_lists.segment_count >= 2
+                    AND conversation_resolved_lists.matched_segment_count = conversation_resolved_lists.segment_count
+                    THEN conversation_resolved_lists.display_values
+                    ELSE u_cdol_health_log.conversation_type
+                    END AS conversation_type,
                     users.lastfirst,
                     u_cdol_health_log.notes
                     FROM students
@@ -95,6 +164,11 @@
                     ON students.dcid = u_cdol_health_log.studentsdcid
                     INNER JOIN users
                     ON u_cdol_health_log.users_dcid = users.dcid
+                    LEFT JOIN health_option_matches exact_conversation_option
+                    ON exact_conversation_option.stored_identity = LOWER(TRIM(u_cdol_health_log.conversation_type))
+                    AND exact_conversation_option.match_rank = 1
+                    LEFT JOIN conversation_resolved_lists
+                    ON conversation_resolved_lists.health_log_id = u_cdol_health_log.id
                     WHERE u_cdol_health_log.yearid= ~(curyearid)
                     AND u_cdol_health_log.log_date >= to_date('~(gpv.sDate;sqlText)','MM/DD/YYYY') AND
                     u_cdol_health_log.log_date <= to_date('~(gpv.eDate;sqlText)','MM/DD/YYYY') AND

@@ -82,15 +82,44 @@
                 </thead>
                 <tbody>
                     ~[tlist_sql;
+                    WITH health_option_matches AS (
+                    SELECT
+                    codetype,
+                    stored_identity,
+                    displayvalue,
+                    ROW_NUMBER() OVER (
+                    PARTITION BY codetype, stored_identity
+                    ORDER BY match_priority, option_id
+                    ) AS match_rank
+                    FROM (
+                    SELECT
+                    health_option.id AS option_id,
+                    health_option.codetype,
+                    LOWER(TRIM(health_option.code)) AS stored_identity,
+                    health_option.displayvalue,
+                    1 AS match_priority
+                    FROM u_cdol_health_option health_option
+                    WHERE health_option.codetype IN ('HEALTH_COMPLAINT', 'HEALTH_DESTINATION')
+                    UNION ALL
+                    SELECT
+                    health_option.id AS option_id,
+                    health_option.codetype,
+                    LOWER(TRIM(health_option.displayvalue)) AS stored_identity,
+                    health_option.displayvalue,
+                    2 AS match_priority
+                    FROM u_cdol_health_option health_option
+                    WHERE health_option.codetype IN ('HEALTH_COMPLAINT', 'HEALTH_DESTINATION')
+                    )
+                    )
                     SELECT
                     u_cdol_health_log.studentsdcid,
                     to_char(u_cdol_health_log.log_date, 'MM/DD/YYYY')|| ' ' || TO_CHAR(TO_DATE('1970-01-01',
                     'YYYY-MM-DD') + NUMTODSINTERVAL(u_cdol_health_log.log_time, 'SECOND'), 'HH' || CHR(58) || 'MI AM'),
                     students.lastfirst,
                     students.grade_level,
-                    u_cdol_health_log.complaint,
+                    NVL(complaint_option.displayvalue, u_cdol_health_log.complaint) AS complaint,
                     u_cdol_health_log.treatment,
-                    u_cdol_health_log.destination,
+                    NVL(destination_option.displayvalue, u_cdol_health_log.destination) AS destination,
                     TO_CHAR(TO_DATE('1970-01-01', 'YYYY-MM-DD') + NUMTODSINTERVAL(u_cdol_health_log.left_time,
                     'SECOND'), 'HH' || CHR(58) || 'MI AM'),
                     users.lastfirst,
@@ -117,6 +146,14 @@
                     ON students.dcid = u_cdol_health_log.studentsdcid
                     INNER JOIN users
                     ON u_cdol_health_log.users_dcid = users.dcid
+                    LEFT JOIN health_option_matches complaint_option
+                    ON complaint_option.codetype = 'HEALTH_COMPLAINT'
+                    AND complaint_option.stored_identity = LOWER(TRIM(u_cdol_health_log.complaint))
+                    AND complaint_option.match_rank = 1
+                    LEFT JOIN health_option_matches destination_option
+                    ON destination_option.codetype = 'HEALTH_DESTINATION'
+                    AND destination_option.stored_identity = LOWER(TRIM(u_cdol_health_log.destination))
+                    AND destination_option.match_rank = 1
                     WHERE u_cdol_health_log.yearid= ~(curyearid)
                     AND u_cdol_health_log.log_date >= to_date('~(gpv.sDate;sqlText)','MM/DD/YYYY') AND
                     u_cdol_health_log.log_date <= to_date('~(gpv.eDate;sqlText)','MM/DD/YYYY') AND
