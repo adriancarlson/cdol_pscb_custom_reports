@@ -10,21 +10,21 @@
         <link href="/images/css/print.css" rel="stylesheet" media="print">
         ~[wc:pscbdevpro_init]
         <style>
-            #pscbDevPro tr > :nth-child(15),
             #pscbDevPro tr > :nth-child(16),
-            #pscbDevPro tr > :nth-child(17) {
+            #pscbDevPro tr > :nth-child(17),
+            #pscbDevPro tr > :nth-child(18) {
                 display: none;
             }
 
-            body[data-current-school="0"] #pscbDevPro tr > :nth-child(15),
             body[data-current-school="0"] #pscbDevPro tr > :nth-child(16),
-            body[data-current-school="104"] #pscbDevPro tr > :nth-child(15),
+            body[data-current-school="0"] #pscbDevPro tr > :nth-child(17),
             body[data-current-school="104"] #pscbDevPro tr > :nth-child(16),
-            body[data-current-school="120"] #pscbDevPro tr > :nth-child(15),
+            body[data-current-school="104"] #pscbDevPro tr > :nth-child(17),
             body[data-current-school="120"] #pscbDevPro tr > :nth-child(16),
-            body[data-current-school="150"] #pscbDevPro tr > :nth-child(17),
-            body[data-current-school="264"] #pscbDevPro tr > :nth-child(17),
-            body[data-current-school="282"] #pscbDevPro tr > :nth-child(17) {
+            body[data-current-school="120"] #pscbDevPro tr > :nth-child(17),
+            body[data-current-school="150"] #pscbDevPro tr > :nth-child(18),
+            body[data-current-school="264"] #pscbDevPro tr > :nth-child(18),
+            body[data-current-school="282"] #pscbDevPro tr > :nth-child(18) {
                 display: table-cell;
             }
         </style>
@@ -98,6 +98,7 @@
                         <th class="left">Student Number</th>
                         <th class="left">Name</th>
                         <th class="left filter-select">Grade Level</th>
+                        <th class="left filter-select">Home Room</th>
                         <th class="left filter-select">Gender</th>
                         <th class="left filter-select">Allergies</th>
                         <th class="center filter-select">Asthma</th>
@@ -127,6 +128,7 @@
                     WHEN TO_CHAR(s.grade_level) = 99 then 'Graduated'
                     ELSE TO_CHAR(s.grade_level)
                     END as PRETTY_GRADE,
+                    s.Home_Room AS home_room,
                     CASE
                     WHEN UPPER(s.gender) = 'M' THEN 'Male'
                     WHEN UPPER(s.gender) = 'F' THEN 'Female'
@@ -167,6 +169,7 @@
                         </td>
                         <td>~(name;t)</td>
                         <td class="center">~(grade_level)</td>
+                        <td class="center">~(home_room;t)</td>
                         <td>~(gender;t)</td>
                         <td>~(allergy;t)</td>
                         <td class="nowrap center">~(asthma;t)</td>

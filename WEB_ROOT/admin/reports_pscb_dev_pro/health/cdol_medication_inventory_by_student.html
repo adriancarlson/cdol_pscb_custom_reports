@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Medication Inventory by Student</title>
+        ~[wc:commonscripts]
+        <link href="/images/css/screen.css" rel="stylesheet" media="screen">
+        <link href="/images/css/print.css" rel="stylesheet" media="print">
+        ~[wc:pscbdevpro_init]
+    </head>
+
+    <body>
+        ~[wc:admin_header_css]
+        Medication Inventory by Student ~[wc:admin_navigation_frame_css]
+        <form name="searchform" action="#" method="POST">
+            <h1>Medication Inventory by Student</h1>
+            <div class="box-round" style="overflow: hidden;">
+                <h2>Report Filters</h2>
+                <table cellspacing="0" cellpadding="0" class="linkDescList">
+                    <thead>
+                        <tr>
+                            <th style="white-space: nowrap;" width="180px">Student Selection</th>
+                            <th style="white-space: nowrap;">Medications</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <select name="ss" id="ss">
+                                    <option value="" ~[if.~[gpv:ss]=]selected[/if]>All Students</option>
+                                    <option value="cur" ~[if.~[gpv:ss]=cur]selected[/if]>Current Selection
+                                        (~[x:studsinset])</option>
+                                </select>
+                            </td>
+                            <td>
+                                <select name="medications" id="medications">
+                                    <option value="1" ~[if.~[gpv:medications]=1]selected[/if]>Students with
+                                        Medications</option>
+                                    <option value="0" ~[if.~[gpv:medications]=0]selected[/if]>All Students</option>
+                                </select>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="button-row left">
+                    <span style="color: red;">&nbsp;&nbsp;Select parameters and click submit</span>
+                    <input type="hidden" name="showData" value="1">
+                    <input type="hidden" name="ac" value="prim">~[submitbutton]
+                </div>
+            </div>
+        </form>
+        ~[if#showData.~(gpv.showData;sqlText)=1]
+        <div class="box-round">
+            <h2 class="pscbdevBkgColor">&nbsp;&nbsp;Medication Inventory by Student</h2>
+            <table cellspacing="0" cellpadding="4" class="tablesorter grid center" id="pscbDevPro" groupRowsByCol="1"
+                color1="#ffffff" color2="#d7edfe">
+                <thead>
+                    <tr>
+                        <th class="left">Std Num</th>
+                        <th class="left filter-select">Student Name</th>
+                        <th class="left filter-select">Gender</th>
+                        <th class="center filter-select">Grade Level</th>
+                        <th class="left">Medications</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ~[tlist_sql;
+                    WITH inventory_totals AS (
+                        SELECT
+                            u_student_medication_id,
+                            SUM(quantity_added) AS quantity_received
+                        FROM u_student_medication_inventory
+                        GROUP BY u_student_medication_id
+                    ),
+                    transaction_totals AS (
+                        SELECT
+                            u_student_medication_id,
+                            SUM(quantity_change) AS quantity_change
+                        FROM u_student_med_inv_txn
+                        GROUP BY u_student_medication_id
+                    ),
+                    student_medications AS (
+                        SELECT
+                            medication.studentsdcid,
+                            COUNT(medication.id) AS medication_count,
+                            '<ul>' || LISTAGG(
+                                '<li>' || medication.medication_name || ' - ' || medication.dose_amount || ' ' ||
+                                NVL(dose_unit_option.displayvalue, medication.dose_unit) || ' | ' ||
+                                NVL(frequency_option.displayvalue, medication.frequency) || ' | Available ' ||
+                                GREATEST(0, NVL(inventory_totals.quantity_received, 0) +
+                                    NVL(transaction_totals.quantity_change, 0)) || ' ' ||
+                                NVL(inventory_unit_option.displayvalue, medication.inventory_unit) || '</li>',
+                                ''
+                            ) WITHIN GROUP (ORDER BY medication.medication_name, medication.dose_amount) ||
+                                '</ul>' AS medication_list
+                        FROM u_student_medication medication
+                        LEFT JOIN inventory_totals
+                            ON inventory_totals.u_student_medication_id = medication.id
+                        LEFT JOIN transaction_totals
+                            ON transaction_totals.u_student_medication_id = medication.id
+                        LEFT JOIN u_cdol_health_option dose_unit_option
+                            ON dose_unit_option.codetype = 'MED_DOSE_UNIT'
+                            AND dose_unit_option.code = medication.dose_unit
+                        LEFT JOIN u_cdol_health_option inventory_unit_option
+                            ON inventory_unit_option.codetype = 'MED_INVENTORY_UNIT'
+                            AND inventory_unit_option.code = medication.inventory_unit
+                        LEFT JOIN u_cdol_health_option frequency_option
+                            ON frequency_option.codetype = 'MED_FREQUENCY'
+                            AND frequency_option.code = medication.frequency
+                        WHERE medication.yearid = ~(curyearid)
+                        ~[if.is.a.school]
+                            AND medication.schoolid = ~(curschoolid)
+                        [/if.is.a.school]
+                        GROUP BY medication.studentsdcid
+                    )
+                    SELECT
+                        students.dcid AS dcid,
+                        students.student_number AS student_number,
+                        students.lastfirst AS lastfirst,
+                        CASE
+                            WHEN UPPER(students.gender) = 'F' THEN 'Female'
+                            WHEN UPPER(students.gender) = 'M' THEN 'Male'
+                            ELSE students.gender
+                        END AS gender,
+                        CASE
+                            WHEN students.grade_level = -1 THEN 'PK'
+                            WHEN students.grade_level = 0 THEN 'K'
+                            WHEN students.grade_level = 99 THEN 'Graduated'
+                            ELSE TO_CHAR(students.grade_level)
+                        END AS grade_level,
+                        student_medications.medication_list AS medication_list
+                    FROM students
+                    LEFT JOIN student_medications
+                        ON students.dcid = student_medications.studentsdcid
+                    ~[if#ss.~(gpv.ss;sqlText)=cur]
+                    INNER JOIN ~[temp.table.current.selection:students] temp
+                        ON students.dcid = temp.dcid
+                    [/if#ss]
+                    WHERE students.enroll_status IN (-1, 0)
+                    ~[if.is.a.school]
+                        AND students.schoolid = ~(curschoolid)
+                    [/if.is.a.school]
+                    ~[if#medications.~(gpv.medications;sqlText)=1]
+                        AND student_medications.medication_count > 0
+                    [/if#medications]
+                    ORDER BY students.lastfirst
+                    ;alternatecolor;nonemessage=<tr><td colspan="100%">No Records were found.</td></tr>]
+                    <tr class="Record" data-StudentID="~(dcid;t)">
+                        <td class="nowrap">~(student_number;t)</td>
+                        <td class="nowrap"><a
+                                href="/admin/students/medication/inventory.html?frn=001~(dcid;t)"
+                                target="_blank">~(lastfirst;t)</a></td>
+                        <td>~(gender;t)</td>
+                        <td class="center">~(grade_level;t)</td>
+                        <td class="nowrap">~(medication_list;t)</td>
+                    </tr>
+                    [/tlist_sql]
+                </tbody>
+            </table>
+        </div>
+        <div style="clear: both;">
+            <p class="center">Report generated at ~[time] on ~[date]</p>
+        </div>
+        [/if#showData]
+        ~[wc:admin_footer_frame_css]
+    </body>
+
+</html>

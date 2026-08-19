@@ -581,6 +581,64 @@
 							]
 						},
 						{
+							"htmlID": "navPSCBDevProHealthOffice-cdol-medication-inventory-administration",
+							"title": "CDOL Medication Inventory and Administration",
+							"pageURL": null,
+							"version": "26.8.2.4",
+							"contextType": "main",
+							"isNewTab": null,
+							"isLandingPage": null,
+							"iconName": null,
+							"requiredContext": null,
+							"sortOrder": 400,
+							"parentHTMLID": "navPSCBDevProSubMenuHealthOffice",
+							"districtLevelContext": 0,
+							"children": [
+								{
+									"htmlID": "cdol_medication_inventory",
+									"title": "Medication Inventory List🔹",
+									"pageURL": "/admin/reports_pscb_dev_pro/health/cdol_medication_inventory.html",
+									"version": "26.8.2.4",
+									"contextType": "main",
+									"isNewTab": null,
+									"isLandingPage": null,
+									"iconName": null,
+									"requiredContext": null,
+									"sortOrder": 10,
+									"parentHTMLID": "navPSCBDevProHealthOffice-cdol-medication-inventory-administration",
+									"districtLevelContext": 0
+								},
+								{
+									"htmlID": "cdol_medication_inventory_by_student",
+									"title": "Medication Inventory by Student🔹",
+									"pageURL": "/admin/reports_pscb_dev_pro/health/cdol_medication_inventory_by_student.html",
+									"version": "26.8.2.4",
+									"contextType": "main",
+									"isNewTab": null,
+									"isLandingPage": null,
+									"iconName": null,
+									"requiredContext": null,
+									"sortOrder": 20,
+									"parentHTMLID": "navPSCBDevProHealthOffice-cdol-medication-inventory-administration",
+									"districtLevelContext": 0
+								},
+								{
+									"htmlID": "cdol_medication_administration",
+									"title": "Medication Administration List🔹",
+									"pageURL": "/admin/reports_pscb_dev_pro/health/cdol_medication_administration.html",
+									"version": "26.8.2.4",
+									"contextType": "main",
+									"isNewTab": null,
+									"isLandingPage": null,
+									"iconName": null,
+									"requiredContext": null,
+									"sortOrder": 30,
+									"parentHTMLID": "navPSCBDevProHealthOffice-cdol-medication-inventory-administration",
+									"districtLevelContext": 0
+								}
+							]
+						},
+						{
 							"htmlID": "navPSCBDevProHealthOffice-cdol-log",
 							"title": "CDOL Health Logs",
 							"pageURL": null,
@@ -590,7 +648,7 @@
 							"isLandingPage": null,
 							"iconName": null,
 							"requiredContext": null,
-							"sortOrder": 400,
+							"sortOrder": 500,
 							"parentHTMLID": "navPSCBDevProSubMenuHealthOffice",
 							"districtLevelContext": 0,
 							"children": [

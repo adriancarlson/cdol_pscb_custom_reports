@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Medication Administration List</title>
+        ~[wc:commonscripts]
+        <link href="/images/css/screen.css" rel="stylesheet" media="screen">
+        <link href="/images/css/print.css" rel="stylesheet" media="print">
+        ~[wc:pscbdevpro_init]
+        <script>
+            pscbToolButtons = { "copyData": "Yes", "csvFile": "Yes", "pdfFile": "Yes", "curSel": "Yes" };
+        </script>
+    </head>
+
+    <body>
+        ~[wc:admin_header_css]<!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a>
+        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html">PSCB Custom Reports</a> &gt; <a
+            href="/admin/reports_pscb_dev_pro/pdevpro_reports_health_menu.html">Health Office</a> &gt; Medication
+        Administration List<!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
+
+        <form name="searchform" action="#" method="POST">
+            <h1>Medication Administration List</h1>
+            <div class="box-round" style="overflow: hidden;">
+                <h2>Report Filters</h2>
+                <table cellspacing="0" cellpadding="0" class="linkDescList">
+                    <thead>
+                        <tr>
+                            <th style="width: 180px;">Student Selection</th>
+                            <th style="width: 150px;">Administration Start Date</th>
+                            <th style="width: 150px;">Administration End Date</th>
+                            <th>Administration Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <select name="ss" id="ss">
+                                    <option value="" ~[if.~(gpv.ss)=]selected[/if]>All Students</option>
+                                    <option value="cur" ~[if.~(gpv.ss)=cur]selected[/if]>Current Selection
+                                        (~[x:studsinset])</option>
+                                </select>
+                            </td>
+                            <td>
+                                <input name="sDate" id="sDate" class="psDateWidget" type="text"
+                                    value="~[if.~(gpv.sDate)=]~[x:termbegdate][else]~(gpv.sDate)[/if]" size="10">
+                            </td>
+                            <td>
+                                <input name="eDate" id="eDate" class="psDateWidget" type="text"
+                                    value="~[if.~(gpv.eDate)=]~(f.currentdate;dateformat=MM/DD/YYYY)[else]~(gpv.eDate)[/if]"
+                                    size="10">
+                            </td>
+                            <td>
+                                <select name="status" id="status">
+                                    <option value="" ~[if.~(gpv.status)=]selected[/if]>All Statuses</option>
+                                    <option value="GIVEN" ~[if.~(gpv.status)=GIVEN]selected[/if]>Given</option>
+                                    <option value="CORRECTED" ~[if.~(gpv.status)=CORRECTED]selected[/if]>Corrected</option>
+                                    <option value="VOID" ~[if.~(gpv.status)=VOID]selected[/if]>Entered in Error</option>
+                                </select>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="button-row left">
+                    <span style="color: red;">&nbsp;&nbsp;Select parameters and click submit</span>
+                    <input type="hidden" name="showData" value="1">
+                    <input type="hidden" name="ac" value="prim">~[submitbutton]
+                </div>
+            </div>
+        </form>
+
+        ~[if#showData.~(gpv.showData)=1]
+        <div class="box-round">
+            <h2 class="pscbdevBkgColor">&nbsp;&nbsp;Medication Administration List
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~(gpv.sDate) to ~(gpv.eDate)</h2>
+            <table cellspacing="0" cellpadding="4" class="tablesorter grid center" id="pscbDevPro"
+                groupRowsByCol="1" color1="#ffffff" color2="#d7edfe">
+                <thead>
+                    <tr>
+                        <th class="left filter-select">Administration Date/Time</th>
+                        <th class="left">Std Num</th>
+                        <th class="left filter-select">Student Name</th>
+                        <th class="center filter-select">Grade Level</th>
+                        <th class="left filter-select">Medication</th>
+                        <th class="left">Prescribed Dose</th>
+                        <th class="right">Quantity Administered</th>
+                        <th class="left filter-select">Inventory Unit</th>
+                        <th class="left filter-select">Route</th>
+                        <th class="left filter-select">Frequency</th>
+                        <th class="left filter-select">Administered By</th>
+                        <th class="left filter-select">Status</th>
+                        <th class="left filter-select">Correction Date/Time</th>
+                        <th class="left filter-select">Corrected By</th>
+                        <th class="left">Administration Notes</th>
+                        <th class="left">Correction Reason</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ~[tlist_sql;
+                    WITH correction_rows AS (
+                        SELECT
+                            correction.*,
+                            ROW_NUMBER() OVER (
+                                PARTITION BY correction.reversal_of_transaction_id
+                                ORDER BY correction.id DESC
+                            ) AS action_rank
+                        FROM u_student_med_inv_txn correction
+                        WHERE correction.transaction_type IN
+                            ('ADMINISTRATION_CORRECTION', 'ADMINISTRATION_VOID')
+                    ),
+                    corrected_rows AS (
+                        SELECT
+                            correction.*,
+                            ROW_NUMBER() OVER (
+                                PARTITION BY correction.reversal_of_transaction_id
+                                ORDER BY correction.id DESC
+                            ) AS correction_rank
+                        FROM u_student_med_inv_txn correction
+                        WHERE correction.transaction_type = 'ADMINISTRATION_CORRECTION'
+                    ),
+                    effective_administrations AS (
+                        SELECT
+                            original.id AS root_transaction_id,
+                            original.u_student_medication_id,
+                            NVL(latest_correction.event_date, original.event_date) AS event_date,
+                            NVL(latest_correction.event_time, original.event_time) AS event_time,
+                            NVL(latest_correction.users_dcid, original.users_dcid) AS users_dcid,
+                            NVL(latest_correction.notes, original.notes) AS notes,
+                            NVL(latest_correction.medication_name, original.medication_name) AS medication_name,
+                            NVL(latest_correction.dose_amount, original.dose_amount) AS dose_amount,
+                            NVL(latest_correction.dose_unit, original.dose_unit) AS dose_unit,
+                            NVL(latest_correction.inventory_unit, original.inventory_unit) AS inventory_unit,
+                            NVL(latest_correction.route, original.route) AS route,
+                            NVL(latest_correction.frequency, original.frequency) AS frequency,
+                            NVL(latest_correction.administration_quantity,
+                                NVL(original.administration_quantity, ABS(original.quantity_change)))
+                                AS administration_quantity,
+                            CASE
+                                WHEN latest_action.transaction_type = 'ADMINISTRATION_VOID' THEN 'Entered in Error'
+                                WHEN latest_correction.id IS NOT NULL THEN 'Corrected'
+                                ELSE 'Given'
+                            END AS administration_status,
+                            latest_action.correction_date,
+                            latest_action.correction_time,
+                            latest_action.correction_users_dcid,
+                            latest_action.correction_reason
+                        FROM u_student_med_inv_txn original
+                        LEFT JOIN correction_rows latest_action
+                            ON latest_action.reversal_of_transaction_id = original.id
+                            AND latest_action.action_rank = 1
+                        LEFT JOIN corrected_rows latest_correction
+                            ON latest_correction.reversal_of_transaction_id = original.id
+                            AND latest_correction.correction_rank = 1
+                        WHERE original.transaction_type = 'ADMINISTRATION'
+                    )
+                    SELECT
+                        students.dcid AS dcid,
+                        TO_CHAR(effective.event_date, 'MM/DD/YYYY') || ' ' ||
+                            TO_CHAR(TO_DATE('1970-01-01', 'YYYY-MM-DD') +
+                                NUMTODSINTERVAL(effective.event_time, 'SECOND'),
+                                'HH' || CHR(58) || 'MI AM') AS administration_date_time,
+                        students.student_number AS student_number,
+                        students.lastfirst AS lastfirst,
+                        CASE
+                            WHEN students.grade_level = -1 THEN 'PK'
+                            WHEN students.grade_level = 0 THEN 'K'
+                            WHEN students.grade_level = 99 THEN 'Graduated'
+                            ELSE TO_CHAR(students.grade_level)
+                        END AS grade_level,
+                        NVL(effective.medication_name, medication.medication_name) AS medication_name,
+                        NVL(effective.dose_amount, medication.dose_amount) AS dose_amount,
+                        NVL(dose_unit_option.displayvalue,
+                            NVL(effective.dose_unit, medication.dose_unit)) AS dose_unit,
+                        effective.administration_quantity AS administration_quantity,
+                        NVL(inventory_unit_option.displayvalue,
+                            NVL(effective.inventory_unit, medication.inventory_unit)) AS inventory_unit,
+                        NVL(route_option.displayvalue,
+                            NVL(effective.route, medication.route)) AS route,
+                        NVL(frequency_option.displayvalue,
+                            NVL(effective.frequency, medication.frequency)) AS frequency,
+                        administering_user.lastfirst AS administered_by,
+                        effective.administration_status AS administration_status,
+                        CASE
+                            WHEN effective.correction_date IS NULL THEN NULL
+                            ELSE TO_CHAR(effective.correction_date, 'MM/DD/YYYY') || ' ' ||
+                                TO_CHAR(TO_DATE('1970-01-01', 'YYYY-MM-DD') +
+                                    NUMTODSINTERVAL(effective.correction_time, 'SECOND'),
+                                    'HH' || CHR(58) || 'MI AM')
+                        END AS correction_date_time,
+                        correction_user.lastfirst AS corrected_by,
+                        effective.notes AS administration_notes,
+                        effective.correction_reason AS correction_reason
+                    FROM effective_administrations effective
+                    INNER JOIN u_student_medication medication
+                        ON medication.id = effective.u_student_medication_id
+                    INNER JOIN students
+                        ON students.dcid = medication.studentsdcid
+                    ~[if#ss.~(gpv.ss;sqlText)=cur]
+                    INNER JOIN ~[temp.table.current.selection:students] temp
+                        ON students.dcid = temp.dcid
+                    [/if#ss]
+                    LEFT JOIN users administering_user
+                        ON administering_user.dcid = effective.users_dcid
+                    LEFT JOIN users correction_user
+                        ON correction_user.dcid = effective.correction_users_dcid
+                    LEFT JOIN u_cdol_health_option dose_unit_option
+                        ON dose_unit_option.codetype = 'MED_DOSE_UNIT'
+                        AND dose_unit_option.code = NVL(effective.dose_unit, medication.dose_unit)
+                    LEFT JOIN u_cdol_health_option inventory_unit_option
+                        ON inventory_unit_option.codetype = 'MED_INVENTORY_UNIT'
+                        AND inventory_unit_option.code = NVL(effective.inventory_unit, medication.inventory_unit)
+                    LEFT JOIN u_cdol_health_option route_option
+                        ON route_option.codetype = 'MED_ROUTE'
+                        AND route_option.code = NVL(effective.route, medication.route)
+                    LEFT JOIN u_cdol_health_option frequency_option
+                        ON frequency_option.codetype = 'MED_FREQUENCY'
+                        AND frequency_option.code = NVL(effective.frequency, medication.frequency)
+                    WHERE medication.yearid = ~(curyearid)
+                        AND effective.event_date >= TO_DATE('~(gpv.sDate;sqlText)', 'MM/DD/YYYY')
+                        AND effective.event_date <= TO_DATE('~(gpv.eDate;sqlText)', 'MM/DD/YYYY')
+                    ~[if.is.a.school]
+                        AND medication.schoolid = ~(curschoolid)
+                    [/if.is.a.school]
+                    ~[if#statusGiven.~(gpv.status;sqlText)=GIVEN]
+                        AND effective.administration_status = 'Given'
+                    [/if#statusGiven]
+                    ~[if#statusCorrected.~(gpv.status;sqlText)=CORRECTED]
+                        AND effective.administration_status = 'Corrected'
+                    [/if#statusCorrected]
+                    ~[if#statusVoid.~(gpv.status;sqlText)=VOID]
+                        AND effective.administration_status = 'Entered in Error'
+                    [/if#statusVoid]
+                    ORDER BY effective.event_date DESC, effective.event_time DESC, students.lastfirst
+                    ;alternatecolor;nonemessage=<tr><td colspan="100%">No Records were found.</td></tr>]
+                    <tr class="Record" data-StudentID="~(dcid;t)">
+                        <td class="nowrap">~(administration_date_time;t)</td>
+                        <td class="nowrap">~(student_number;t)</td>
+                        <td class="nowrap"><a
+                                href="/admin/students/medication/administration.html?frn=001~(dcid;t)"
+                                target="_blank">~(lastfirst;t)</a></td>
+                        <td class="center">~(grade_level;t)</td>
+                        <td class="nowrap">~(medication_name;t)</td>
+                        <td class="nowrap">~(dose_amount;t) ~(dose_unit;t)</td>
+                        <td class="right">~(administration_quantity;t)</td>
+                        <td>~(inventory_unit;t)</td>
+                        <td>~(route;t)</td>
+                        <td>~(frequency;t)</td>
+                        <td>~(administered_by;t)</td>
+                        <td>~(administration_status;t)</td>
+                        <td class="nowrap">~(correction_date_time;t)</td>
+                        <td>~(corrected_by;t)</td>
+                        <td>~(administration_notes;t)</td>
+                        <td>~(correction_reason;t)</td>
+                    </tr>
+                    [/tlist_sql]
+                </tbody>
+            </table>
+        </div>
+        <p class="center">Report generated at ~[time] on ~[date]</p>
+        [/if#showData]
+        ~[wc:admin_footer_frame_css]
+    </body>
+
+</html>
