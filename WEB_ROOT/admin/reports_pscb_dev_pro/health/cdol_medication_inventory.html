@@ -159,7 +159,9 @@
                         AND NVL(inventory_totals.quantity_received, 0) +
                             NVL(transaction_totals.quantity_change, 0) > 0
                     [/if#inventory]
-                    ORDER BY students.lastfirst, medication.medication_name
+                    ORDER BY inventory_totals.last_added_date DESC NULLS LAST,
+                        students.lastfirst,
+                        medication.medication_name
                     ;alternatecolor;nonemessage=<tr><td colspan="100%">No Records were found.</td></tr>]
                     <tr class="Record" data-StudentID="~(dcid;t)">
                         <td class="nowrap">~(student_number;t)</td>

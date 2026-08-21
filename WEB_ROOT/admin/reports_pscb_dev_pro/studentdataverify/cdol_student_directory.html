@@ -25,18 +25,28 @@
                 <table cellspacing="0" cellpadding="0" class="linkDescList">
                     <thead>
                         <tr>
-                            <th style="white-space: nowrap;">Student Selection</th>
+                            <th style="white-space: nowrap;" width="180px">Student Selection</th>
+                            <th style="white-space: nowrap;" width="180px">Directory Permission</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
                             <td>
                                 <select name="ss" id="ss">
-                                    <option value='' ~[if.~[gpv:ss]=]selected[/if]>All Students
+                                    <option value='' ~[if.~[gpv:ss]=]selected[/if]>All Students</option>
                                     <option value="cur" ~[if.~[gpv:ss]=cur]selected[/if]>Current Selection
-                                        (~[x:studsinset])
+                                        (~[x:studsinset])</option>
                                 </select>
                             </td>
+                            <td>
+                                <select name="dp" id="dp">
+                                    <option value="all" ~[if.~[gpv:dp]=all]selected[/if]>All Students</option>
+                                    <option value="1" ~[if.~[gpv:dp]=]selected[/if]~[if.~[gpv:dp]=1]selected[/if]>
+                                        Permission to Publish</option>
+                                </select>
+                            </td>
+                            <td></td>
                         </tr>
                     </tbody>
                 </table>
@@ -58,6 +68,7 @@
                         <th class="left">Student Name</th>
                         <th class="left filter-select">Grade Level</th>
                         <th class="left filter-select">Home Room</th>
+                        <th class="left filter-select">Gender</th>
                         <th class="left filter-select">Stu Address</th>
                         <th class="left">Mother</th>
                         <th class="left">Mother Address</th>
@@ -196,7 +207,11 @@
                         (gp.guardianid=g.guardianid) LEFT JOIN guardianstudent gs ON ( s.dcid=gs.studentsdcid AND
                         gp.guardianid=gs.guardianid ) LEFT JOIN U_PERSON_ADDITIONAL_INFO U ON (p.ID=u.personid) WHERE
                         s.enroll_status=0 AND cs.codesetid !=32 ORDER BY s.lastfirst, sca.contactpriorityorder ) SELECT
-                        A .dcid, A .LASTFIRST AS LastFirst, A .GRADE_LEVEL, A .HOME_ROOM, CASE WHEN A .STREET IS NULL
+                        A .dcid, A .LASTFIRST AS LastFirst, A .GRADE_LEVEL, A .HOME_ROOM, CASE
+                        WHEN UPPER(A .GENDER) = 'M' THEN 'Male'
+                        WHEN UPPER(A .GENDER) = 'F' THEN 'Female'
+                        ELSE A .GENDER
+                        END AS Gender, CASE WHEN A .STREET IS NULL
                         THEN A .mailing_street || ' <br>' || A .mailing_city || ' ' || A .mailing_state || ' ' || A
                         .mailing_zip ELSE A .street || ' <br>' || A .city || ' ' || A .state || ' ' || A .zip END,
                         C1.ContactFirstLast, CASE WHEN C1HA.HOME_STREET IS NULL THEN C1MA .mailing_street || ' <br>'
@@ -219,13 +234,15 @@
                         SELECT * FROM pcontact ) C2 ON ( C2.DCID=A .DCID AND C2.Relationship='Father' ) LEFT JOIN
                         (select* from HA) C2HA ON (C2.contactid=C2HA.id) LEFT JOIN (select* from MA) C2MA ON
                         (C2.contactid=C2MA.id) WHERE A .enroll_status=0 ~[if.is.a.school] AND A.schoolid=~(curschoolid)
-                        [/if.is.a.school] ORDER BY A .lastfirst ;alternatecolor;nonemessage=<tr nodata>
+                        [/if.is.a.school] ~[if#directoryPermission.~(gpv.dp;sqlText)=1] AND AD.DIRECTORY_PERMISSION = 1
+                        [/if#directoryPermission] ORDER BY A .lastfirst ;alternatecolor;nonemessage=<tr nodata>
                         <td colspan="100%">No Records Found.</td>
                         </tr>]
                         <tr class="Record" data-StudentID="~(dcid;t)">
                             <td nowrap>~(LastFirst)</td>
                             <td>~(Grade_Level)</td>
                             <td>~(homeroom;t)</td>
+                            <td>~(gender;t)</td>
                             <td nowrap>~(stuaddress)</td>
                             <td nowrap>~(mother;t)</td>
                             <td nowrap>~(mother_address)</td>
