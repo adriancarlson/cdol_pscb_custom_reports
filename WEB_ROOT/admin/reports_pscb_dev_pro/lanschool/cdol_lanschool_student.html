@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <title>LanSchool - Students</title>
+        <link href="/images/css/screen.css" rel="stylesheet" media="screen">
+        <link href="/images/css/print.css" rel="stylesheet" media="print">
+        ~[wc:commonscripts]
+    </head>
+
+    <body>
+        ~[wc:admin_header_css]<!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a> &gt; <a
+            href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html" target="_top">PSCB DEV Custom Reports</a> &gt;
+        <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_lanschool_menu.html" target="_top">LanSchool</a> &gt;
+        LanSchool - Students<!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
+        <h1>LanSchool - Students</h1>
+        ~[wc:pscbdevpro2_init]
+        <!-- Start of Results -->
+        <script>
+            var tableColumns = [
+                { 'title': 'Class ID', 'field': 'class_id', 'sorter': 'string', 'headerFilter': 'input' },
+                { 'title': 'Student Username', 'field': 'student_web_id', 'sorter': 'string', 'headerFilter': 'input' },
+            ];
+
+            var tableData = ~[tlist_sql;
+            WITH reportData AS(
+                SELECT DISTINCT
+            courses.course_number || '-' || sections.section_number AS class_id,
+                students.student_web_id AS student_web_id
+            FROM sections
+            INNER JOIN schools
+            ON schools.school_number = sections.schoolid
+            INNER JOIN courses
+            ON sections.course_number = courses.course_number
+            INNER JOIN terms
+            ON sections.termid = terms.id
+            AND schools.school_number = terms.schoolid
+            INNER JOIN schoolstaff
+            ON schoolstaff.id = sections.teacher
+            INNER JOIN users
+            ON schoolstaff.users_dcid = users.dcid
+            INNER JOIN cc
+            ON sections.id = cc.sectionid
+            INNER JOIN students
+            ON cc.studentid = students.id
+            WHERE sections.termid BETWEEN ~(curyearid)00 AND ~(curyearid)99
+            ~[if.is.a.school] AND sections.schoolid = ~(curschoolid)[/if.is.a.school]
+            AND courses.course_name NOT LIKE '% - 6th'
+            AND courses.course_name NOT LIKE '% - 7th'
+            AND courses.course_name NOT LIKE '% - 8th'
+            AND courses.course_name NOT LIKE '% - Junior High'
+            AND courses.course_name NOT LIKE 'Outside Class%'
+            AND courses.course_name NOT LIKE 'Community Service%'
+            )
+            SELECT COALESCE(JSON_ARRAYAGG(JSON_OBJECT(class_id, student_web_id)
+            ORDER BY class_id, student_web_id RETURNING CLOB), TO_CLOB(CHR(91) || CHR(93)))
+            FROM reportData;]~(1)
+            [/tlist_sql];
+        </script>
+        <!-- End of pscbDevPro -->
+        ~[wc:admin_footer_frame_css]
+    </body>
+
+</html>

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <title>LanSchool - Staff</title>
+        <link href="/images/css/screen.css" rel="stylesheet" media="screen">
+        <link href="/images/css/print.css" rel="stylesheet" media="print">
+        ~[wc:commonscripts]
+    </head>
+
+    <body>
+        ~[wc:admin_header_css]<!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a> &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html" target="_top">PSCB DEV Custom Reports</a> &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_lanschool_menu.html" target="_top">LanSchool</a> &gt; LanSchool - Staff<!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
+        <h1>LanSchool - Staff</h1>
+        ~[wc:pscbdevpro2_init]
+        <!-- Start of Results -->
+        <script>
+            var tableColumns = [
+                { 'title': 'Username', 'field': 'username', 'sorter': 'string', 'headerFilter': 'input' },
+                { 'title': 'Class ID', 'field': 'class_id', 'sorter': 'string', 'headerFilter': 'input' },
+                { 'title': 'Class Display Name', 'field': 'class_display_name', 'sorter': 'string', 'headerFilter': 'input' },
+            ];
+
+            var tableData = ~[tlist_sql;
+            WITH reportData AS (
+            SELECT
+            CASE
+            WHEN users.loginid LIKE '~~%' THEN
+            NVL(SUBSTR(users.email_addr, 0, INSTR(users.email_addr, '@') - 1), users.email_addr)
+            WHEN users.teacherloginid LIKE '~~%' THEN
+            NVL(SUBSTR(users.email_addr, 0, INSTR(users.email_addr, '@') - 1), users.email_addr)
+            ELSE COALESCE(users.teacherloginid, users.loginid, ' ')
+            END AS username,
+            courses.course_number || '-' || sections.section_number AS class_id,
+            courses.course_name || '-' || sections.expression AS class_display_name
+            FROM sections
+            INNER JOIN schools
+            ON sections.schoolid = schools.school_number
+            INNER JOIN courses
+            ON sections.course_number = courses.course_number
+            INNER JOIN terms
+            ON sections.termid = terms.id
+            AND schools.school_number = terms.schoolid
+            INNER JOIN schoolstaff
+            ON schoolstaff.id = sections.teacher
+            INNER JOIN users
+            ON schoolstaff.users_dcid = users.dcid
+            WHERE sections.termid BETWEEN ~(curyearid)00 AND ~(curyearid)99
+            ~[if.is.a.school] AND sections.schoolid = ~(curschoolid) [/if.is.a.school]
+            AND courses.course_name NOT LIKE '% - 6th'
+            AND courses.course_name NOT LIKE '% - 7th'
+            AND courses.course_name NOT LIKE '% - 8th'
+            AND courses.course_name NOT LIKE '% - Junior High'
+            AND courses.course_name NOT LIKE 'Outside Class%'
+            AND courses.course_name NOT LIKE 'Community Service%'
+            )
+            SELECT COALESCE(JSON_ARRAYAGG(JSON_OBJECT(username, class_id, class_display_name)
+            ORDER BY username, class_id RETURNING CLOB), TO_CLOB(CHR(91)||CHR(93)))
+            FROM reportData;]~(1)
+            [/tlist_sql];
+        </script>
+        <!-- End of pscbDevPro -->
+        ~[wc:admin_footer_frame_css]
+    </body>
+
+</html>

@@ -917,6 +917,66 @@
 					]
 				},
 				{
+					"htmlID": "navPSCBDevProSubMenuLanSchool",
+					"title": "LanSchool",
+					"pageURL": null,
+					"version": "26.8.3.10",
+					"contextType": "main",
+					"isNewTab": null,
+					"isLandingPage": null,
+					"iconName": null,
+					"requiredContext": null,
+					"sortOrder": 140,
+					"parentHTMLID": "navPSCBDevProReportsMenu",
+					"districtLevelContext": 0,
+					"children": [
+						{
+							"htmlID": "navPSCBDevProLanSchool",
+							"title": "LanSchool",
+							"pageURL": null,
+							"version": "26.8.3.10",
+							"contextType": "main",
+							"isNewTab": null,
+							"isLandingPage": null,
+							"iconName": null,
+							"requiredContext": null,
+							"sortOrder": 10,
+							"parentHTMLID": "navPSCBDevProSubMenuLanSchool",
+							"districtLevelContext": 0,
+							"children": [
+								{
+									"htmlID": "cdol_lanschool_student",
+									"title": "LanSchool - Students🔹",
+									"pageURL": "~[if#lanschoolStudent.~(curschoolid)=160]/admin/reports_pscb_dev_pro/lanschool/cdol_lanschool_student.html[/if#lanschoolStudent]",
+									"version": "26.8.3.10",
+									"contextType": "main",
+									"isNewTab": null,
+									"isLandingPage": null,
+									"iconName": null,
+									"requiredContext": null,
+									"sortOrder": 10,
+									"parentHTMLID": "navPSCBDevProLanSchool",
+									"districtLevelContext": 0
+								},
+								{
+									"htmlID": "cdol_lanschool_staff",
+									"title": "LanSchool - Staff🔹",
+									"pageURL": "~[if#lanschoolStaff.~(curschoolid)=160]/admin/reports_pscb_dev_pro/lanschool/cdol_lanschool_staff.html[/if#lanschoolStaff]",
+									"version": "26.8.3.10",
+									"contextType": "main",
+									"isNewTab": null,
+									"isLandingPage": null,
+									"iconName": null,
+									"requiredContext": null,
+									"sortOrder": 20,
+									"parentHTMLID": "navPSCBDevProLanSchool",
+									"districtLevelContext": 0
+								}
+							]
+						}
+					]
+				},
+				{
 					"htmlID": "navPSCBDevProSubMenuSchoolMessenger",
 					"title": "SchoolMessenger",
 					"pageURL": null,

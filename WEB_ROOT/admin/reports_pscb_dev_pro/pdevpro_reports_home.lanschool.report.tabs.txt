@@ -1,0 +1,10 @@
+~[if#lanschoolHome.~(curschoolid)=160]
+<tr class="~[evenoddrow]">
+    <td>
+        <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_lanschool_menu.html">LanSchool</a>
+    </td>
+    <td>
+        Custom CDOL LanSchool reports.
+    </td>
+</tr>
+[/if#lanschoolHome]
