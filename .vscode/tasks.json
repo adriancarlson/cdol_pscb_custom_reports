@@ -3,8 +3,17 @@
     "tasks": [
         {
             "label": "buildplugin",
-            "type": "shell",
-            "command": "py ../../pluginpack.py --with-version --mask \"(?:cdol-custom-pscb-report-navigation\\.json|cdol-custom-pscb-student-navigation\\.json|README\\.md)$\"",
+            "type": "process",
+            "command": "py",
+            "args": [
+                "../../pluginpack.py",
+                "--with-version",
+                "--mask",
+                "(?:cdol-custom-pscb-report-navigation\\.json|cdol-custom-pscb-student-navigation\\.json|README\\.md)$"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
             "problemMatcher": [],
             "group": {
                 "kind": "build",

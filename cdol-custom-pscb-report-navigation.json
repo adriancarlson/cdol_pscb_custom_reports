@@ -670,7 +670,7 @@
 							"htmlID": "navPSCBDevProHealthOffice-cdol-medication-inventory-administration",
 							"title": "CDOL Medication",
 							"pageURL": null,
-							"version": "26.8.2.4",
+							"version": "26.9.0.1",
 							"contextType": "main",
 							"isNewTab": null,
 							"isLandingPage": null,
@@ -721,6 +721,20 @@
 									"sortOrder": 30,
 									"parentHTMLID": "navPSCBDevProHealthOffice-cdol-medication-inventory-administration",
 									"districtLevelContext": 0
+								},
+								{
+									"htmlID": "cdol_missed_daily_administration",
+									"title": "Missed Daily Administration🔹",
+									"pageURL": "/admin/reports_pscb_dev_pro/health/cdol_missed_daily_administration.html",
+									"version": "26.9.0.4",
+									"contextType": "main",
+									"isNewTab": null,
+									"isLandingPage": null,
+									"iconName": null,
+									"requiredContext": null,
+									"sortOrder": 40,
+									"parentHTMLID": "navPSCBDevProHealthOffice-cdol-medication-inventory-administration",
+									"districtLevelContext": 1
 								}
 							]
 						}

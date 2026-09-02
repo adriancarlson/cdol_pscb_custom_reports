@@ -51,6 +51,12 @@
 				List</a></td>
 		<td>List medication administrations for a selected date range</td>
 	</tr>
+	~[if#missedDailySchool.is.a.school]
+	<tr>
+		<td><a href="/admin/reports_pscb_dev_pro/health/cdol_missed_daily_administration.html">Missed Daily Administration</a></td>
+		<td>List unresolved daily medication administrations grouped by student</td>
+	</tr>
+	[/if#missedDailySchool]
 </table>
 <table id="cdolHealthLogTable" cellspacing="0" cellpadding="4" class="table grid">
 	<thead>

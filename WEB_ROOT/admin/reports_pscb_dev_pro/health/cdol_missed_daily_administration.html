@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Missed Daily Administration</title>
+        ~[wc:commonscripts]
+        <link href="/images/css/screen.css" rel="stylesheet" media="screen">
+        <link href="/images/css/print.css" rel="stylesheet" media="print">
+    </head>
+
+    <body>
+        ~[wc:admin_header_css]<!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a>
+        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html">PSCB Custom Reports</a> &gt; <a
+            href="/admin/reports_pscb_dev_pro/pdevpro_reports_health_menu.html">Health Office</a> &gt; Missed Daily
+        Administration<!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
+
+        <h1>Missed Daily Administration</h1>
+        ~[if#schoolOnly.is.a.school]
+        ~[tlist_sql;
+            SELECT 1 AS cutoff_missing
+            FROM dual
+            WHERE NOT EXISTS (
+                SELECT 1
+                FROM u_cdol_med_admin_setting setting
+                WHERE setting.schoolid = ~(curschoolid)
+                    AND setting.daily_cutoff_time IS NOT NULL
+            )
+        ;]
+        <div class="feedback-alert">This school has no daily medication cutoff configured. Missed daily
+            administrations cannot be calculated until a cutoff is saved in
+            <a href="/admin/schoolsetup/medication/administration_settings.html">Medication Administration Settings</a>.
+        </div>
+        [/tlist_sql]
+
+        ~[wc:pscbdevpro2_init]
+        <script>
+            function missedText(value) {
+                return value === null || value === undefined ? "" : String(value);
+            }
+
+            function missedDateSorter(a, b) {
+                function dateValue(value) {
+                    var match = missedText(value).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+                    return match ? Date.UTC(Number(match[3]), Number(match[1]) - 1, Number(match[2])) : Number.NEGATIVE_INFINITY;
+                }
+                var left = dateValue(a), right = dateValue(b);
+                return left === right ? 0 : (left < right ? -1 : 1);
+            }
+
+            function missedGradeSorter(a, b) {
+                var special = { PK: -1, K: 0, Graduated: 99 };
+                var left = Object.prototype.hasOwnProperty.call(special, a) ? special[a] : Number(a);
+                var right = Object.prototype.hasOwnProperty.call(special, b) ? special[b] : Number(b);
+                return left - right;
+            }
+
+            function missedColumn(options) {
+                var definition = Object.assign({ sorter: "string", headerFilter: "input", minWidth: 110 }, options);
+                definition.formatter = function (cell) {
+                    var row = cell.getData();
+                    cell.getRow().getElement().style.backgroundColor = row._cdol_row_color;
+                    var link = definition.field === "student_number" && /^\d+$/.test(missedText(row.studentsdcid));
+                    var node = document.createElement(link ? "a" : "span");
+                    node.textContent = missedText(cell.getValue());
+                    if (link) {
+                        node.setAttribute("href", "/admin/students/medication/administration.html?frn=001" + row.studentsdcid);
+                        node.setAttribute("target", "_blank");
+                        node.setAttribute("rel", "noopener noreferrer");
+                    }
+                    node.style.whiteSpace = "normal";
+                    return node;
+                };
+                return definition;
+            }
+
+            var tableColumns = [
+                missedColumn({"title": "Missed Date", "field": "missed_date", "sorter": missedDateSorter}),
+                missedColumn({"title": "Std Num", "field": "student_number"}),
+                missedColumn({"title": "Student Name", "field": "student"}),
+                missedColumn({"title": "Grade Level", "field": "grade_level", "sorter": missedGradeSorter, "hozAlign": "center"}),
+                missedColumn({"title": "Medication", "field": "medication_name"}),
+                missedColumn({"title": "Prescribed Dose", "field": "prescribed_dose"}),
+                missedColumn({"title": "Route", "field": "route"}),
+                missedColumn({"title": "Frequency", "field": "frequency"})
+            ];
+
+            var tableData = ~[tlist_sql;
+            WITH scoped_medications AS (
+                SELECT medication.id, medication.studentsdcid, medication.schoolid, medication.yearid,
+                    medication.medication_name, medication.dose_amount, medication.dose_unit,
+                    medication.route, medication.frequency
+                FROM u_student_medication medication
+                WHERE medication.schoolid = ~(curschoolid)
+                    AND medication.schoolid > 0
+                    AND medication.yearid = ~(curyearid)
+                    AND LOWER(TRIM(medication.frequency)) = 'daily'
+            ),
+            medication_start AS (
+                SELECT medication.id AS medication_id,
+                    MIN(TRUNC(inventory.added_date)) AS first_inventory_date
+                FROM scoped_medications medication
+                INNER JOIN u_student_medication_inventory inventory
+                    ON inventory.u_student_medication_id = medication.id
+                GROUP BY medication.id
+            ),
+            active_settings AS (
+                SELECT schoolid, daily_cutoff_time
+                FROM (
+                    SELECT setting.schoolid, setting.daily_cutoff_time,
+                        ROW_NUMBER() OVER (
+                            PARTITION BY setting.schoolid ORDER BY setting.id DESC
+                        ) AS setting_rank
+                    FROM u_cdol_med_admin_setting setting
+                    WHERE setting.daily_cutoff_time IS NOT NULL
+                )
+                WHERE setting_rank = 1
+            ),
+            student_enrollment AS (
+                SELECT students.dcid AS studentsdcid, students.schoolid,
+                    TRUNC(students.entrydate) AS entrydate, TRUNC(students.exitdate) AS exitdate
+                FROM students
+                UNION ALL
+                SELECT students.dcid AS studentsdcid, reenrollments.schoolid,
+                    TRUNC(reenrollments.entrydate) AS entrydate, TRUNC(reenrollments.exitdate) AS exitdate
+                FROM students
+                INNER JOIN reenrollments ON reenrollments.studentid = students.id
+            ),
+            expected_rows AS (
+                SELECT DISTINCT medication.id AS medication_id, medication.studentsdcid,
+                    TRUNC(calendar_day.date_value) AS expected_date
+                FROM scoped_medications medication
+                INNER JOIN medication_start ON medication_start.medication_id = medication.id
+                INNER JOIN active_settings ON active_settings.schoolid = medication.schoolid
+                INNER JOIN terms ON terms.schoolid = medication.schoolid
+                    AND terms.yearid = medication.yearid AND terms.isyearrec = 1
+                INNER JOIN calendar_day ON calendar_day.schoolid = medication.schoolid
+                    AND calendar_day.date_value BETWEEN terms.firstday AND terms.lastday
+                INNER JOIN student_enrollment ON student_enrollment.studentsdcid = medication.studentsdcid
+                    AND student_enrollment.schoolid = medication.schoolid
+                    AND calendar_day.date_value >= student_enrollment.entrydate
+                    AND calendar_day.date_value < student_enrollment.exitdate
+                WHERE TRUNC(calendar_day.date_value) > medication_start.first_inventory_date
+                    AND NVL(calendar_day.insession, 0) = 1
+                    AND TRUNC(calendar_day.date_value) - TRUNC(calendar_day.date_value, 'IW') BETWEEN 0 AND 4
+                    AND (
+                        TRUNC(calendar_day.date_value) < TRUNC(SYSDATE)
+                        OR (
+                            TRUNC(calendar_day.date_value) = TRUNC(SYSDATE)
+                            AND active_settings.daily_cutoff_time <= ROUND((SYSDATE - TRUNC(SYSDATE)) * 86400)
+                        )
+                    )
+            ),
+            scoped_transactions AS (
+                SELECT txn.id, txn.u_student_medication_id AS medication_id,
+                    txn.transaction_type, txn.event_date, txn.reversal_of_transaction_id
+                FROM u_student_med_inv_txn txn
+                INNER JOIN scoped_medications medication ON medication.id = txn.u_student_medication_id
+            ),
+            ranked_given_corrections AS (
+                SELECT txn.*,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY txn.reversal_of_transaction_id ORDER BY txn.id DESC
+                    ) AS correction_rank
+                FROM scoped_transactions txn
+                WHERE txn.transaction_type IN ('ADMINISTRATION_CORRECTION', 'ADMINISTRATION_VOID')
+            ),
+            effective_given AS (
+                SELECT original.medication_id, original.reversal_of_transaction_id,
+                    TRUNC(CASE WHEN correction.id IS NOT NULL
+                        THEN correction.event_date ELSE original.event_date END) AS event_date
+                FROM scoped_transactions original
+                LEFT JOIN ranked_given_corrections correction
+                    ON correction.reversal_of_transaction_id = original.id AND correction.correction_rank = 1
+                WHERE original.transaction_type = 'ADMINISTRATION'
+                    AND (correction.id IS NULL OR correction.transaction_type = 'ADMINISTRATION_CORRECTION')
+            ),
+            resolved_occurrences AS (
+                SELECT medication_id, event_date FROM effective_given
+                UNION ALL
+                SELECT not_given.medication_id, TRUNC(not_given.event_date) AS event_date
+                FROM scoped_transactions not_given
+                WHERE not_given.transaction_type = 'NON_ADMINISTRATION'
+                    AND NOT EXISTS (
+                        SELECT 1 FROM effective_given given
+                        WHERE given.reversal_of_transaction_id = not_given.id
+                    )
+            ),
+            report_rows (
+                studentsdcid,
+                missed_date,
+                student_number,
+                student,
+                grade_level,
+                medication_name,
+                dose_amount,
+                dose_unit,
+                route,
+                frequency,
+                report_order
+            ) AS (
+            SELECT
+                students.dcid AS dcid,
+                TO_CHAR(expected.expected_date, 'MM/DD/YYYY') AS missed_date,
+                students.student_number AS student_number,
+                students.lastfirst AS lastfirst,
+                CASE
+                    WHEN students.grade_level = -1 THEN 'PK'
+                    WHEN students.grade_level = 0 THEN 'K'
+                    WHEN students.grade_level = 99 THEN 'Graduated'
+                    ELSE TO_CHAR(students.grade_level)
+                END AS grade_level,
+                medication.medication_name AS medication_name,
+                medication.dose_amount AS dose_amount,
+                NVL(dose_unit_option.displayvalue, medication.dose_unit) AS dose_unit,
+                NVL(route_option.displayvalue, medication.route) AS route,
+                NVL(frequency_option.displayvalue, medication.frequency) AS frequency,
+                ROW_NUMBER() OVER (ORDER BY students.lastfirst, students.dcid, expected.expected_date DESC,
+                medication.medication_name, medication.dose_amount, medication.id) AS report_order
+            FROM expected_rows expected
+            INNER JOIN scoped_medications medication ON medication.id = expected.medication_id
+            INNER JOIN students ON students.dcid = expected.studentsdcid
+            LEFT JOIN u_cdol_health_option dose_unit_option
+                ON dose_unit_option.codetype = 'MED_DOSE_UNIT'
+                AND dose_unit_option.code = medication.dose_unit
+            LEFT JOIN u_cdol_health_option route_option
+                ON route_option.codetype = 'MED_ROUTE'
+                AND route_option.code = medication.route
+            LEFT JOIN u_cdol_health_option frequency_option
+                ON frequency_option.codetype = 'MED_FREQUENCY'
+                AND frequency_option.code = medication.frequency
+            WHERE NOT EXISTS (
+                SELECT 1 FROM resolved_occurrences resolved
+                WHERE resolved.medication_id = expected.medication_id
+                    AND resolved.event_date = expected.expected_date
+            )
+            )
+            SELECT COALESCE(
+                REPLACE(
+                    JSON_ARRAYAGG(
+                        JSON_OBJECT(
+                            'studentsdcid' VALUE studentsdcid,
+                            'missed_date' VALUE missed_date,
+                            'student_number' VALUE student_number,
+                            'student' VALUE student,
+                            'grade_level' VALUE grade_level,
+                            'medication_name' VALUE medication_name,
+                            'dose_amount' VALUE dose_amount,
+                            'dose_unit' VALUE dose_unit,
+                            'route' VALUE route,
+                            'frequency' VALUE frequency
+                            NULL ON NULL RETURNING CLOB
+                        ) ORDER BY report_order RETURNING CLOB
+                    ),
+                    '<', '\u003c'
+                ),
+                TO_CLOB(CHR(91) || CHR(93))
+            ) AS report_json
+            FROM report_rows
+            ;]~(1)[/tlist_sql];
+            var studentBands = new Map();
+            tableData = tableData.map(function (source) {
+                var row = {};
+                Object.keys(source).forEach(function (key) { row[key.toLowerCase()] = source[key]; });
+                row.prescribed_dose = [row.dose_amount, row.dose_unit].map(missedText).filter(function (value) {
+                    return value !== "";
+                }).join(" ");
+                var studentID = missedText(row.studentsdcid);
+                if (!studentBands.has(studentID)) {
+                    studentBands.set(studentID, studentBands.size % 2 === 0 ? "#ffffff" : "#d7edfe");
+                }
+                row._cdol_row_color = studentBands.get(studentID);
+                return row;
+            });
+        </script>
+        [else#schoolOnly]
+        <div class="feedback-alert">Missed Daily Administration is available only at the school level.
+            Select a school to run this report.</div>
+        [/if#schoolOnly]
+        ~[wc:admin_footer_frame_css]
+    </body>
+
+</html>
