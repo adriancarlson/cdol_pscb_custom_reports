@@ -11,6 +11,13 @@
         <link href="/images/css/print.css" rel="stylesheet" media="print">
         <link href="/images/css/cdol.css" rel="stylesheet">
         ~[wc:pscbdevpro_init]
+        <style>
+            #pscbDevPro td.cell-highlight-orange { background-color: #ffe0b2 !important; color: #222 !important; }
+            #pscbDevPro td.cell-highlight-yellow { background-color: #fff9c4 !important; color: #222 !important; }
+            #pscbDevPro td.cell-highlight-green { background-color: #bfffc7 !important; color: #222 !important; }
+            #pscbDevPro td.cell-highlight-blue { background-color: #bfe0ff !important; color: #222 !important; }
+            #pscbDevPro td.cell-highlight-red { background-color: #ffc7ce !important; color: #9c0006 !important; }
+        </style>
     </head>
 
     <body>
@@ -19,7 +26,7 @@
         <h1>NCEA - Staff Info</h1>
         <div class="box-round">
             <h2 class="pscbdevBkgColor">&nbsp;&nbsp;NCEA Staff Info</h2>
-            <table cellspacing="0" cellpadding="4" class="center" class="tablesorter grid" id="pscbDevPro">
+            <table cellspacing="0" cellpadding="4" class="center tablesorter grid" id="pscbDevPro">
                 <thead>
                     <tr>
                         <th class="left">Staff Name</th>
@@ -39,7 +46,7 @@
                     schoolstaff.dcid,
                     users.lastfirst,
                     CASE
-                    WHEN userscorefields.gender IS NULL THEN 'cell-highlight-orange'
+                    WHEN TRIM(userscorefields.gender) IS NULL THEN 'cell-highlight-orange'
                     ELSE ''
                     END genderHighlight,
                     CASE
@@ -48,7 +55,7 @@
                     ELSE userscorefields.gender
                     END as GENDER,
                     CASE
-                    WHEN users.fedethnicity IS NULL THEN 'cell-highlight-yellow'
+                    WHEN TRIM(TO_CHAR(users.fedethnicity)) IS NULL THEN 'cell-highlight-yellow'
                     ELSE ''
                     END ETHNICITYHighlight,
                     CASE
@@ -57,13 +64,13 @@
                     ELSE TO_CHAR(users.fedethnicity)
                     END as ETHNICITY,
                     CASE
-                    WHEN teacherrace.racecd IS NULL THEN 'cell-highlight-green'
+                    WHEN TRIM(teacherrace.racecd) IS NULL THEN 'cell-highlight-green'
                     ELSE ''
                     END raceHighlight,
                     LISTAGG(teacherrace.racecd,', ') WITHIN GROUP (ORDER BY teacherrace.racecd) OVER (PARTITION BY
                     schoolstaff.dcid) RACE,
                     CASE
-                    WHEN s_usr_ncea_x.religiousaffiliation IS NULL THEN 'cell-highlight-blue'
+                    WHEN TRIM(s_usr_ncea_x.religiousaffiliation) IS NULL THEN 'cell-highlight-blue'
                     ELSE ''
                     END religiousaffiliationHighlight,
                     CASE
@@ -72,7 +79,7 @@
                     ELSE s_usr_ncea_x.religiousaffiliation
                     END as religiousaffiliation,
                     CASE
-                    WHEN s_usr_ncea_x.religiousclergylay IS NULL THEN 'cell-highlight-red'
+                    WHEN TRIM(s_usr_ncea_x.religiousclergylay) IS NULL THEN 'cell-highlight-red'
                     ELSE ''
                     END STAFF_TYPEHighlight,
                     CASE
@@ -82,7 +89,7 @@
                     ELSE s_usr_ncea_x.religiousclergylay
                     END as STAFF_TYPE,
                     CASE
-                    WHEN S_SSF_NCEA_X.FTE_CODE IS NULL THEN 'cell-highlight-orange'
+                    WHEN TRIM(S_SSF_NCEA_X.FTE_CODE) IS NULL THEN 'cell-highlight-orange'
                     ELSE ''
                     END FTEHighlight,
                     CASE
@@ -91,7 +98,7 @@
                     ELSE S_SSF_NCEA_X.FTE_CODE
                     END as FTE,
                     CASE
-                    WHEN s_ssf_ncea_x.excludefromncea_tf IS NULL THEN 'cell-highlight-red'
+                    WHEN TRIM(TO_CHAR(s_ssf_ncea_x.excludefromncea_tf)) IS NULL THEN 'cell-highlight-red'
                     ELSE ''
                     END excludeHighlight,
                     CASE
@@ -121,11 +128,11 @@
                         ~[if.is.a.school] AND schools.school_number = ~(curschoolid) [/if.is.a.school]
                         ~[if#Mandatory.~(gpv.status;sqlText)=0]
                         AND (s_ssf_ncea_x.excludefromncea_tf = '0' or s_ssf_ncea_x.excludefromncea_tf IS NULL)
-                        AND (userscorefields.gender is NULL
-                        OR s_usr_ncea_x.religiousaffiliation is NULL
-                        OR teacherrace.racecd is NULL
-                        OR s_usr_ncea_x.religiousclergylay is null
-                        OR S_SSF_NCEA_X.FTE_CODE is null)
+                        AND (TRIM(userscorefields.gender) IS NULL
+                        OR TRIM(s_usr_ncea_x.religiousaffiliation) IS NULL
+                        OR TRIM(teacherrace.racecd) IS NULL
+                        OR TRIM(s_usr_ncea_x.religiousclergylay) IS NULL
+                        OR TRIM(S_SSF_NCEA_X.FTE_CODE) IS NULL)
                         [/if#Mandatory]
                         ORDER BY schools.name, users.lastfirst
                         ;alternatecolor; nonemessage=
@@ -134,7 +141,7 @@
                         </tr>]
                         <tr class="Record">
                             <td><a href="/admin/faculty/facultyNCEA.html?frn=005~(dcid;t)"
-                                    target="_blank">~(staffname;t)</a>
+                                    target="_blank">~(staffname;t)</a></td>
                             <td class="~(genderHighlight;t)">~(gender;t)</td>
                             <td class="~(ethnicityHighlight;t)">~(ethnicity;t)</td>
                             <td class="~(raceHighlight;t)">~(race;t)</td>

@@ -8,7 +8,6 @@
         ~[wc:commonscripts]
         <link href="/images/css/screen.css" rel="stylesheet" media="screen">
         <link href="/images/css/print.css" rel="stylesheet" media="print">
-        ~[wc:pscbdevpro_init]
     </head>
 
     <body>
@@ -37,7 +36,7 @@
                                 </select>
                             </td>
                             <td>
-                                <select name="gr" name="gr">
+                                <select name="gr" id="gr">
                                     <option value='' ~[if.~[gpv:gr]=]selected[/if]>All Grades</option>
                                     ~[tlist_sql;
                                     SELECT DISTINCT GRADE_LEVEL,
@@ -66,38 +65,55 @@
                 </div>
             </div>
         </form>
+        ~[wc:pscbdevpro2_init]
         ~[if#showData.~(gpv.showData;sqlText)=1]
-        <div class="box-round">
-            <h2 class="pscbdevBkgColor">&nbsp;&nbsp;Public School Districts</h2>
-            <table cellspacing="0" cellpadding="4" class="tablesorter grid center" id="pscbDevPro" groupRowsByCol="1"
-                color1="#ffffff" color2="#d7edfe">
-                <thead>
-                    <tr>
-                        <th class="left filter-select">Public School District</th>
-                        <th class="left">Student Number</th>
-                        <th class="left">Name</th>
-                        <th class="left filter-select">Grade Level</th>
-                        <th class="left filter-select">Gender</th>
-                        <th class="left">Address</th>
-                        <th class="left">City</th>
-                        <th class="left">State</th>
-                        <th class="left">Zip</th>
-                        ~[if.district.office]<th class="left">School</th>[/if]
-                    </tr>
-                </thead>
-                <tbody>
-                    ~[tlist_sql;
+        <script>
+            function pscbFormatter(cell) {
+                var link = document.createElement('a');
+                link.href = '/admin/students/generaldemographics.html?frn=001' + cell.getData().studentsdcid;
+                link.target = '_blank';
+                link.textContent = cell.getValue();
+                return link;
+            }
+
+            var tableColumns = [
+                { 'title': 'Public School District', 'field': 'district_of_residence', 'sorter': 'string', 'headerFilter': 'input' },
+                { 'title': 'Student Number', 'field': 'student_number', 'sorter': 'string', 'headerFilter': 'input', 'formatter': pscbFormatter },
+                { 'title': 'First Name', 'field': 'first_name', 'sorter': 'string', 'headerFilter': 'input' },
+                { 'title': 'Last Name', 'field': 'last_name', 'sorter': 'string', 'headerFilter': 'input' },
+                { 'title': 'Date of Birth', 'field': 'dob', 'sorter': 'string', 'headerFilter': 'input' },
+                { 'title': 'Age (Years, Months)', 'field': 'age', 'sorter': 'string', 'headerFilter': 'input' },
+                { 'title': 'Grade Level', 'field': 'grade_level', 'sorter': 'string', 'headerFilter': 'input' },
+                { 'title': 'Gender', 'field': 'gender', 'sorter': 'string', 'headerFilter': 'input' },
+                { 'title': 'Address', 'field': 'street', 'sorter': 'string', 'headerFilter': 'input' },
+                { 'title': 'City', 'field': 'city', 'sorter': 'string', 'headerFilter': 'input' },
+                { 'title': 'State', 'field': 'state', 'sorter': 'string', 'headerFilter': 'input' },
+                { 'title': 'Zip', 'field': 'zip', 'sorter': 'string', 'headerFilter': 'input' },
+                ~[if.district.office]
+                { 'title': 'School', 'field': 'school', 'sorter': 'string', 'headerFilter': 'input' },
+                [/if]
+            ];
+
+            var tableData = ~[tlist_sql;
+                WITH reportData AS (
                     SELECT
-                    s.dcid,
+                    s.dcid AS studentsdcid,
                     g.NAME || ' ' || s.DISTRICTOFRESIDENCE as District_of_Residence,
                     s.student_number,
-                    s.lastfirst,
+                    s.lastfirst AS student,
+                    s.first_name,
+                    s.last_name,
+                    TO_CHAR(s.dob, 'MM/DD/YYYY') AS dob,
+                    CASE WHEN s.dob IS NOT NULL AND TRUNC(s.dob) <= TRUNC(SYSDATE) THEN
+                        TO_CHAR(TRUNC(MONTHS_BETWEEN(TRUNC(SYSDATE), TRUNC(s.dob)) / 12)) || ' years, ' ||
+                        TO_CHAR(MOD(TRUNC(MONTHS_BETWEEN(TRUNC(SYSDATE), TRUNC(s.dob))), 12)) || ' months'
+                    END AS age,
                     CASE
                     WHEN TO_CHAR(s.grade_level) = -1 then 'PK'
                     WHEN TO_CHAR(s.grade_level) = 0 then 'K'
                     WHEN TO_CHAR(s.grade_level) = 99 then 'Graduated'
                     ELSE TO_CHAR(s.grade_level)
-                    END as PRETTY_GRADE,
+                    END as grade_level,
                     CASE
                     WHEN UPPER(s.gender) = 'M' THEN 'Male'
                     WHEN UPPER(s.gender) = 'F' THEN 'Female'
@@ -107,7 +123,8 @@
                     s.city,
                     s.state,
                     s.zip,
-                    sch.abbreviation
+                    sch.abbreviation AS school,
+                    g.NAME AS district_sort
                     FROM Students s
                     ~[if#ss.~(gpv.ss;sqlText)=cur] INNER JOIN ~[temp.table.current.selection:students] temp ON
                     (s.dcid =
@@ -118,28 +135,17 @@
                     WHERE s.enroll_status in (-1,0)
                     ~[if.is.a.school] AND s.schoolid = ~(curschoolid) [/if.is.a.school]
                     ~[if#gr.~(gpv.gr;sqlText)#] AND s.grade_level = ~(gpv.gr) [/if#gr]
-                    ORDER BY g.NAME, sch.abbreviation, s.lastfirst
-                    ;alternatecolor;nonemessage=<tr>
-                        <td colspan="100%">No Records were found.</td>
-                    </tr>]
-                    <tr class="Record" data-StudentID="~(dcid)">
-                        <td class="nowrap">~(district;t)</td>
-                        <td class="nowrap"><a href="/admin/students/generaldemographics.html?frn=001~(dcid)"
-                                target="_blank">~(studentnumb)</a>
-                        </td>
-                        <td class="nowrap">~(name;t)</td>
-                        <td class="center">~(grade_level)</td>
-                        <td>~(gender;t)</td>
-                        <td>~(address;t)</td>
-                        <td>~(city;t)</td>
-                        <td>~(state;t)</td>
-                        <td>~(zip;t)</td>
-                        ~[if.district.office]<td>~(school;t)</td>[/if]
-                    </tr>
-                    [/tlist_sql]
-                </tbody>
-            </table>
-        </div>
+                )
+                SELECT COALESCE(
+                    JSON_ARRAYAGG(
+                        JSON_OBJECT(studentsdcid, district_of_residence, student_number, first_name, last_name,
+                            dob, age, grade_level, gender, street, city, state, zip, school)
+                        ORDER BY district_sort, school, student RETURNING CLOB
+                    ),
+                    TO_CLOB(CHR(91) || CHR(93))
+                )
+                FROM reportData;]~(1)[/tlist_sql];
+        </script>
         <div style="clear: both;">
             <p class="center">Report generated at ~[time] on ~[date]</p>
         </div>

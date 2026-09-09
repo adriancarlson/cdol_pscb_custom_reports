@@ -11,6 +11,13 @@
         <link href="/images/css/print.css" rel="stylesheet" media="print">
         <link href="/images/css/cdol.css" rel="stylesheet">
         ~[wc:pscbdevpro_init]
+        <style>
+            #pscbDevPro td.cell-highlight-orange { background-color: #ffe0b2 !important; color: #222 !important; }
+            #pscbDevPro td.cell-highlight-yellow { background-color: #fff9c4 !important; color: #222 !important; }
+            #pscbDevPro td.cell-highlight-green { background-color: #bfffc7 !important; color: #222 !important; }
+            #pscbDevPro td.cell-highlight-blue { background-color: #bfe0ff !important; color: #222 !important; }
+            #pscbDevPro td.cell-highlight-red { background-color: #ffc7ce !important; color: #9c0006 !important; }
+        </style>
     </head>
 
     <body>
@@ -49,7 +56,7 @@
                     s.lastfirst,
                     s.grade_level,
                     CASE
-                    WHEN s.gender IS NULL THEN 'cell-highlight-orange'
+                    WHEN TRIM(s.gender) IS NULL THEN 'cell-highlight-orange'
                     ELSE ''
                     END genderHighlight,
                     CASE
@@ -58,7 +65,7 @@
                     ELSE s.gender
                     END gender,
                     CASE
-                    WHEN s.fedethnicity IS NULL THEN 'cell-highlight-yellow'
+                    WHEN TRIM(TO_CHAR(s.fedethnicity)) IS NULL THEN 'cell-highlight-yellow'
                     WHEN TO_CHAR(s.fedethnicity) = '-1' THEN 'cell-highlight-yellow'
                     ELSE ''
                     END ethnicityHighlight,
@@ -69,12 +76,12 @@
                     ELSE TO_CHAR(s.fedethnicity)
                     END as ETHNICITY,
                     CASE
-                    WHEN r.racecd IS NULL THEN 'cell-highlight-green'
+                    WHEN TRIM(r.racecd) IS NULL THEN 'cell-highlight-green'
                     ELSE ''
                     END raceHighlight,
                     LISTAGG(r.racecd,', ') WITHIN GROUP (ORDER BY r.racecd) OVER (PARTITION BY s.dcid) racecodes,
                     CASE
-                    WHEN s_stu_ncea_x.RELIGIOUSAFFILIATION IS NULL THEN 'cell-highlight-blue'
+                    WHEN TRIM(s_stu_ncea_x.RELIGIOUSAFFILIATION) IS NULL THEN 'cell-highlight-blue'
                     ELSE ''
                     END religiousaffiliationHighlight,
                     CASE
@@ -83,12 +90,16 @@
                     ELSE s_stu_ncea_x.RELIGIOUSAFFILIATION
                     END as religiousaffiliation,
                     CASE
+                    WHEN TRIM(TO_CHAR(s_stu_ncea_x.DIAGNOSEDDISABILITY_TF)) IS NULL THEN 'cell-highlight-red'
+                    ELSE ''
+                    END has_disabilityHighlight,
+                    CASE
                     WHEN TO_CHAR(s_stu_ncea_x.DIAGNOSEDDISABILITY_TF) = '1' then 'Yes'
                     WHEN TO_CHAR(s_stu_ncea_x.DIAGNOSEDDISABILITY_TF) = '0' then 'No'
                     ELSE TO_CHAR(s_stu_ncea_x.DIAGNOSEDDISABILITY_TF)
                     END as has_disability,
                     CASE
-                    WHEN TO_CHAR(s_stu_ncea_x.DIAGNOSEDDISABILITY_TF) = '1' and s_stu_ncea_x.DiagnosedDisability is NULL
+                    WHEN TO_CHAR(s_stu_ncea_x.DIAGNOSEDDISABILITY_TF) = '1' and TRIM(s_stu_ncea_x.DiagnosedDisability) IS NULL
                     THEN 'cell-highlight-red'
                     ELSE ''
                     END sisorderHighlight,
@@ -103,42 +114,67 @@
                     ELSE TO_CHAR(s_stu_ncea_x.DiagnosedDisability)
                     END as disability,
                     CASE
+                    WHEN TRIM(TO_CHAR(s_stu_ncea_x.ungraded_tf)) IS NULL THEN 'cell-highlight-red'
+                    ELSE ''
+                    END ungradedHighlight,
+                    CASE
                     WHEN TO_CHAR(s_stu_ncea_x.ungraded_tf) = '1' then 'Yes'
                     WHEN TO_CHAR(s_stu_ncea_x.ungraded_tf) = '0' then 'No'
                     ELSE TO_CHAR(s_stu_ncea_x.ungraded_tf)
                     END as ungraded,
+                    CASE
+                    WHEN TRIM(TO_CHAR(s_stu_ncea_x.TITLEI_TF)) IS NULL THEN 'cell-highlight-red'
+                    ELSE ''
+                    END rectitle1Highlight,
                     CASE
                     WHEN TO_CHAR(s_stu_ncea_x.TITLEI_TF) = '1' then 'Yes'
                     WHEN TO_CHAR(s_stu_ncea_x.TITLEI_TF) = '0' then 'No'
                     ELSE TO_CHAR(s_stu_ncea_x.TITLEI_TF)
                     END as rectitle1,
                     CASE
+                    WHEN TRIM(TO_CHAR(s_stu_ncea_x.FederalNutrition_TF)) IS NULL THEN 'cell-highlight-red'
+                    ELSE ''
+                    END recFreeRdcHighlight,
+                    CASE
                     WHEN TO_CHAR(s_stu_ncea_x.FederalNutrition_TF) = '1' then 'Yes'
                     WHEN TO_CHAR(s_stu_ncea_x.FederalNutrition_TF) = '0' then 'No'
                     ELSE TO_CHAR(s_stu_ncea_x.FederalNutrition_TF)
                     END as recFreeRdc,
+                    CASE
+                    WHEN TRIM(TO_CHAR(s_stu_ncea_x.FederalNutrition_Elig_TF)) IS NULL THEN 'cell-highlight-red'
+                    ELSE ''
+                    END eligFreeRdcHighlight,
                     CASE
                     WHEN TO_CHAR(s_stu_ncea_x.FederalNutrition_Elig_TF) = '1' then 'Yes'
                     WHEN TO_CHAR(s_stu_ncea_x.FederalNutrition_Elig_TF) = '0' then 'No'
                     ELSE TO_CHAR(s_stu_ncea_x.FederalNutrition_Elig_TF)
                     END as eligFreeRdc,
                     CASE
+                    WHEN TRIM(TO_CHAR(s_stu_ncea_x.Parental_Choice_TF)) IS NULL THEN 'cell-highlight-red'
+                    ELSE ''
+                    END parentchoiceHighlight,
+                    CASE
                     WHEN TO_CHAR(s_stu_ncea_x.Parental_Choice_TF) = '1' then 'Yes'
                     WHEN TO_CHAR(s_stu_ncea_x.Parental_Choice_TF) = '0' then 'No'
                     ELSE TO_CHAR(s_stu_ncea_x.Parental_Choice_TF)
                     END as parentchoice,
+                    CASE
+                    WHEN TRIM(TO_CHAR(s_stu_ncea_x.Intl_Visa_TF)) IS NULL THEN 'cell-highlight-red'
+                    ELSE ''
+                    END visaHighlight,
                     CASE
                     WHEN TO_CHAR(s_stu_ncea_x.Intl_Visa_TF) = '1' then 'Yes'
                     WHEN TO_CHAR(s_stu_ncea_x.Intl_Visa_TF) = '0' then 'No'
                     ELSE TO_CHAR(s_stu_ncea_x.Intl_Visa_TF)
                     END as visa,
                     CASE
-                    WHEN s_stu_ncea_x.EXCLUDEFROMNCEA_TF ='1' THEN 'cell-highlight-red'
+                    WHEN TRIM(TO_CHAR(s_stu_ncea_x.EXCLUDEFROMNCEA_TF)) IS NULL THEN 'cell-highlight-red'
                     ELSE ''
                     END excludeHighlight,
                     CASE
                     WHEN TO_CHAR(s_stu_ncea_x.EXCLUDEFROMNCEA_TF) = '1' then 'Excluded from NCEA'
-                    ELSE 'Included in NCEA'
+                    WHEN TO_CHAR(s_stu_ncea_x.EXCLUDEFROMNCEA_TF) = '0' then 'Included in NCEA'
+                    ELSE TO_CHAR(s_stu_ncea_x.EXCLUDEFROMNCEA_TF)
                     END as EXCLUDE_FROM_NCEA,
                     schools.name
                     FROM
@@ -152,12 +188,12 @@
                     WHERE s.enroll_status = 0
                     ~[if.is.a.school] AND s.schoolid = ~(curschoolid) [/if.is.a.school]
                     ~[if#Mandatory.~(gpv.status;sqlText)=0]
-                    AND (s.gender is NULL
-                    OR s_stu_ncea_x.RELIGIOUSAFFILIATION is NULL
-                    OR r.racecd is NULL
-                    OR s.fedethnicity is NULL
+                    AND (TRIM(s.gender) IS NULL
+                    OR TRIM(s_stu_ncea_x.RELIGIOUSAFFILIATION) IS NULL
+                    OR TRIM(r.racecd) IS NULL
+                    OR TRIM(TO_CHAR(s.fedethnicity)) IS NULL
                     OR TO_CHAR(s.fedethnicity) ='-1'
-                    OR (TO_CHAR(s_stu_ncea_x.DIAGNOSEDDISABILITY_TF) = '1' and s_stu_ncea_x.DiagnosedDisability is NULL)
+                    OR (TO_CHAR(s_stu_ncea_x.DIAGNOSEDDISABILITY_TF) = '1' and TRIM(s_stu_ncea_x.DiagnosedDisability) IS NULL)
                     )
                     [/if#Mandatory]
                     ~[if#cursel.~(gpv.status;sqlText)=2] AND s.dcid IN (SELECT dcid FROM
@@ -178,14 +214,14 @@
                         <td class="~(ethnicityHighlight;t)">~(ethnicity;t)</td>
                         <td class="~(raceHighlight;t)">~(race;t)</td>
                         <td class="~(religionHighlight;t)">~(religion;t)</td>
-                        <td>~(has_disability;t)</td>
+                        <td class="~(has_disabilityHighlight;t)">~(has_disability;t)</td>
                         <td class="~(disabilityHighlight;t)">~(disability;t)</td>
-                        <td>~(ungraded;t)</td>
-                        <td>~(rectitle1;t)</td>
-                        <td>~(recFREERdc;t)</td>
-                        <td>~(eligFREERdc;t)</td>
-                        <td>~(parentchoice;t)</td>
-                        <td>~(visa;t)</td>
+                        <td class="~(ungradedHighlight;t)">~(ungraded;t)</td>
+                        <td class="~(rectitle1Highlight;t)">~(rectitle1;t)</td>
+                        <td class="~(recFreeRdcHighlight;t)">~(recFreeRdc;t)</td>
+                        <td class="~(eligFreeRdcHighlight;t)">~(eligFreeRdc;t)</td>
+                        <td class="~(parentchoiceHighlight;t)">~(parentchoice;t)</td>
+                        <td class="~(visaHighlight;t)">~(visa;t)</td>
                         <td class="~(excludeHighlight;t)">~(exclude;t)</td>
                         ~[if.district.office]<td>~(school;t)</td>[/if]
                     </tr>
