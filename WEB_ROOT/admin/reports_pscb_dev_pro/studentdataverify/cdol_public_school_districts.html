@@ -77,7 +77,12 @@
             }
 
             var tableColumns = [
-                { 'title': 'Public School District', 'field': 'district_of_residence', 'sorter': 'string', 'headerFilter': 'input' },
+                {
+                    'title': 'Public School District', 'field': 'district_of_residence', 'sorter': 'string',
+                    'headerFilter': 'list',
+                    'headerFilterParams': { 'valuesLookup': true, 'sort': 'asc', 'clearable': true },
+                    'headerFilterFunc': '=', 'headerFilterPlaceholder': 'All Districts'
+                },
                 { 'title': 'Student Number', 'field': 'student_number', 'sorter': 'string', 'headerFilter': 'input', 'formatter': pscbFormatter },
                 { 'title': 'First Name', 'field': 'first_name', 'sorter': 'string', 'headerFilter': 'input' },
                 { 'title': 'Last Name', 'field': 'last_name', 'sorter': 'string', 'headerFilter': 'input' },
@@ -100,7 +105,6 @@
                     s.dcid AS studentsdcid,
                     g.NAME || ' ' || s.DISTRICTOFRESIDENCE as District_of_Residence,
                     s.student_number,
-                    s.lastfirst AS student,
                     s.first_name,
                     s.last_name,
                     TO_CHAR(s.dob, 'MM/DD/YYYY') AS dob,
@@ -123,8 +127,7 @@
                     s.city,
                     s.state,
                     s.zip,
-                    sch.abbreviation AS school,
-                    g.NAME AS district_sort
+                    sch.abbreviation AS school
                     FROM Students s
                     ~[if#ss.~(gpv.ss;sqlText)=cur] INNER JOIN ~[temp.table.current.selection:students] temp ON
                     (s.dcid =
@@ -140,7 +143,7 @@
                     JSON_ARRAYAGG(
                         JSON_OBJECT(studentsdcid, district_of_residence, student_number, first_name, last_name,
                             dob, age, grade_level, gender, street, city, state, zip, school)
-                        ORDER BY district_sort, school, student RETURNING CLOB
+                        ORDER BY last_name, first_name, student_number RETURNING CLOB
                     ),
                     TO_CLOB(CHR(91) || CHR(93))
                 )
