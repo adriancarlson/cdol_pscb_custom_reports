@@ -795,6 +795,20 @@
 									"sortOrder": 20,
 									"parentHTMLID": "navPSCBDevProNCEA",
 									"districtLevelContext": 0
+								},
+								{
+									"htmlID": "ncea_newly_baptized",
+									"title": "NCEA - Newly Baptized🔹",
+									"pageURL": "/admin/reports_pscb_dev_pro/ncea/ncea_newly_baptized.html",
+									"version": "26.9.1",
+									"contextType": "main",
+									"isNewTab": null,
+									"isLandingPage": null,
+									"iconName": null,
+									"requiredContext": null,
+									"sortOrder": 30,
+									"parentHTMLID": "navPSCBDevProNCEA",
+									"districtLevelContext": 0
 								}
 							]
 						}

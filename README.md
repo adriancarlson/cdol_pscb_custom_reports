@@ -62,3 +62,24 @@ PSCB files are not bundled here. No medication, health-log, or school-setting re
 Before production use, test the installed reports in PowerSchool, including long notes, empty results,
 report filters, student selection, exports, and the school-only missed-administration report. Local
 JavaScript and fictional-data browser checks do not validate Oracle execution or PSCB permissions.
+
+## NCEA baptisms and reception into full communion
+
+Version `26.9.1` adds **NCEA - Baptisms and Reception into Full Communion** to the classic
+and enhanced NCEA menus. It uses PSCB framework 2, matching the LanSchool reports, and
+loads immediately with a distinct-student total and the supplied student detail columns.
+The total covers the complete result, independent of table filters.
+
+The selected PowerSchool year (`~(curyearid) + 1990` / `+ 1991`) supplies the August 1
+inclusive and June 1 exclusive boundaries. Select 2025-2026 to report August 1, 2025,
+through May 31, 2026. School context limits results to that school; District Office
+includes all schools. The supplied joins and school/grade-descending/name ordering are retained.
+No active-enrollment or NCEA-exclusion filter is added to the supplied criteria.
+
+This query uses only `u_student_sacramental.student_baptism_date`. It cannot independently
+identify reception into full communion or distinguish Catholic from other baptisms.
+Confirm how those events are recorded before using the total for submission. First Communion
+and Confirmation dates are not queried. Current student grade and school are shown.
+
+Install the report plugin and update the separate EUI menu-links plugin as described above.
+Live PowerSchool validation is still required for Oracle execution, PSCB tools, counts, and exports.

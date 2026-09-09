@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <title>NCEA - Newly Baptized</title>
+        <link href="/images/css/screen.css" rel="stylesheet" media="screen">
+        <link href="/images/css/print.css" rel="stylesheet" media="print">
+        ~[wc:commonscripts]
+    </head>
+
+    <body>
+        ~[wc:admin_header_css]<!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a> &gt;
+        <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html" target="_top">PSCB DEV Custom Reports</a> &gt;
+        <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_ncea_menu.html" target="_top">NCEA</a> &gt;
+        Newly Baptized<!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
+        <h1>NCEA - Newly Baptized</h1>
+        <p>Reporting period: ~[tlist_sql;
+            SELECT TO_CHAR(~(curyearid) + 1990) || '-08-01 through ' ||
+            TO_CHAR(~(curyearid) + 1991) || '-05-31' FROM dual;
+            ]~(1)[/tlist_sql] (selected school year).</p>
+        <p>Total students: <strong id="nceaStudentCount"></strong></p>
+        ~[wc:pscbdevpro2_init]
+        <script>
+            var tableColumns = [
+                { title: 'Student #', field: 'student_number', sorter: 'number', headerFilter: 'input' },
+                { title: 'Last Name', field: 'last_name', sorter: 'string', headerFilter: 'input' },
+                { title: 'First Name', field: 'first_name', sorter: 'string', headerFilter: 'input' },
+                { title: 'Gender', field: 'gender', sorter: 'string', headerFilter: 'input' },
+                { title: 'Grade', field: 'grade_level', sorter: 'number', headerFilter: 'input' },
+                { title: 'Baptism Date', field: 'student_baptism_date', sorter: 'string', headerFilter: 'input' },
+                { title: 'School', field: 'school', sorter: 'string', headerFilter: 'input' }
+            ];
+            var tableData = ~[tlist_sql;
+            WITH report_rows AS(
+                SELECT
+                    students.dcid AS studentsdcid,
+                students.student_number,
+                students.last_name,
+                students.first_name,
+                students.gender,
+                students.grade_level,
+                TO_CHAR(u_student_sacramental.student_baptism_date, 'YYYY-MM-DD') AS student_baptism_date,
+                schools.name AS school
+                FROM students
+                INNER JOIN u_student_sacramental ON students.dcid = u_student_sacramental.studentsdcid
+                INNER JOIN schools ON students.schoolid = schools.school_number
+                WHERE u_student_sacramental.student_baptism_date >=
+            TO_DATE(TO_CHAR(~(curyearid) + 1990) || '-08-01', 'YYYY-MM-DD')
+                    AND u_student_sacramental.student_baptism_date <
+            TO_DATE(TO_CHAR(~(curyearid) + 1991) || '-06-01', 'YYYY-MM-DD')
+                    ~[if.is.a.school] AND students.schoolid = ~(curschoolid)[/if.is.a.school]
+            )
+            SELECT COALESCE(
+                REPLACE(JSON_ARRAYAGG(
+                    JSON_OBJECT(
+                        'studentsdcid' VALUE studentsdcid,
+                        'student_number' VALUE student_number,
+                        'last_name' VALUE last_name,
+                        'first_name' VALUE first_name,
+                        'gender' VALUE gender,
+                        'grade_level' VALUE grade_level,
+                        'student_baptism_date' VALUE student_baptism_date,
+                        'school' VALUE school
+                        NULL ON NULL RETURNING CLOB
+                    ) ORDER BY school, grade_level DESC, last_name, first_name RETURNING CLOB
+                ), '<', '\u003c'),
+                TO_CLOB(CHR(91) || CHR(93))
+            ) AS report_json
+            FROM report_rows;
+            ]~(1)[/tlist_sql];
+            document.getElementById('nceaStudentCount').textContent =
+                new Set(tableData.map(function (row) { return row.studentsdcid; })).size;
+        </script>
+        ~[wc:admin_footer_frame_css]
+    </body>
+
+</html>
