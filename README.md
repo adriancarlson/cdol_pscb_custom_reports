@@ -70,10 +70,17 @@ and enhanced NCEA menus. It uses PSCB framework 2, matching the LanSchool report
 loads immediately with a distinct-student total and the supplied student detail columns.
 The total covers the complete result, independent of table filters.
 
-The selected PowerSchool year (`~(curyearid) + 1990` / `+ 1991`) supplies the August 1
-inclusive and June 1 exclusive boundaries. Select 2025-2026 to report August 1, 2025,
-through May 31, 2026. School context limits results to that school; District Office
-includes all schools. The supplied joins and school/grade-descending/name ordering are retained.
+The report now uses the previous school year's full-year Terms record:
+`terms.yearid = ~(curyearid) - 1`, `terms.isyearrec = 1`, and
+`terms.schoolid = students.schoolid`. With 2026-2027 selected, it reports the
+2025-2026 term. Baptism dates include `FIRSTDAY` through the entire `LASTDAY`;
+the dates are no longer fixed to August 1 and May 31. School context limits results
+to that school; District Office uses each student's current school's term dates.
+A school without a matching prior-year term contributes no rows. The school-level
+report displays the configured date range or a missing-term message. `EXISTS` avoids
+duplicating students if matching term records overlap. The supplied joins and
+school/grade-descending/name ordering are retained. This adjustment is packaged as
+`26.9.0.1`, following the current repository manifest version `26.9.0.0`.
 No active-enrollment or NCEA-exclusion filter is added to the supplied criteria.
 
 This query uses only `u_student_sacramental.student_baptism_date`. It cannot independently

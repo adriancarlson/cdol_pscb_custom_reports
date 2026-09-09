@@ -15,21 +15,52 @@
         <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_ncea_menu.html" target="_top">NCEA</a> &gt;
         Newly Baptized<!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
         <h1>NCEA - Newly Baptized</h1>
+        <p>Reporting school year: ~[tlist_sql;
+            SELECT TO_CHAR(~(curyearid) + 1989) || '-' || TO_CHAR(~(curyearid) + 1990)
+            FROM dual;]~(1)[/tlist_sql] (previous school year).</p>
+        ~[if.is.a.school]
         <p>Reporting period: ~[tlist_sql;
-            SELECT TO_CHAR(~(curyearid) + 1990) || '-08-01 through ' ||
-            TO_CHAR(~(curyearid) + 1991) || '-05-31' FROM dual;
-            ]~(1)[/tlist_sql] (selected school year).</p>
+            SELECT TO_CHAR(terms.firstday, 'MM/DD/YYYY') || ' through ' ||
+                TO_CHAR(terms.lastday, 'MM/DD/YYYY')
+            FROM terms
+            WHERE terms.yearid = ~(curyearid) - 1
+                AND terms.isyearrec = 1
+                AND terms.schoolid = ~(curschoolid)
+            ;nonemessage=Previous school year term not configured.]~(1)[/tlist_sql]</p>
+        [/if.is.a.school]
+        ~[if.district.office]
+        <p>Reporting period uses each school's previous full-year term start and end dates.</p>
+        [/if]
         <p>Total students: <strong id="nceaStudentCount"></strong></p>
         ~[wc:pscbdevpro2_init]
         <script>
             var tableColumns = [
-                { title: 'Student #', field: 'student_number', sorter: 'number', headerFilter: 'input' },
+                { title: 'Student #', field: 'student_number', sorter: 'number', headerFilter: 'input',
+                    formatter: function (cell) {
+                        var dcid = cell.getData().studentsdcid;
+                        var isLink = /^\d+$/.test(String(dcid));
+                        var node = document.createElement(isLink ? 'a' : 'span');
+                        node.textContent = cell.getValue();
+                        if (isLink) {
+                            node.setAttribute('href', '/admin/students/sacramental.html?frn=001' + dcid);
+                            node.setAttribute('target', '_blank');
+                            node.setAttribute('rel', 'noopener noreferrer');
+                        }
+                        return node;
+                    } },
                 { title: 'Last Name', field: 'last_name', sorter: 'string', headerFilter: 'input' },
                 { title: 'First Name', field: 'first_name', sorter: 'string', headerFilter: 'input' },
                 { title: 'Gender', field: 'gender', sorter: 'string', headerFilter: 'input' },
                 { title: 'Grade', field: 'grade_level', sorter: 'number', headerFilter: 'input' },
-                { title: 'Baptism Date', field: 'student_baptism_date', sorter: 'string', headerFilter: 'input' },
+                { title: 'Baptism Date', field: 'student_baptism_date',
+                    sorter: function (a, b) {
+                        var aParts = a.split('/');
+                        var bParts = b.split('/');
+                        return Number(aParts[2] + aParts[0] + aParts[1]) - Number(bParts[2] + bParts[0] + bParts[1]);
+                    }, headerFilter: 'input' },
+                ~[if.district.office]
                 { title: 'School', field: 'school', sorter: 'string', headerFilter: 'input' }
+                [/if]
             ];
             var tableData = ~[tlist_sql;
             WITH report_rows AS(
@@ -40,15 +71,21 @@
                 students.first_name,
                 students.gender,
                 students.grade_level,
-                TO_CHAR(u_student_sacramental.student_baptism_date, 'YYYY-MM-DD') AS student_baptism_date,
+                TRUNC(u_student_sacramental.student_baptism_date) AS baptism_sort_date,
+                TO_CHAR(u_student_sacramental.student_baptism_date, 'MM/DD/YYYY') AS student_baptism_date,
                 schools.name AS school
                 FROM students
                 INNER JOIN u_student_sacramental ON students.dcid = u_student_sacramental.studentsdcid
                 INNER JOIN schools ON students.schoolid = schools.school_number
-                WHERE u_student_sacramental.student_baptism_date >=
-            TO_DATE(TO_CHAR(~(curyearid) + 1990) || '-08-01', 'YYYY-MM-DD')
-                    AND u_student_sacramental.student_baptism_date <
-            TO_DATE(TO_CHAR(~(curyearid) + 1991) || '-06-01', 'YYYY-MM-DD')
+                WHERE EXISTS (
+                    SELECT 1
+                    FROM terms
+                    WHERE terms.schoolid = students.schoolid
+                        AND terms.yearid = ~(curyearid) - 1
+                        AND terms.isyearrec = 1
+                        AND u_student_sacramental.student_baptism_date >= TRUNC(terms.firstday)
+                        AND u_student_sacramental.student_baptism_date < TRUNC(terms.lastday) + 1
+                )
                     ~[if.is.a.school] AND students.schoolid = ~(curschoolid)[/if.is.a.school]
             )
             SELECT COALESCE(
@@ -63,7 +100,7 @@
                         'student_baptism_date' VALUE student_baptism_date,
                         'school' VALUE school
                         NULL ON NULL RETURNING CLOB
-                    ) ORDER BY school, grade_level DESC, last_name, first_name RETURNING CLOB
+                    ) ORDER BY baptism_sort_date ASC, last_name ASC, first_name ASC RETURNING CLOB
                 ), '<', '\u003c'),
                 TO_CLOB(CHR(91) || CHR(93))
             ) AS report_json
