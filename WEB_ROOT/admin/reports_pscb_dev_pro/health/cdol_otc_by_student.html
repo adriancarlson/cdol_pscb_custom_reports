@@ -64,6 +64,7 @@
                         <th class="left filter-select">Gender</th>
                         <th class="center filter-select">Grade Level</th>
                         <th class="left">OTC Medications</th>
+                        <th class="left">Last Updated</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -102,7 +103,9 @@
                     WHEN TO_CHAR(students.grade_level) = 99 then 'Graduated'
                     ELSE TO_CHAR(students.grade_level)
                     END as PRETTY_GRADE,
-                    stuOTC.med_list
+                    stuOTC.med_list,
+                    u_student_additional_info.med_sig,
+                    TO_CHAR(u_student_additional_info.med_sig_date, 'MM/DD/YYYY') AS med_sig_date
                     FROM students
                     LEFT JOIN u_student_additional_info
                     ON students.dcid = u_student_additional_info.studentsdcid
@@ -130,6 +133,7 @@
                         <td>~(gender;t)</td>
                         <td class="center">~(grade_level;t)</td>
                         <td class="nowrap">~(medication;t)</td>
+                        <td class="left nowrap">~(med_sig;t)&nbsp;&mdash;&nbsp;~(med_sig_date;t)</td>
                     </tr>
                     [/tlist_sql]
                 </tbody>

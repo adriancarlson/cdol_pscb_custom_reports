@@ -69,6 +69,7 @@
                         <th class="left filter-select">Antibiotic Ointment</th>
                         <th class="left filter-select">Hydrocortisone</th>
                         <th class="left filter-select">Cough Drop</th>
+                        <th class="left">Last Updated</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -94,7 +95,9 @@
                     CASE WHEN u_student_additional_info.antacid = 1 THEN 'Yes' ELSE 'No' END as antacid,
                     CASE WHEN u_student_additional_info.antibiotic = 1 THEN 'Yes' ELSE 'No' END as antibiotic,
                     CASE WHEN u_student_additional_info.hydrocortisone = 1 THEN 'Yes' ELSE 'No' END as hydrocortisone,
-                    CASE WHEN u_student_additional_info.cough_drop = 1 THEN 'Yes' ELSE 'No' END as cough_drop
+                    CASE WHEN u_student_additional_info.cough_drop = 1 THEN 'Yes' ELSE 'No' END as cough_drop,
+                    u_student_additional_info.med_sig,
+                    TO_CHAR(u_student_additional_info.med_sig_date, 'MM/DD/YYYY') AS med_sig_date
                     FROM students
                     ~[if#ss.~(gpv.ss;sqlText)=cur] INNER JOIN ~[temp.table.current.selection:students] temp ON
                     (students.dcid = temp.dcid) [/if#ss]
@@ -126,6 +129,7 @@
                         <td>~(antibiotic;t)</td>
                         <td>~(hydrocortisone;t)</td>
                         <td>~(cough_drop;t)</td>
+                        <td class="left nowrap">~(med_sig;t)&nbsp;&mdash;&nbsp;~(med_sig_date;t)</td>
                     </tr>
                     [/tlist_sql]
                 </tbody>

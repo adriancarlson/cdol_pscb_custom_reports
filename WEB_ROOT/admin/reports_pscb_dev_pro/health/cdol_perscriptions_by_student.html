@@ -67,6 +67,7 @@
                         <th class="center filter-select">Grade Level</th>
                         <th class="center filter-select">Med. Count</th>
                         <th class="left">Medications</th>
+                        <th class="left">Last Updated</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -100,10 +101,14 @@
                     ELSE TO_CHAR(students.grade_level)
                     END as PRETTY_GRADE,
                     stuRx.cnt,
-                    stuRx.Rxs
+                    stuRx.Rxs,
+                    u_student_additional_info.med_sig,
+                    TO_CHAR(u_student_additional_info.med_sig_date, 'MM/DD/YYYY') AS med_sig_date
                     FROM students
                     LEFT JOIN stuRx
                     on students.dcid =stuRx.studentsdcid
+                    LEFT JOIN u_student_additional_info
+                    ON students.dcid = u_student_additional_info.studentsdcid
                     ~[if#ss.~(gpv.ss;sqlText)=cur] INNER JOIN ~[temp.table.current.selection:students] temp ON
                     (students.dcid = temp.dcid) [/if#ss]
                     WHERE students.enroll_status in (-1, 0)
@@ -121,6 +126,7 @@
                         <td class="center">~(grade_level;t)</td>
                         <td class="center">~(medcount;t)</td>
                         <td class="nowrap">~(medication;t)</td>
+                        <td class="left nowrap">~(med_sig;t)&nbsp;&mdash;&nbsp;~(med_sig_date;t)</td>
                     </tr>
                     [/tlist_sql]
                 </tbody>
