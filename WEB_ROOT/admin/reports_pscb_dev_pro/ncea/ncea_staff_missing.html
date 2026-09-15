@@ -56,11 +56,13 @@
                     END as GENDER,
                     CASE
                     WHEN TRIM(TO_CHAR(users.fedethnicity)) IS NULL THEN 'cell-highlight-yellow'
+                    WHEN TO_CHAR(users.fedethnicity) = '-1' THEN 'cell-highlight-yellow'
                     ELSE ''
                     END ETHNICITYHighlight,
                     CASE
                     WHEN TO_CHAR(users.fedethnicity) = '1' then 'Hispanic/Latino'
                     WHEN TO_CHAR(users.fedethnicity) = '0' then 'Not Hispanic/Latino'
+                    WHEN TO_CHAR(users.fedethnicity) = '-1' then NULL
                     ELSE TO_CHAR(users.fedethnicity)
                     END as ETHNICITY,
                     CASE
@@ -97,13 +99,10 @@
                     WHEN S_SSF_NCEA_X.FTE_CODE = 'PT' then 'Part-Time'
                     ELSE S_SSF_NCEA_X.FTE_CODE
                     END as FTE,
+                    '' excludeHighlight,
                     CASE
-                    WHEN TRIM(TO_CHAR(s_ssf_ncea_x.excludefromncea_tf)) IS NULL THEN 'cell-highlight-red'
-                    ELSE ''
-                    END excludeHighlight,
-                    CASE
-                    WHEN TO_CHAR(s_ssf_ncea_x.excludefromncea_tf) = '1' then 'Excluded from NCEA'
-                    WHEN TO_CHAR(s_ssf_ncea_x.excludefromncea_tf) = '0' then 'Included in NCEA'
+                    WHEN NVL(TO_CHAR(s_ssf_ncea_x.excludefromncea_tf), '0') = '1' then 'Excluded from NCEA'
+                    WHEN NVL(TO_CHAR(s_ssf_ncea_x.excludefromncea_tf), '0') = '0' then 'Included in NCEA'
                     ELSE TO_CHAR(s_ssf_ncea_x.excludefromncea_tf)
                     END as EXCLUDE_FROM_NCEA,
                     schools.name
@@ -129,6 +128,8 @@
                         ~[if#Mandatory.~(gpv.status;sqlText)=0]
                         AND (s_ssf_ncea_x.excludefromncea_tf = '0' or s_ssf_ncea_x.excludefromncea_tf IS NULL)
                         AND (TRIM(userscorefields.gender) IS NULL
+                        OR TRIM(TO_CHAR(users.fedethnicity)) IS NULL
+                        OR TO_CHAR(users.fedethnicity) = '-1'
                         OR TRIM(s_usr_ncea_x.religiousaffiliation) IS NULL
                         OR TRIM(teacherrace.racecd) IS NULL
                         OR TRIM(s_usr_ncea_x.religiousclergylay) IS NULL

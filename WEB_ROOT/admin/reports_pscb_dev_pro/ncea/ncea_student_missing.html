@@ -89,17 +89,15 @@
                     WHEN s_stu_ncea_x.RELIGIOUSAFFILIATION = 'N' then 'Non-Catholic'
                     ELSE s_stu_ncea_x.RELIGIOUSAFFILIATION
                     END as religiousaffiliation,
+                    '' has_disabilityHighlight,
                     CASE
-                    WHEN TRIM(TO_CHAR(s_stu_ncea_x.DIAGNOSEDDISABILITY_TF)) IS NULL THEN 'cell-highlight-red'
-                    ELSE ''
-                    END has_disabilityHighlight,
-                    CASE
-                    WHEN TO_CHAR(s_stu_ncea_x.DIAGNOSEDDISABILITY_TF) = '1' then 'Yes'
-                    WHEN TO_CHAR(s_stu_ncea_x.DIAGNOSEDDISABILITY_TF) = '0' then 'No'
+                    WHEN NVL(TO_CHAR(s_stu_ncea_x.DIAGNOSEDDISABILITY_TF), '0') = '1' then 'Yes'
+                    WHEN NVL(TO_CHAR(s_stu_ncea_x.DIAGNOSEDDISABILITY_TF), '0') = '0' then 'No'
                     ELSE TO_CHAR(s_stu_ncea_x.DIAGNOSEDDISABILITY_TF)
                     END as has_disability,
                     CASE
-                    WHEN TO_CHAR(s_stu_ncea_x.DIAGNOSEDDISABILITY_TF) = '1' and TRIM(s_stu_ncea_x.DiagnosedDisability) IS NULL
+                    WHEN TO_CHAR(s_stu_ncea_x.DIAGNOSEDDISABILITY_TF) = '1'
+                    AND TRIM(s_stu_ncea_x.DiagnosedDisability) IS NULL
                     THEN 'cell-highlight-red'
                     ELSE ''
                     END sisorderHighlight,
@@ -113,67 +111,46 @@
                     WHEN TO_CHAR(s_stu_ncea_x.DiagnosedDisability) = 'O' then 'Other'
                     ELSE TO_CHAR(s_stu_ncea_x.DiagnosedDisability)
                     END as disability,
+                    '' ungradedHighlight,
                     CASE
-                    WHEN TRIM(TO_CHAR(s_stu_ncea_x.ungraded_tf)) IS NULL THEN 'cell-highlight-red'
-                    ELSE ''
-                    END ungradedHighlight,
-                    CASE
-                    WHEN TO_CHAR(s_stu_ncea_x.ungraded_tf) = '1' then 'Yes'
-                    WHEN TO_CHAR(s_stu_ncea_x.ungraded_tf) = '0' then 'No'
+                    WHEN NVL(TO_CHAR(s_stu_ncea_x.ungraded_tf), '0') = '1' then 'Yes'
+                    WHEN NVL(TO_CHAR(s_stu_ncea_x.ungraded_tf), '0') = '0' then 'No'
                     ELSE TO_CHAR(s_stu_ncea_x.ungraded_tf)
                     END as ungraded,
+                    '' rectitle1Highlight,
                     CASE
-                    WHEN TRIM(TO_CHAR(s_stu_ncea_x.TITLEI_TF)) IS NULL THEN 'cell-highlight-red'
-                    ELSE ''
-                    END rectitle1Highlight,
-                    CASE
-                    WHEN TO_CHAR(s_stu_ncea_x.TITLEI_TF) = '1' then 'Yes'
-                    WHEN TO_CHAR(s_stu_ncea_x.TITLEI_TF) = '0' then 'No'
+                    WHEN NVL(TO_CHAR(s_stu_ncea_x.TITLEI_TF), '0') = '1' then 'Yes'
+                    WHEN NVL(TO_CHAR(s_stu_ncea_x.TITLEI_TF), '0') = '0' then 'No'
                     ELSE TO_CHAR(s_stu_ncea_x.TITLEI_TF)
                     END as rectitle1,
+                    '' recFreeRdcHighlight,
                     CASE
-                    WHEN TRIM(TO_CHAR(s_stu_ncea_x.FederalNutrition_TF)) IS NULL THEN 'cell-highlight-red'
-                    ELSE ''
-                    END recFreeRdcHighlight,
-                    CASE
-                    WHEN TO_CHAR(s_stu_ncea_x.FederalNutrition_TF) = '1' then 'Yes'
-                    WHEN TO_CHAR(s_stu_ncea_x.FederalNutrition_TF) = '0' then 'No'
+                    WHEN NVL(TO_CHAR(s_stu_ncea_x.FederalNutrition_TF), '0') = '1' then 'Yes'
+                    WHEN NVL(TO_CHAR(s_stu_ncea_x.FederalNutrition_TF), '0') = '0' then 'No'
                     ELSE TO_CHAR(s_stu_ncea_x.FederalNutrition_TF)
                     END as recFreeRdc,
+                    '' eligFreeRdcHighlight,
                     CASE
-                    WHEN TRIM(TO_CHAR(s_stu_ncea_x.FederalNutrition_Elig_TF)) IS NULL THEN 'cell-highlight-red'
-                    ELSE ''
-                    END eligFreeRdcHighlight,
-                    CASE
-                    WHEN TO_CHAR(s_stu_ncea_x.FederalNutrition_Elig_TF) = '1' then 'Yes'
-                    WHEN TO_CHAR(s_stu_ncea_x.FederalNutrition_Elig_TF) = '0' then 'No'
+                    WHEN NVL(TO_CHAR(s_stu_ncea_x.FederalNutrition_Elig_TF), '0') = '1' then 'Yes'
+                    WHEN NVL(TO_CHAR(s_stu_ncea_x.FederalNutrition_Elig_TF), '0') = '0' then 'No'
                     ELSE TO_CHAR(s_stu_ncea_x.FederalNutrition_Elig_TF)
                     END as eligFreeRdc,
+                    '' parentchoiceHighlight,
                     CASE
-                    WHEN TRIM(TO_CHAR(s_stu_ncea_x.Parental_Choice_TF)) IS NULL THEN 'cell-highlight-red'
-                    ELSE ''
-                    END parentchoiceHighlight,
-                    CASE
-                    WHEN TO_CHAR(s_stu_ncea_x.Parental_Choice_TF) = '1' then 'Yes'
-                    WHEN TO_CHAR(s_stu_ncea_x.Parental_Choice_TF) = '0' then 'No'
+                    WHEN NVL(TO_CHAR(s_stu_ncea_x.Parental_Choice_TF), '0') = '1' then 'Yes'
+                    WHEN NVL(TO_CHAR(s_stu_ncea_x.Parental_Choice_TF), '0') = '0' then 'No'
                     ELSE TO_CHAR(s_stu_ncea_x.Parental_Choice_TF)
                     END as parentchoice,
+                    '' visaHighlight,
                     CASE
-                    WHEN TRIM(TO_CHAR(s_stu_ncea_x.Intl_Visa_TF)) IS NULL THEN 'cell-highlight-red'
-                    ELSE ''
-                    END visaHighlight,
-                    CASE
-                    WHEN TO_CHAR(s_stu_ncea_x.Intl_Visa_TF) = '1' then 'Yes'
-                    WHEN TO_CHAR(s_stu_ncea_x.Intl_Visa_TF) = '0' then 'No'
+                    WHEN NVL(TO_CHAR(s_stu_ncea_x.Intl_Visa_TF), '0') = '1' then 'Yes'
+                    WHEN NVL(TO_CHAR(s_stu_ncea_x.Intl_Visa_TF), '0') = '0' then 'No'
                     ELSE TO_CHAR(s_stu_ncea_x.Intl_Visa_TF)
                     END as visa,
+                    '' excludeHighlight,
                     CASE
-                    WHEN TRIM(TO_CHAR(s_stu_ncea_x.EXCLUDEFROMNCEA_TF)) IS NULL THEN 'cell-highlight-red'
-                    ELSE ''
-                    END excludeHighlight,
-                    CASE
-                    WHEN TO_CHAR(s_stu_ncea_x.EXCLUDEFROMNCEA_TF) = '1' then 'Excluded from NCEA'
-                    WHEN TO_CHAR(s_stu_ncea_x.EXCLUDEFROMNCEA_TF) = '0' then 'Included in NCEA'
+                    WHEN NVL(TO_CHAR(s_stu_ncea_x.EXCLUDEFROMNCEA_TF), '0') = '1' then 'Excluded from NCEA'
+                    WHEN NVL(TO_CHAR(s_stu_ncea_x.EXCLUDEFROMNCEA_TF), '0') = '0' then 'Included in NCEA'
                     ELSE TO_CHAR(s_stu_ncea_x.EXCLUDEFROMNCEA_TF)
                     END as EXCLUDE_FROM_NCEA,
                     schools.name
@@ -193,7 +170,6 @@
                     OR TRIM(r.racecd) IS NULL
                     OR TRIM(TO_CHAR(s.fedethnicity)) IS NULL
                     OR TO_CHAR(s.fedethnicity) ='-1'
-                    OR (TO_CHAR(s_stu_ncea_x.DIAGNOSEDDISABILITY_TF) = '1' and TRIM(s_stu_ncea_x.DiagnosedDisability) IS NULL)
                     )
                     [/if#Mandatory]
                     ~[if#cursel.~(gpv.status;sqlText)=2] AND s.dcid IN (SELECT dcid FROM
