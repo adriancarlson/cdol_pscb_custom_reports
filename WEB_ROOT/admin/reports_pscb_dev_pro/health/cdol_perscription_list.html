@@ -69,12 +69,47 @@
                         <th class="left">Dosage/Units</th>
                         <th class="left">Frequency</th>
                         <th class="left filter-select">Perscription Required</th>
-                        <th class="left">Last Updated</th>
+                        <th class="left">Last Submitted By</th>
                     </tr>
                 </thead>
                 <tbody>
                     ~[tlist_sql;
-                    SELECT
+                    WITH student_data AS (
+                    SELECT students.id student_id, students.dcid student_dcid,
+                    TRIM(u_student_additional_info.med_sig) parent_name, u_student_additional_info.med_sig_date parent_date,
+                    TRIM(u_student_additional_info.med_last_updated_user_type) audit_user_type,
+                    TRIM(u_student_additional_info.med_last_updated_by) audit_name,
+                    u_student_additional_info.med_last_updated_date audit_date
+                    FROM students LEFT JOIN u_student_additional_info ON u_student_additional_info.studentsdcid = students.dcid
+                    ), admin_rows AS (
+                    SELECT student_data.student_dcid, u_fb_form_response.created_by admin_name, u_fb_form_response.created_on admin_date,
+                    LAG(UPPER(TRIM(u_fb_form_response.created_by))) OVER (PARTITION BY student_data.student_dcid ORDER BY u_fb_form_response.created_on, u_fb_form_response.id) previous_admin_name,
+                    LAG(u_fb_form_response.created_on) OVER (PARTITION BY student_data.student_dcid ORDER BY u_fb_form_response.created_on, u_fb_form_response.id) previous_admin_date,
+                    ROW_NUMBER() OVER (PARTITION BY student_data.student_dcid ORDER BY u_fb_form_response.created_on DESC, u_fb_form_response.id DESC) latest_row
+                    FROM student_data JOIN u_fb_form_response ON u_fb_form_response.student_id = student_data.student_id
+                    WHERE u_fb_form_response.u_fb_form_id = 24778944 AND u_fb_form_response.response_type = 'A' AND u_fb_form_response.id > 0
+                    AND u_fb_form_response.created_on > student_data.parent_date AND (u_fb_form_response.approval IS NULL OR u_fb_form_response.approval = '1')
+                    ), admin_events AS (
+                    SELECT admin_rows.*, SUM(CASE WHEN UPPER(TRIM(admin_rows.admin_name)) = admin_rows.previous_admin_name
+                    AND CAST(admin_rows.admin_date AS TIMESTAMP) <= CAST(admin_rows.previous_admin_date AS TIMESTAMP) + INTERVAL '60' SECOND
+                    THEN 0 ELSE 1 END) OVER (PARTITION BY admin_rows.student_dcid) newer_admin_count
+                    FROM admin_rows
+                    ), form_attribution AS (
+                    SELECT student_data.student_dcid,
+                    CASE WHEN NVL(admin_events.newer_admin_count, 0) >= 2 THEN admin_events.admin_date ELSE student_data.parent_date END submitted_date,
+                    CASE WHEN NVL(admin_events.newer_admin_count, 0) >= 2 THEN
+                    'Admin' || CHR(58) || ' ' || NVL(admin_events.admin_name, 'Name unavailable') || ' - ' || TO_CHAR(admin_events.admin_date, 'MM/DD/YYYY')
+                    ELSE 'Parent' || CHR(58) || ' ' || student_data.parent_name || ' - ' || TO_CHAR(student_data.parent_date, 'MM/DD/YYYY') END submitted_by
+                    FROM student_data LEFT JOIN admin_events ON admin_events.student_dcid = student_data.student_dcid AND admin_events.latest_row = 1
+                    WHERE student_data.parent_name IS NOT NULL AND student_data.parent_date IS NOT NULL
+                    ), attribution AS (
+                    SELECT student_data.student_dcid, CASE WHEN student_data.audit_date IS NOT NULL
+                    AND (form_attribution.submitted_date IS NULL OR student_data.audit_date > form_attribution.submitted_date) THEN
+                    student_data.audit_user_type || CHR(58) || ' ' || student_data.audit_name || ' - ' || TO_CHAR(student_data.audit_date, 'MM/DD/YYYY')
+                    ELSE form_attribution.submitted_by END last_submitted_by
+                    FROM student_data LEFT JOIN form_attribution ON form_attribution.student_dcid = student_data.student_dcid
+                    WHERE form_attribution.submitted_date IS NOT NULL OR student_data.audit_date IS NOT NULL
+                    ) SELECT
                     students.dcid,
                     students.student_number,
                     students.lastfirst,
@@ -93,8 +128,7 @@
                     u_fb_medications.dosage|| ' ' || u_fb_medications.dosage_units,
                     u_fb_medications.frequency_taken,
                     u_fb_medications.prescribed,
-                    u_student_additional_info.med_sig,
-                    TO_CHAR(u_student_additional_info.med_sig_date, 'MM/DD/YYYY') AS med_sig_date
+                    attribution.last_submitted_by
                     FROM students
                     ~[if#ss.~(gpv.ss;sqlText)=cur] INNER JOIN ~[temp.table.current.selection:students] temp ON
                     (students.dcid = temp.dcid) [/if#ss]
@@ -102,6 +136,7 @@
                     ON students.dcid = u_fb_medications.studentsdcid
                     LEFT JOIN u_student_additional_info
                     ON students.dcid = u_student_additional_info.studentsdcid
+                    LEFT JOIN attribution ON students.dcid = attribution.student_dcid
                     WHERE students.enroll_status in (-1, 0)
                     ~[if.is.a.school] AND students.schoolid = ~(curschoolid) [/if.is.a.school]
                     ~[if#prescribed.~(gpv.prescribed;sqlText)=1]
@@ -119,7 +154,7 @@
                         <td>~(dosage;t)</td>
                         <td>~(frequency;t)</td>
                         <td>~(prescribed;t)</td>
-                        <td class="left nowrap">~(med_sig;t)&nbsp;&mdash;&nbsp;~(med_sig_date;t)</td>
+                        <td class="left nowrap">~(last_submitted_by;t)</td>
                     </tr>
                     [/tlist_sql]
                 </tbody>
