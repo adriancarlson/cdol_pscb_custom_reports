@@ -100,6 +100,10 @@
 		<td>List students and whether they are a family representative
 		</td>
 	</tr>
+	<tr id="grandparentContacts">
+		<td><a href="/admin/reports_pscb_dev_pro/contacts/cdol_grandparents_list.html">Grandparents List</a></td>
+		<td>One row per grandparent with relationship, all emails and phones, and associated students.</td>
+	</tr>
 </table>
 
 

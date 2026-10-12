@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Grandparents List</title>
+        ~[wc:commonscripts]
+        <link href="/images/css/screen.css" rel="stylesheet" media="screen">
+        <link href="/images/css/print.css" rel="stylesheet" media="print">
+        ~[wc:pscbdevpro_init]
+        <style>
+            #pscbDevPro .grandparent-address {
+                min-width: 420px;
+                white-space: pre-line;
+            }
+        </style>
+    </head>
+
+    <body>
+        ~[wc:admin_header_css] <a href="/admin/home.html" target="_top">Start Page</a> &gt; <a
+            href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html" target="_top">PSCB DEV Custom Reports</a> &gt;
+        <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_contacts_menu.html" target="_top">Contacts</a> &gt;
+        Grandparents List ~[wc:admin_navigation_frame_css]
+        <form name="searchform" action="#" method="POST">
+            <h1>Grandparents List</h1>
+            <div class="box-round" style="overflow: hidden;">
+                <h2>Report Filters</h2>
+                <table cellspacing="0" cellpadding="0" class="linkDescList">
+                    <thead>
+                        <tr>
+                            <th style="white-space: nowrap;">Student Selection</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <select name="ss" id="ss">
+                                    <option value='' ~[if.~[gpv:ss]=]selected[/if]>All Students</option>
+                                    <option value="cur" ~[if.~[gpv:ss]=cur]selected[/if]>Current Selection
+                                        (~[x:studsinset])</option>
+                                </select>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="button-row left">
+                    <span style="color: red;">&nbsp;&nbsp;Select parameters and click submit</span>
+                    <input type="hidden" name="showData" value="1">
+                    <input type="hidden" name="ac" value="prim">~[submitbutton]
+                </div>
+            </div>
+        </form>
+        ~[if#showData.~(gpv.showData;sqlText)=1]
+        <div class="box-round">
+            <h2 class="pscbdevBkgColor">&nbsp;&nbsp;Grandparents List</h2>
+            <table cellspacing="0" cellpadding="4" class="tablesorter grid center" id="pscbDevPro"
+                color1="#ffffff" color2="#d7edfe">
+                <thead>
+                    <tr>
+                        <th class="left">Contact Name</th>
+                        <th class="left">Relationship</th>
+                        <th class="left grandparent-address">Address</th>
+                        <th class="left">Email(s)</th>
+                        <th class="left">Phones</th>
+                        <th class="left">Student(s)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ~[tlist_sql;
+                    WITH grandparent_associations AS (
+                        SELECT DISTINCT person.id personid, codeset.code relationship,
+                            students.dcid studentdcid, students.lastfirst, students.grade_level,
+                            schools.abbreviation school
+                        FROM students
+                        JOIN studentcontactassoc ON studentcontactassoc.studentdcid = students.dcid
+                        JOIN studentcontactdetail ON studentcontactdetail.studentcontactassocid = studentcontactassoc.studentcontactassocid
+                        JOIN person ON person.id = studentcontactassoc.personid
+                        JOIN codeset ON codeset.codesetid = studentcontactdetail.relationshiptypecodesetid
+                        LEFT JOIN schools ON schools.school_number = students.schoolid
+                        WHERE students.enroll_status = 0 AND person.isactive = 1
+                            AND codeset.code IN ('Grandmother', 'Grandfather')
+                            AND TRUNC(SYSDATE) BETWEEN NVL(studentcontactdetail.startdate, TRUNC(SYSDATE))
+                                AND NVL(studentcontactdetail.enddate, TRUNC(SYSDATE))
+                            ~[if.is.a.school] AND students.schoolid = ~(curschoolid) [/if.is.a.school]
+                            ~[if#ss.~(gpv.ss;sqlText)=cur]
+                            AND students.dcid IN (SELECT dcid FROM ~[temp.table.current.selection:students])
+                            [/if#ss]
+                    ), grandparent_relationships AS (
+                        SELECT personid, LISTAGG(relationship, ' | ')
+                            WITHIN GROUP (ORDER BY relationship) relationships
+                        FROM (SELECT DISTINCT personid, relationship FROM grandparent_associations)
+                        GROUP BY personid
+                    ), grandparent_students AS (
+                        SELECT personid, '<ul>' || LISTAGG(
+                            '<li><a href="/admin/students/contacts.html?frn=001' || studentdcid || '" target="_blank">' ||
+                            REPLACE(REPLACE(REPLACE(lastfirst, CHR(38), CHR(38) || 'amp' || CHR(59)), '<', CHR(38) || 'lt' || CHR(59)), '>', CHR(38) || 'gt' || CHR(59)) ||
+                            ' (' || grade_level || ' - ' ||
+                            REPLACE(REPLACE(REPLACE(school, CHR(38), CHR(38) || 'amp' || CHR(59)), '<', CHR(38) || 'lt' || CHR(59)), '>', CHR(38) || 'gt' || CHR(59)) ||
+                            ')</a></li>', '') WITHIN GROUP (ORDER BY grade_level DESC, lastfirst, studentdcid) || '</ul>' student_list
+                        FROM (SELECT DISTINCT personid, studentdcid, lastfirst, grade_level, school FROM grandparent_associations)
+                        GROUP BY personid
+                    )
+                    SELECT person.id,
+                        CASE WHEN person.firstname IS NULL AND person.lastname IS NULL THEN '-No Name-'
+                            ELSE TRIM(person.lastname || ', ' || person.firstname) END contact_name,
+                        grandparent_relationships.relationships,
+                        NVL((SELECT LISTAGG(
+                            TRIM(personaddress.street ||
+                                CASE WHEN personaddress.city IS NOT NULL THEN ', ' || personaddress.city END ||
+                                CASE WHEN address_state.code IS NOT NULL THEN ' ' || address_state.code END ||
+                                CASE WHEN personaddress.postalcode IS NOT NULL THEN ' ' || personaddress.postalcode END) ||
+                            CASE WHEN address_type.code IS NOT NULL THEN ' (' || address_type.code || ')' END, CHR(10))
+                            WITHIN GROUP (ORDER BY personaddressassoc.personaddressassocid)
+                            FROM personaddressassoc
+                            JOIN personaddress ON personaddress.personaddressid = personaddressassoc.personaddressid
+                            LEFT JOIN codeset address_type ON address_type.codesetid = personaddressassoc.addresstypecodesetid
+                            LEFT JOIN codeset address_state ON address_state.codesetid = personaddress.statescodesetid
+                            WHERE personaddressassoc.personid = person.id
+                                AND TRUNC(SYSDATE) BETWEEN NVL(personaddressassoc.startdate, TRUNC(SYSDATE))
+                                    AND NVL(personaddressassoc.enddate, TRUNC(SYSDATE))), '-None-') addresses,
+                        NVL((SELECT LISTAGG(emailaddress.emailaddress, ', ')
+                            WITHIN GROUP (ORDER BY personemailaddressassoc.emailaddresspriorityorder, emailaddress.emailaddress)
+                            FROM personemailaddressassoc
+                            JOIN emailaddress ON emailaddress.emailaddressid = personemailaddressassoc.emailaddressid
+                            WHERE personemailaddressassoc.personid = person.id), '-None-') emails,
+                        NVL((SELECT LISTAGG(personphonenumberassoc.phonenumberasentered ||
+                            CASE WHEN phone_type.code IS NOT NULL THEN ' (' || phone_type.code || ')' END, ' | ')
+                            WITHIN GROUP (ORDER BY personphonenumberassoc.ispreferred DESC,
+                                personphonenumberassoc.phonenumberpriorityorder, personphonenumberassoc.phonenumberasentered)
+                            FROM personphonenumberassoc
+                            LEFT JOIN codeset phone_type ON phone_type.codesetid = personphonenumberassoc.phonetypecodesetid
+                            WHERE personphonenumberassoc.personid = person.id
+                                AND personphonenumberassoc.phonenumberasentered IS NOT NULL), '-None-') phones,
+                        grandparent_students.student_list
+                    FROM person
+                    JOIN grandparent_relationships ON grandparent_relationships.personid = person.id
+                    JOIN grandparent_students ON grandparent_students.personid = person.id
+                    ORDER BY person.lastname, person.firstname, person.id;alternatecolor;nonemessage=<tr>
+                        <td colspan="6">No active grandmother or grandfather contacts were found.</td>
+                    </tr>]
+                    <tr class="Record">
+                        <td><a href="/admin/contacts/edit.html#?contactid=~(id)" target="_blank">~(contact_name;t)</a></td>
+                        <td>~(relationship;t)</td>
+                        <td class="grandparent-address">~(addresses;t)</td>
+                        <td>~(emails;t)</td>
+                        <td>~(phones;t)</td>
+                        <td>~(student_list)</td>
+                    </tr>
+                    [/tlist_sql]
+                </tbody>
+            </table>
+        </div>
+        <div style="clear: both;">
+            <p class="center">Report generated at ~[time] on ~[date]</p>
+        </div>
+        [/if#showData]
+        ~[wc:admin_footer_frame_css]
+    </body>
+
+</html>

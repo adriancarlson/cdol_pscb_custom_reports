@@ -357,6 +357,20 @@
 									"sortOrder": 220,
 									"parentHTMLID": "navPSCBDevProContacts",
 									"districtLevelContext": 0
+								},
+								{
+									"htmlID": "navPSCBDevProContactsStudentsContactsInformationList-cdol-grandparentContacts",
+									"title": "Grandparents List🔹",
+									"pageURL": "/admin/reports_pscb_dev_pro/contacts/cdol_grandparents_list.html",
+									"version": "26.10.0.7",
+									"contextType": "main",
+									"isNewTab": null,
+									"isLandingPage": null,
+									"iconName": null,
+									"requiredContext": null,
+									"sortOrder": 230,
+									"parentHTMLID": "navPSCBDevProContacts",
+									"districtLevelContext": 0
 								}
 							]
 						}
