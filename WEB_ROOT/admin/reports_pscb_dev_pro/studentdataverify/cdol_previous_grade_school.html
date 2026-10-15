@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Previous Grade School</title>
+    ~[wc:commonscripts]
+    <link href="/images/css/screen.css" rel="stylesheet" media="screen">
+    <link href="/images/css/print.css" rel="stylesheet" media="print">
+</head>
+<body>
+    ~[wc:admin_header_css]<!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a>
+    &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html">PSCB Custom Reports</a>
+    &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_studentdataverify_menu.html">Student Data Verification</a>
+    &gt; Previous Grade School<!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
+    <h1>Previous Grade School</h1>
+    <p>Active students and their recorded previous schools, newest first. Years reflect enrollment entry
+        through the last day attended, followed by | and recorded grade levels.
+        The student's current school is excluded.</p>
+    ~[wc:pscbdevpro2_init]
+    <script>
+        function previousSchoolText(cell) {
+            var node = document.createElement("span");
+            node.textContent = cell.getValue() == null ? "" : String(cell.getValue());
+            node.style.whiteSpace = "pre-wrap";
+            return node;
+        }
+
+        function previousSchoolStudent(cell) {
+            var node = document.createElement("a");
+            node.textContent = cell.getValue();
+            node.href = "/admin/students/transferinfo.html?frn=001" + cell.getData().studentsdcid;
+            node.target = "_blank";
+            node.rel = "noopener noreferrer";
+            return node;
+        }
+
+        function previousSchoolGrades(grades) {
+            function label(grade) {
+                return grade < 0 ? "PK" : grade === 0 ? "K" : grade === 99 ? "Graduated" : String(grade);
+            }
+            var values = Array.from(new Set(grades)).sort(function (a, b) { return a - b; });
+            var runs = [];
+            values.forEach(function (grade) {
+                var last = runs[runs.length - 1];
+                if (last && grade === last[1] + 1) last[1] = grade;
+                else runs.push([grade, grade]);
+            });
+            return runs.map(function (run) {
+                return run[0] === run[1] ? label(run[0]) : label(run[0]) + "-" + label(run[1]);
+            }).join(", ") || "Grade not recorded";
+        }
+
+        var tableColumns = [
+            { title: "Student Number", field: "student_number", sorter: "string", headerFilter: "input", formatter: previousSchoolText },
+            { title: "Student Name", field: "student", sorter: "string", headerFilter: "input", formatter: previousSchoolStudent },
+            { title: "Gender", field: "gender", sorter: "string", headerFilter: "input", formatter: previousSchoolText },
+            { title: "Grade Level", field: "grade_level", sorter: "number", headerFilter: "input", formatter: function (cell) {
+                var grade = cell.getValue();
+                return grade === -1 ? "PK" : grade === 0 ? "K" : grade === 99 ? "Graduated" : String(grade);
+            } },
+            { title: "Previous Grade School", field: "previous_grade_school", sorter: "string", headerFilter: "list",
+                headerFilterParams: { valuesLookup: function () {
+                    var names = new Set();
+                    tableData.forEach(function (student) {
+                        student._previous_school_names.forEach(function (name) { names.add(name); });
+                    });
+                    var noHistory = "No previous school recorded";
+                    var options = Array.from(names).filter(function (name) { return name !== noHistory; });
+                    options.sort(function (a, b) { return a.localeCompare(b); });
+                    options.push(noHistory);
+                    return options;
+                }, clearable: true },
+                headerFilterFunc: function (value, cellValue, rowData) {
+                    return !value || rowData._previous_school_names.indexOf(value) !== -1;
+                },
+                formatter: function (cell) {
+                    var node = previousSchoolText(cell);
+                    if (cell.getValue() === "No previous school recorded") node.style.fontStyle = "italic";
+                    return node;
+                }, variableHeight: true, minWidth: 320, widthGrow: 3 }
+        ];
+
+        var tableData = ~[tlist_sql;
+            WITH scoped_students AS (
+                SELECT students.id, students.dcid, students.student_number, students.lastfirst,
+                    students.gender, students.grade_level, students.schoolid
+                FROM students
+                WHERE students.enroll_status = 0
+                ~[if.is.a.school]AND students.schoolid = ~(curschoolid)[/if.is.a.school]
+            ), history AS (
+                SELECT student.dcid, reenrollments.schoolid,
+                    NVL(schools.name, 'School #' || TO_CHAR(reenrollments.schoolid)) AS school_name,
+                    reenrollments.entrydate, reenrollments.exitdate, reenrollments.grade_level
+                FROM scoped_students student
+                INNER JOIN reenrollments ON reenrollments.studentid = student.id
+                LEFT JOIN schools ON schools.school_number = reenrollments.schoolid
+                WHERE reenrollments.schoolid <> student.schoolid
+                    AND reenrollments.entrydate < reenrollments.exitdate
+                    AND reenrollments.entrydate < TRUNC(SYSDATE) + 1
+            ), school_history AS (
+                SELECT dcid,
+                    JSON_ARRAYAGG(JSON_OBJECT(
+                        'schoolid' VALUE schoolid,
+                        'school' VALUE school_name,
+                        'first_year' VALUE EXTRACT(YEAR FROM entrydate),
+                        'last_year' VALUE EXTRACT(YEAR FROM (exitdate - 1)),
+                        'grade_level' VALUE grade_level
+                        RETURNING CLOB
+                    ) ORDER BY exitdate DESC, entrydate DESC, schoolid RETURNING CLOB) AS schools_json
+                FROM history
+                GROUP BY dcid
+            )
+            SELECT COALESCE(REPLACE(JSON_ARRAYAGG(JSON_OBJECT(
+                'studentsdcid' VALUE student.dcid,
+                'student_number' VALUE student.student_number,
+                'student' VALUE student.lastfirst,
+                'gender' VALUE student.gender,
+                'grade_level' VALUE student.grade_level,
+                'history' VALUE school_history.schools_json FORMAT JSON
+                NULL ON NULL RETURNING CLOB
+            ) ORDER BY student.lastfirst, student.dcid RETURNING CLOB), '<', '\u003c'),
+                TO_CLOB(CHR(91) || CHR(93))) AS report_json
+            FROM scoped_students student
+            LEFT JOIN school_history ON school_history.dcid = student.dcid
+        ;]~(1)[/tlist_sql];
+
+        tableData.forEach(function (student) {
+            var schools = new Map();
+            (student.history || []).forEach(function (entry) {
+                var key = String(entry.schoolid);
+                if (!schools.has(key)) schools.set(key, { name: entry.school, ranges: [] });
+                var grade = entry.grade_level;
+                var grades = grade !== null && grade !== undefined && grade !== "" && Number.isFinite(Number(grade))
+                    ? [Number(grade)] : [];
+                schools.get(key).ranges.push([entry.first_year, entry.last_year, grades]);
+            });
+            student._previous_school_names = Array.from(schools.values()).map(function (school) {
+                return school.name;
+            });
+            if (!student._previous_school_names.length) student._previous_school_names.push("No previous school recorded");
+            student.previous_grade_school = Array.from(schools.values()).map(function (school) {
+                // Combine overlapping calendar-year ranges, retaining gaps between separate visits.
+                var merged = [];
+                school.ranges.sort(function (a, b) { return a[0] - b[0] || a[1] - b[1]; });
+                school.ranges.forEach(function (range) {
+                    var last = merged[merged.length - 1];
+                    if (last && range[0] <= last[1]) {
+                        last[1] = Math.max(last[1], range[1]);
+                        last[2] = last[2].concat(range[2]);
+                    }
+                    else merged.push(range.slice());
+                });
+                var years = merged.map(function (range) {
+                    var dates = range[0] === range[1] ? String(range[0]) : range[0] + "-" + range[1];
+                    return dates + " | " + previousSchoolGrades(range[2]);
+                }).join("; ");
+                return school.name + " (" + years + ")";
+            }).join("\n") || "No previous school recorded";
+            delete student.history;
+        });
+    </script>
+    ~[wc:admin_footer_frame_css]
+</body>
+</html>

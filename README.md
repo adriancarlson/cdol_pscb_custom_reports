@@ -1,5 +1,38 @@
 # CDOL PSCB Custom Reports
 
+## Previous Grade School
+
+Version `26.10.0.8` adds **Previous Grade School** under **Student Data Verification**
+in the classic and enhanced menus, using `pscbdevpro2_init` like Missed Daily Administration.
+It loads immediately with one row per active student in the current school (all active students
+at District Office). Columns are Student Number, Student Name, Gender, Grade Level, and
+Previous Grade School. Student names open Enrollment History.
+
+Previous schools come from `reenrollments`, joined to `schools` by school number. Every
+record for the student's current school is excluded, including past enrollment there.
+Other schools appear once each, newest enrollment first, with calendar-year ranges derived
+from entry date through exit date minus one day (PowerSchool exit dates are exclusive).
+Overlapping year ranges are combined; separate year ranges are retained for return visits
+and listed oldest first within each school.
+Each date range is followed by ` | ` and the grades recorded on its enrollment records,
+for example `School Name (2017-2020 | K-3; 2022-2023 | 5-6)`.
+Consecutive recorded grades are compressed into ranges; missing grades are not inferred
+from dates. Separate grade sequences use commas, and separate attendance ranges use semicolons.
+Null grades display `Grade not recorded`; negative grades display PK and zero displays K.
+No grade-level restriction is applied to prior schools, matching the requested enrollment
+history source. Zero-length, reversed, and future-start enrollments are excluded.
+Missing school names display the school number; students without eligible history remain
+in the report with `No previous school recorded`. External schools absent from enrollment
+history cannot be inferred. The grouped cell is plain text for filtering and exports.
+The Previous Grade School dropdown lists individual school names alphabetically and matches
+students who attended the selected school regardless of their other schools, years, or grades.
+It always includes `No previous school recorded` at the bottom and can be cleared to show all rows.
+That placeholder is italicized in report rows; exports retain its plain text.
+
+Update the separate EUI menu-links plugin as described below to install the enhanced link.
+Live PowerSchool validation is required for Oracle execution, framework tools, exports, and
+comparison with Enrollment History; the authenticated example page could not be accessed locally.
+
 ## Installing the custom EUI menu links
 
 To display the custom report links in PowerSchool:

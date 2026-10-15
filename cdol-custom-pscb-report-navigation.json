@@ -1220,7 +1220,7 @@
 									"isLandingPage": null,
 									"iconName": null,
 									"requiredContext": null,
-									"sortOrder": 40,
+									"sortOrder": 20,
 									"parentHTMLID": "navPSCBDevProSubMenuStudentDataVerification-cdol",
 									"districtLevelContext": 0
 								},
@@ -1234,7 +1234,7 @@
 									"isLandingPage": null,
 									"iconName": null,
 									"requiredContext": null,
-									"sortOrder": 50,
+									"sortOrder": 30,
 									"parentHTMLID": "navPSCBDevProSubMenuStudentDataVerification-cdol",
 									"districtLevelContext": 0
 								},
@@ -1248,7 +1248,7 @@
 									"isLandingPage": null,
 									"iconName": null,
 									"requiredContext": null,
-									"sortOrder": 80,
+									"sortOrder": 40,
 									"parentHTMLID": "navPSCBDevProSubMenuStudentDataVerification-cdol",
 									"districtLevelContext": 0
 								},
@@ -1262,7 +1262,7 @@
 									"isLandingPage": null,
 									"iconName": null,
 									"requiredContext": null,
-									"sortOrder": 90,
+									"sortOrder": 50,
 									"parentHTMLID": "navPSCBDevProSubMenuStudentDataVerification-cdol",
 									"districtLevelContext": 0
 								},
@@ -1276,7 +1276,7 @@
 									"isLandingPage": null,
 									"iconName": null,
 									"requiredContext": null,
-									"sortOrder": 100,
+									"sortOrder": 60,
 									"parentHTMLID": "navPSCBDevProSubMenuStudentDataVerification-cdol",
 									"districtLevelContext": 0
 								},
@@ -1290,7 +1290,7 @@
 									"isLandingPage": null,
 									"iconName": null,
 									"requiredContext": null,
-									"sortOrder": 110,
+									"sortOrder": 70,
 									"parentHTMLID": "navPSCBDevProSubMenuStudentDataVerification-cdol",
 									"districtLevelContext": 0
 								},
@@ -1304,7 +1304,7 @@
 									"isLandingPage": null,
 									"iconName": null,
 									"requiredContext": null,
-									"sortOrder": 120,
+									"sortOrder": 80,
 									"parentHTMLID": "navPSCBDevProSubMenuStudentDataVerification-cdol",
 									"districtLevelContext": 0
 								},
@@ -1318,7 +1318,7 @@
 									"isLandingPage": null,
 									"iconName": null,
 									"requiredContext": null,
-									"sortOrder": 130,
+									"sortOrder": 90,
 									"parentHTMLID": "navPSCBDevProSubMenuStudentDataVerification-cdol",
 									"districtLevelContext": 0
 								},
@@ -1332,7 +1332,7 @@
 									"isLandingPage": null,
 									"iconName": null,
 									"requiredContext": null,
-									"sortOrder": 135,
+									"sortOrder": 100,
 									"parentHTMLID": "navPSCBDevProSubMenuStudentDataVerification-cdol",
 									"districtLevelContext": 0
 								},
@@ -1346,7 +1346,7 @@
 									"isLandingPage": null,
 									"iconName": null,
 									"requiredContext": null,
-									"sortOrder": 140,
+									"sortOrder": 110,
 									"parentHTMLID": "navPSCBDevProSubMenuStudentDataVerification-cdol",
 									"districtLevelContext": 0
 								},
@@ -1360,7 +1360,7 @@
 									"isLandingPage": null,
 									"iconName": null,
 									"requiredContext": null,
-									"sortOrder": 150,
+									"sortOrder": 120,
 									"parentHTMLID": "navPSCBDevProSubMenuStudentDataVerification-cdol",
 									"districtLevelContext": 0
 								},
@@ -1374,7 +1374,7 @@
 									"isLandingPage": null,
 									"iconName": null,
 									"requiredContext": null,
-									"sortOrder": 160,
+									"sortOrder": 130,
 									"parentHTMLID": "navPSCBDevProSubMenuStudentDataVerification-cdol",
 									"districtLevelContext": 0
 								},
@@ -1388,7 +1388,7 @@
 									"isLandingPage": null,
 									"iconName": null,
 									"requiredContext": null,
-									"sortOrder": 161,
+									"sortOrder": 140,
 									"parentHTMLID": "navPSCBDevProSubMenuStudentDataVerification-cdol",
 									"districtLevelContext": 0
 								},
@@ -1402,7 +1402,7 @@
 									"isLandingPage": null,
 									"iconName": null,
 									"requiredContext": null,
-									"sortOrder": 162,
+									"sortOrder": 150,
 									"parentHTMLID": "navPSCBDevProSubMenuStudentDataVerification-cdol",
 									"districtLevelContext": 0
 								},
@@ -1417,7 +1417,7 @@
 									"iconName": null,
 									"requiredContext": null,
 									"checkParams": true,
-									"sortOrder": 163,
+									"sortOrder": 160,
 									"parentHTMLID": "navPSCBDevProSubMenuStudentDataVerification-cdol",
 									"districtLevelContext": 0
 								},
@@ -1464,6 +1464,20 @@
 									"districtLevelContext": 0
 								},
 								{
+									"htmlID": "cdol_previous_grade_school",
+									"title": "Previous Grade School🔹",
+									"pageURL": "~[if.~(decode;~(curschoolid);101;disp;115;disp;130;disp;160;disp;189;disp;210;disp;nodisp)=disp]/admin/reports_pscb_dev_pro/studentdataverify/cdol_previous_grade_school.html[/if]",
+									"version": "26.10.0.8",
+									"contextType": "main",
+									"isNewTab": null,
+									"isLandingPage": null,
+									"iconName": null,
+									"requiredContext": null,
+									"sortOrder": 200,
+									"parentHTMLID": "navPSCBDevProSubMenuStudentDataVerification-cdol",
+									"districtLevelContext": 0
+								},
+								{
 									"htmlID": "cdol_student_car_info",
 									"title": "Student Car Information🔹",
 									"pageURL": "/admin/reports_pscb_dev_pro/studentdataverify/cdol_car_info.html",
@@ -1473,7 +1487,7 @@
 									"isLandingPage": null,
 									"iconName": null,
 									"requiredContext": null,
-									"sortOrder": 200,
+									"sortOrder": 210,
 									"parentHTMLID": "navPSCBDevProSubMenuStudentDataVerification-cdol",
 									"districtLevelContext": 0
 								},
@@ -1487,7 +1501,7 @@
 									"isLandingPage": null,
 									"iconName": null,
 									"requiredContext": null,
-									"sortOrder": 210,
+									"sortOrder": 220,
 									"parentHTMLID": "navPSCBDevProSubMenuStudentDataVerification-cdol",
 									"districtLevelContext": 0
 								},
@@ -1501,7 +1515,7 @@
 									"isLandingPage": null,
 									"iconName": null,
 									"requiredContext": null,
-									"sortOrder": 220,
+									"sortOrder": 230,
 									"parentHTMLID": "navPSCBDevProSubMenuStudentDataVerification-cdol",
 									"districtLevelContext": 0
 								}

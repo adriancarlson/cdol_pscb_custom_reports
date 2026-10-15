@@ -113,6 +113,10 @@
 				Districts</a></td>
 		<td>List Students according to their Public School Districts</td>
 	</tr>
+	<tr>
+		<td><a href="/admin/reports_pscb_dev_pro/studentdataverify/cdol_previous_grade_school.html">Previous Grade School</a></td>
+		<td>List active students with previous schools and attendance years, excluding their current school.</td>
+	</tr>
 	<tr id="sEmail">
 		<td><a href="/admin/reports_pscb_dev_pro/studentdataverify/cdol_student_email.html">Student Email</a></td>
 		<td>List of students and their emails</td>
