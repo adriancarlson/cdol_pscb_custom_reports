@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alumni List</title>
+    ~[wc:commonscripts]
+    <link href="/images/css/screen.css" rel="stylesheet" media="screen">
+    <link href="/images/css/print.css" rel="stylesheet" media="print">
+    <style>
+        .alumni-value { display: block; white-space: pre; overflow: hidden; text-overflow: ellipsis; }
+    </style>
+</head>
+<body>
+    ~[wc:admin_header_css]<a href="/admin/home.html" target="_top">Start Page</a>
+    &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html">PSCB Custom Reports</a>
+    &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_contacts_menu.html">Contacts</a>
+    &gt; Alumni List~[wc:admin_navigation_frame_css]
+    <h1>Alumni List</h1>
+    <form id="rptFilters" name="searchform" action="#" method="POST">
+        <div class="box-round">
+            <h2>Report Filters</h2>
+            <label for="contact_count">Number of Contacts</label>
+            <select name="contact_count" id="contact_count">
+                <option value="1" ~[if.~(gpv.contact_count)=1]selected[/if]>1</option>
+                <option value="2" ~[if.~(gpv.contact_count)=2]selected[/if]>2</option>
+                <option value="3" ~[if.~(gpv.contact_count)=3]selected[/if]>3</option>
+                <option value="4" ~[if.~(gpv.contact_count)=4]selected[/if] ~[if.~(gpv.contact_count)=]selected[/if]>4</option>
+                <option value="5" ~[if.~(gpv.contact_count)=5]selected[/if]>5</option>
+                <option value="6" ~[if.~(gpv.contact_count)=6]selected[/if]>6</option>
+            </select>
+            <div class="button-row">
+                <input type="hidden" name="showData" value="1">
+                <input type="hidden" name="ac" value="prim">~[submitbutton]
+            </div>
+        </div>
+    </form>
+    ~[wc:pscbdevpro2_init]
+    ~[if#showData.~(gpv.showData;sqlText)=1]
+    <script>
+        var alumniContactCount = 4;
+        ~[if#contacts1.~(gpv.contact_count)=1]alumniContactCount = 1;[/if#contacts1]
+        ~[if#contacts2.~(gpv.contact_count)=2]alumniContactCount = 2;[/if#contacts2]
+        ~[if#contacts3.~(gpv.contact_count)=3]alumniContactCount = 3;[/if#contacts3]
+        ~[if#contacts4.~(gpv.contact_count)=4]alumniContactCount = 4;[/if#contacts4]
+        ~[if#contacts5.~(gpv.contact_count)=5]alumniContactCount = 5;[/if#contacts5]
+        ~[if#contacts6.~(gpv.contact_count)=6]alumniContactCount = 6;[/if#contacts6]
+        function alumniText(cell) {
+            var node = document.createElement("span");
+            node.textContent = cell.getValue() == null ? "" : String(cell.getValue());
+            node.className = "alumni-value";
+            node.title = node.textContent;
+            return node;
+        }
+        function alumniStudent(cell) {
+            var node = document.createElement("a");
+            node.textContent = cell.getValue();
+            node.className = "alumni-value";
+            node.title = node.textContent;
+            node.href = "/admin/students/contacts.html?frn=001" + cell.getData().studentsdcid;
+            node.target = "_blank";
+            node.rel = "noopener noreferrer";
+            return node;
+        }
+        function alumniContact(cell) {
+            var node = alumniText(cell);
+            var id = cell.getData()[cell.getField().replace(/_name$/, "_id")];
+            if (!id) return node;
+            var link = document.createElement("a");
+            link.textContent = node.textContent;
+            link.className = "alumni-value";
+            link.title = link.textContent;
+            link.href = "/admin/contacts/edit.html#?contactid=" + id;
+            link.target = "_blank";
+            link.rel = "noopener noreferrer";
+            return link;
+        }
+        function alumniAddress(street, city, state, zip) {
+            var clean = function (value) { return value == null ? "" : String(value).trim(); };
+            return [clean(street), [clean(city), clean(state), clean(zip)].filter(Boolean).join(" ")]
+                .filter(Boolean).join(", ");
+        }
+        function alumniPrepare(rows) {
+            return rows.map(function (student) {
+                var home = alumniAddress(student.home_street, student.home_city, student.home_state, student.home_zip);
+                var mailing = alumniAddress(student.mailing_street, student.mailing_city, student.mailing_state, student.mailing_zip);
+                var normalized = function (value) { return value.replace(/\s+/g, " ").toUpperCase(); };
+                student.address = home && mailing && normalized(home) !== normalized(mailing)
+                    ? "Home: " + home + "\nMailing: " + mailing : home || mailing;
+                for (var index = 1; index <= alumniContactCount; index++) {
+                    var contact = (student.contacts || [])[index - 1] || {};
+                    ["id", "name", "relationship", "address", "emails", "phones"].forEach(function (field) {
+                        student["contact_" + index + "_" + field] = contact[field] == null ? "" : contact[field];
+                    });
+                }
+                ["contacts", "home_street", "home_city", "home_state", "home_zip", "mailing_street",
+                    "mailing_city", "mailing_state", "mailing_zip"].forEach(function (field) { delete student[field]; });
+                return student;
+            });
+        }
+        var tableColumns = [
+            {title: "Student Number", field: "student_number", sorter: "string", headerFilter: "input", formatter: alumniStudent, width: 120, minWidth: 90},
+            {title: "Student Name", field: "student", sorter: "string", headerFilter: "input", formatter: alumniText, width: 180, minWidth: 120},
+            {title: "Class Year", field: "class_year", sorter: "number", headerFilter: "list", headerFilterParams: {valuesLookup: true, clearable: true, sort: "desc"}, formatter: alumniText, width: 110, minWidth: 90},
+            {title: "Student Address", field: "address", sorter: "string", headerFilter: "input", formatter: alumniText, variableHeight: true, width: 300, minWidth: 160}
+        ];
+        for (var contactNumber = 1; contactNumber <= alumniContactCount; contactNumber++) {
+            [
+                ["Name", "name", 180], ["Relationship", "relationship", 145],
+                ["Address", "address", 300], ["Emails", "emails", 220], ["Phones", "phones", 220]
+            ].forEach(function (definition) {
+                var column = {title: "Contact " + contactNumber + " " + definition[0],
+                    field: "contact_" + contactNumber + "_" + definition[1], sorter: "string",
+                    formatter: definition[1] === "name" ? alumniContact : alumniText,
+                    variableHeight: true, width: definition[2], minWidth: 100,
+                    headerFilter: definition[1] === "relationship" ? "list" : "input"};
+                if (definition[1] === "relationship") column.headerFilterParams = {valuesLookup: true, clearable: true};
+                tableColumns.push(column);
+            });
+        }
+        ~[if.district.office]
+        tableColumns.push({title: "School", field: "school", sorter: "string", headerFilter: "list",
+            headerFilterParams: {valuesLookup: true, clearable: true}, formatter: alumniText, width: 110, minWidth: 90});
+        [/if.district.office]
+        var tableData = ~[tlist_sql;
+            WITH enrollment_history AS (
+                SELECT students.dcid studentsdcid, students.schoolid, students.grade_level,
+                    TRUNC(students.entrydate) entrydate, TRUNC(students.exitdate) exitdate
+                FROM students
+                UNION ALL
+                SELECT students.dcid, reenrollments.schoolid, reenrollments.grade_level,
+                    TRUNC(reenrollments.entrydate), TRUNC(reenrollments.exitdate)
+                FROM reenrollments
+                JOIN students ON students.id = reenrollments.studentid
+            ), qualifying_classes AS (
+                SELECT DISTINCT enrollment_history.studentsdcid, schools.school_number schoolid,
+                    schools.abbreviation school, EXTRACT(YEAR FROM terms.lastday) class_year,
+                    terms.lastday term_end
+                FROM enrollment_history
+                JOIN schools ON schools.school_number = enrollment_history.schoolid
+                JOIN terms ON terms.schoolid = schools.school_number AND terms.isyearrec = 1
+                JOIN students ON students.dcid = enrollment_history.studentsdcid
+                WHERE schools.school_number > 0
+                    AND enrollment_history.grade_level = schools.high_grade
+                    AND enrollment_history.entrydate < enrollment_history.exitdate
+                    AND enrollment_history.entrydate <= TRUNC(terms.lastday)
+                    AND enrollment_history.exitdate > GREATEST(TRUNC(terms.firstday), TRUNC(terms.lastday) - 14)
+                    AND TRUNC(terms.lastday) < TRUNC(SYSDATE)
+                    AND NOT (students.enroll_status = 0 AND students.schoolid = schools.school_number)
+                    ~[if.is.a.school]AND schools.school_number = ~(curschoolid)[/if.is.a.school]
+            ), ranked_alumni AS (
+                SELECT qualifying_classes.*,
+                    ROW_NUMBER() OVER (PARTITION BY studentsdcid ORDER BY term_end DESC, schoolid) class_rank
+                FROM qualifying_classes
+            ), alumni AS (
+                SELECT studentsdcid, schoolid, school, class_year FROM ranked_alumni WHERE class_rank = 1
+            ), contact_relationships AS (
+                SELECT DISTINCT alumni.studentsdcid, person.id personid, person.firstname, person.lastname,
+                    studentcontactassoc.contactpriorityorder, codeset.code relationship
+                FROM alumni
+                JOIN studentcontactassoc ON studentcontactassoc.studentdcid = alumni.studentsdcid
+                JOIN person ON person.id = studentcontactassoc.personid AND person.isactive = 1
+                JOIN studentcontactdetail ON studentcontactdetail.studentcontactassocid = studentcontactassoc.studentcontactassocid
+                LEFT JOIN codeset ON codeset.codesetid = studentcontactdetail.relationshiptypecodesetid
+                WHERE TRUNC(SYSDATE) BETWEEN NVL(studentcontactdetail.startdate, TRUNC(SYSDATE))
+                    AND NVL(studentcontactdetail.enddate, TRUNC(SYSDATE))
+            ), contact_people AS (
+                SELECT studentsdcid, personid, firstname, lastname, MIN(contactpriorityorder) priority,
+                    LISTAGG(relationship, ', ') WITHIN GROUP (ORDER BY relationship) relationship
+                FROM contact_relationships
+                GROUP BY studentsdcid, personid, firstname, lastname
+            ), ranked_contacts AS (
+                SELECT contact_people.*,
+                    ROW_NUMBER() OVER (PARTITION BY studentsdcid ORDER BY priority NULLS LAST, personid) contact_rank
+                FROM contact_people
+            ), contact_details AS (
+                SELECT ranked_contacts.*,
+                    (SELECT LISTAGG(TRIM(personaddress.street ||
+                        CASE WHEN personaddress.city IS NOT NULL THEN ', ' || personaddress.city END ||
+                        CASE WHEN address_state.code IS NOT NULL THEN ' ' || address_state.code END ||
+                        CASE WHEN personaddress.postalcode IS NOT NULL THEN ' ' || personaddress.postalcode END) ||
+                        CASE WHEN address_type.code IS NOT NULL THEN ' (' || address_type.code || ')' END, CHR(10))
+                        WITHIN GROUP (ORDER BY personaddressassoc.personaddressassocid)
+                     FROM personaddressassoc
+                     JOIN personaddress ON personaddress.personaddressid = personaddressassoc.personaddressid
+                     LEFT JOIN codeset address_state ON address_state.codesetid = personaddress.statescodesetid
+                     LEFT JOIN codeset address_type ON address_type.codesetid = personaddressassoc.addresstypecodesetid
+                     WHERE personaddressassoc.personid = ranked_contacts.personid
+                        AND TRUNC(SYSDATE) BETWEEN NVL(personaddressassoc.startdate, TRUNC(SYSDATE))
+                            AND NVL(personaddressassoc.enddate, TRUNC(SYSDATE))) addresses,
+                    (SELECT LISTAGG(emailaddress.emailaddress, ', ')
+                        WITHIN GROUP (ORDER BY personemailaddressassoc.emailaddresspriorityorder, emailaddress.emailaddress)
+                     FROM personemailaddressassoc
+                     JOIN emailaddress ON emailaddress.emailaddressid = personemailaddressassoc.emailaddressid
+                     WHERE personemailaddressassoc.personid = ranked_contacts.personid) emails,
+                    (SELECT LISTAGG(personphonenumberassoc.phonenumberasentered ||
+                        CASE WHEN phone_type.code IS NOT NULL THEN ' (' || phone_type.code || ')' END, ' | ')
+                        WITHIN GROUP (ORDER BY personphonenumberassoc.ispreferred DESC,
+                            personphonenumberassoc.phonenumberpriorityorder, personphonenumberassoc.phonenumberasentered)
+                     FROM personphonenumberassoc
+                     LEFT JOIN codeset phone_type ON phone_type.codesetid = personphonenumberassoc.phonetypecodesetid
+                     WHERE personphonenumberassoc.personid = ranked_contacts.personid
+                        AND personphonenumberassoc.phonenumberasentered IS NOT NULL) phones
+                FROM ranked_contacts WHERE contact_rank <= 6
+            ), contact_json AS (
+                SELECT studentsdcid, JSON_ARRAYAGG(JSON_OBJECT(
+                    'id' VALUE personid,
+                    'name' VALUE CASE WHEN firstname IS NULL AND lastname IS NULL THEN '-No Name-'
+                        ELSE TRIM(firstname || ' ' || lastname) END,
+                    'relationship' VALUE relationship, 'address' VALUE addresses,
+                    'emails' VALUE emails, 'phones' VALUE phones
+                    NULL ON NULL RETURNING CLOB
+                ) ORDER BY contact_rank RETURNING CLOB) contacts
+                FROM contact_details GROUP BY studentsdcid
+            )
+            SELECT COALESCE(REPLACE(JSON_ARRAYAGG(JSON_OBJECT(
+                'studentsdcid' VALUE students.dcid,
+                'student_number' VALUE students.student_number,
+                'student' VALUE students.lastfirst,
+                'class_year' VALUE alumni.class_year,
+                'home_street' VALUE students.street, 'home_city' VALUE students.city,
+                'home_state' VALUE students.state, 'home_zip' VALUE students.zip,
+                'mailing_street' VALUE students.mailing_street, 'mailing_city' VALUE students.mailing_city,
+                'mailing_state' VALUE students.mailing_state, 'mailing_zip' VALUE students.mailing_zip,
+                'school' VALUE alumni.school,
+                'contacts' VALUE contact_json.contacts FORMAT JSON
+                NULL ON NULL RETURNING CLOB
+            ) ORDER BY alumni.class_year DESC, students.lastfirst, students.dcid RETURNING CLOB), '<', '\u003c'),
+                TO_CLOB(CHR(91) || CHR(93))) report_json
+            FROM alumni
+            JOIN students ON students.dcid = alumni.studentsdcid
+            LEFT JOIN contact_json ON contact_json.studentsdcid = alumni.studentsdcid
+        ;]~(1)[/tlist_sql];
+        tableData = alumniPrepare(tableData);
+
+    </script>
+    [/if#showData]
+    ~[wc:admin_footer_frame_css]
+</body>
+</html>

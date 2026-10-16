@@ -104,6 +104,10 @@
 		<td><a href="/admin/reports_pscb_dev_pro/contacts/cdol_grandparents_list.html">Grandparents List</a></td>
 		<td>One row per grandparent with relationship, all emails and phones, and associated students.</td>
 	</tr>
+    <tr id="alumniList">
+        <td><a href="/admin/reports_pscb_dev_pro/contacts/cdol_alumni_list.html">Alumni List</a></td>
+        <td>Former students in the school's highest grade near year end, with their first six active contacts.</td>
+    </tr>
 </table>
 
 

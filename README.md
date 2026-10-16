@@ -156,3 +156,50 @@ PowerSchool `tlist_sql` queries, even inside quoted strings.
 
 Local checks do not establish live Oracle execution; verify shared grandparents,
 multiple phones/emails, effective dates, selection, student links, and exports in PowerSchool.
+
+## Alumni List
+
+Version `26.10.0.15` adds Alumni List after Grandparents List in both Contacts menus,
+using PSCB framework 2. Select Number of Contacts (1–6, default 4) and submit to run.
+The report has no date-window filter.
+Historical enrollment combines STUDENTS and REENROLLMENTS. A qualifying enrollment
+matches SCHOOLS.HIGH_GRADE and overlaps the interval from full-year TERMS.LASTDAY minus
+14 calendar days through LASTDAY, inclusive. Entry is inclusive and exit is exclusive.
+Only completed full-year terms qualify. Students active at that historical school today
+are excluded; students now active at another school can qualify. School context filters
+historical school, not the student's currently assigned school. Class Year is the calendar
+year of the qualifying term end. The latest qualifying class is used per student; at
+District Office this means the most recent qualifying school across the district, with
+school number breaking ties. Earlier withdrawals are excluded; withdrawals within the
+final window can qualify because dates alone do not establish graduation.
+
+Columns are Student Number, Student Name, Class Year, Student Address, and the selected number of contact
+groups (Name, Relationship, Address, Emails, Phones). School abbreviation is the last
+column only at District Office. Rows sort by Class Year descending, student name, and ID.
+Student addresses combine home and mailing, showing labels only when both exist and differ
+(case and whitespace are ignored for comparison). One address appears without a label.
+Addresses and contact details are currently recorded values, not historical snapshots.
+
+Contacts must be active with a currently effective student relationship. They are ranked
+by contact priority, null priorities last, then person ID; only the first selected number appear (up to six).
+Students without contacts remain included and unused contact groups stay blank. All current
+contact addresses appear on separate lines with types, emails use commas, and phones use
+pipes with types in parentheses. The report uses JSON CLOB output and text-node formatters.
+The separate EUI menu-links plugin must be repackaged with the root navigation JSON;
+no pagecataloging entry is bundled in this report plugin.
+
+Local checks do not verify Oracle or installed PSCB behavior. After installation, validate
+highest-grade settings, term dates, historical enrollment boundaries, school/district scope,
+contact priority, empty results, multiline cells, and exports against known students.
+
+Alumni List version `26.10.0.15` retains the pre-run contact count, dropdown filters,
+and compact columns. The custom top scrollbar and its DOM/resize observers have been
+removed. The filter form now matches the repository's Public School Districts and Student Car
+Information reports: POST to #, hidden showData/ac fields, the standard submitbutton,
+and the framework wildcard outside the results condition. PowerSchool markup restores
+selected options and emits the validated contact count directly in the results script.
+There is no pre-framework script, DOM-dependent count initialization, custom submit handler,
+or URL navigation override.
+The SQL remains inside the Submit condition. Compact, resizable columns preserve explicit
+address line breaks without automatic wrapping; long values display an ellipsis with the
+full value in a hover tooltip. Exports retain full cell values. Source-map 404s alone do not identify report initialization failures.

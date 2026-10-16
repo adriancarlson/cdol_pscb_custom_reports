@@ -371,6 +371,20 @@
 									"sortOrder": 230,
 									"parentHTMLID": "navPSCBDevProContacts",
 									"districtLevelContext": 0
+								},
+								{
+									"htmlID": "navPSCBDevProContacts-cdol-alumniList",
+									"title": "Alumni List🔹",
+									"pageURL": "/admin/reports_pscb_dev_pro/contacts/cdol_alumni_list.html",
+									"version": "26.10.0.15",
+									"contextType": "main",
+									"isNewTab": null,
+									"isLandingPage": null,
+									"iconName": null,
+									"requiredContext": null,
+									"sortOrder": 240,
+									"parentHTMLID": "navPSCBDevProContacts",
+									"districtLevelContext": 0
 								}
 							]
 						}
