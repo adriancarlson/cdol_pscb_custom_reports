@@ -205,6 +205,54 @@
                 </tbody>
             </table>
         </div>
+        <script>
+            (function ($) {
+                'use strict';
+
+                var $table = $('#pscbDevPro');
+                var blankOption = '(Blanks)';
+
+                function configureBlankFilters() {
+                    var table = $table[0];
+                    var config = table && table.config;
+                    if (!config || !$.tablesorter || !$.tablesorter.filter) {
+                        return;
+                    }
+
+                    var options = config.widgetOptions;
+                    options.filter_functions = options.filter_functions || {};
+                    options.filter_selectSource = options.filter_selectSource || {};
+
+                    $table.find('thead th.filter-select').each(function () {
+                        var column = $(this).index();
+                        $(this).attr('data-placeholder', 'All').data('placeholder', 'All');
+
+                        // Keep normal exact-value filtering; only this option needs a custom match.
+                        options.filter_functions[column] = function (exact, normalized, filter) {
+                            var value = $.trim(String(exact == null ? '' : exact));
+                            if (filter === blankOption) {
+                                return value === '';
+                            }
+                            return options.filter_ignoreCase ?
+                                value.toLowerCase() === filter.toLowerCase() : value === filter;
+                        };
+                        options.filter_selectSource[column] = function (table, column, onlyAvailable) {
+                            var values = $.tablesorter.filter.getOptions(table, column, onlyAvailable);
+                            values.unshift(blankOption);
+                            return values;
+                        };
+                        // Replace the options already built by the framework during initialization.
+                        $.tablesorter.filter.buildSelect(table, column, '', true);
+                    });
+                }
+
+                // This script sits after the table so the handler is bound before framework initialization.
+                $table.on('filterInit.nceaBlanks', configureBlankFilters);
+                if ($table[0] && $table[0].config && $table[0].config.widgetOptions.filter_initialized) {
+                    configureBlankFilters();
+                }
+            }(jQuery));
+        </script>
         <!-- End of pscbDevPro -->
         <div style="clear: both;">
             <p class="center">Report generated at ~[time] on ~[date]</p>

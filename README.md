@@ -1,5 +1,13 @@
 # CDOL PSCB Custom Reports
 
+## NCEA column filters
+
+Every column dropdown in NCEA Student Info and NCEA Staff Info includes `(Blanks)`
+to show rows with an empty or whitespace-only cell in that column. Select `All`
+to clear that column's filter. Multiple column filters can be combined.
+The filter code is embedded directly in each report and uses the PSCB tablesorter
+framework. Live PowerSchool validation is still required.
+
 ## Previous Grade School
 
 Version `26.10.0.8` adds **Previous Grade School** under **Student Data Verification**
