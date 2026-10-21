@@ -128,7 +128,11 @@
                             NVL(latest_correction.users_dcid, original.users_dcid) AS users_dcid,
                             NVL(latest_correction.notes, original.notes) AS notes,
                             NVL(latest_correction.medication_name, original.medication_name) AS medication_name,
-                            NVL(latest_correction.dose_amount, original.dose_amount) AS dose_amount,
+                            CASE
+                                WHEN NVL(latest_correction.variable_dose, original.variable_dose) = 1 THEN NULL
+                                ELSE NVL(latest_correction.dose_amount, original.dose_amount)
+                            END AS dose_amount,
+                            NVL(latest_correction.variable_dose, NVL(original.variable_dose, 0)) AS variable_dose,
                             NVL(latest_correction.dose_unit, original.dose_unit) AS dose_unit,
                             NVL(latest_correction.inventory_unit, original.inventory_unit) AS inventory_unit,
                             NVL(latest_correction.route, original.route) AS route,
@@ -169,7 +173,10 @@
                             ELSE TO_CHAR(students.grade_level)
                         END AS grade_level,
                         NVL(effective.medication_name, medication.medication_name) AS medication_name,
-                        NVL(effective.dose_amount, medication.dose_amount) AS dose_amount,
+                        CASE WHEN effective.variable_dose = 1 THEN 'Varies ·'
+                            ELSE TO_CHAR(NVL(effective.dose_amount,
+                                CASE WHEN NVL(medication.variable_dose, 0) = 0 THEN medication.dose_amount END))
+                        END AS dose_amount,
                         NVL(dose_unit_option.displayvalue,
                             NVL(effective.dose_unit, medication.dose_unit)) AS dose_unit,
                         effective.administration_quantity AS administration_quantity,

@@ -86,7 +86,9 @@
                             medication.studentsdcid,
                             COUNT(medication.id) AS medication_count,
                             '<ul>' || LISTAGG(
-                                '<li>' || medication.medication_name || ' - ' || medication.dose_amount || ' ' ||
+                                '<li>' || medication.medication_name || ' - ' ||
+                                CASE WHEN NVL(medication.variable_dose, 0) = 1 THEN 'Varies ·'
+                                    ELSE TO_CHAR(medication.dose_amount) END || ' ' ||
                                 NVL(dose_unit_option.displayvalue, medication.dose_unit) || ' | ' ||
                                 NVL(frequency_option.displayvalue, medication.frequency) || ' | Available ' ||
                                 GREATEST(0, NVL(inventory_totals.quantity_received, 0) +

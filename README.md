@@ -211,3 +211,15 @@ or URL navigation override.
 The SQL remains inside the Submit condition. Compact, resizable columns preserve explicit
 address line breaks without automatic wrapping; long values display an ellipsis with the
 full value in a hover tooltip. Exports retain full cell values. Source-map 404s alone do not identify report initialization failures.
+
+## Variable-dose medication reports (26.10.1.3)
+
+Install CDOL Health 26.9.8.2 and its Data Access plugin before this report version.
+The new `variable_dose` Integer fields must exist on `u_student_medication` and
+`u_student_med_inv_txn`. Inventory, Inventory by Student, Administration, and
+Missed Daily Administration display `Varies · [unit]` for explicit variable doses.
+Historical fixed numeric snapshots remain fixed until explicitly corrected;
+variable correction snapshots do not fall back to the original numeric amount.
+
+Run `py tests/test_variable_dose.py` for local expression/CTE checks. SQLite is a
+test substitute; verify Oracle execution and report authorization on the test server.
