@@ -40,15 +40,15 @@ class VariableDoseReportsTest(unittest.TestCase):
     def effective_dose(self):
         source = (REPORTS / 'cdol_medication_administration.html').read_text()
         ctes = source[source.index('WITH correction_rows AS ('):source.index('SELECT\n                        students.dcid AS dcid')]
-        expression = re.search(r"CASE WHEN effective.variable_dose = 1[\s\S]*?END AS dose_amount", source).group()
+        expression = re.search(r"CASE WHEN NVL\(medication.variable_dose, 0\) = 1 OR effective.variable_dose = 1[\s\S]*?END AS dose_amount", source).group()
         return self.db.execute(ctes + f'''SELECT {expression}, effective.administration_quantity
             FROM effective_administrations effective JOIN u_student_medication medication
             ON medication.id = effective.u_student_medication_id''').fetchone()
 
-    def test_legacy_99_stays_numeric_when_medication_becomes_variable(self):
+    def test_current_variable_setting_overrides_legacy_numeric_display(self):
         self.insert()
         self.db.execute('INSERT INTO u_student_medication VALUES (7, NULL, 1)')
-        self.assertEqual(self.effective_dose(), ('99.0', 4))
+        self.assertEqual(self.effective_dose(), ('Varies ·', 4))
 
     def test_corrected_variable_snapshot_does_not_fall_back_to_original_99(self):
         self.insert()
@@ -57,12 +57,12 @@ class VariableDoseReportsTest(unittest.TestCase):
         self.db.execute('INSERT INTO u_student_medication VALUES (7, 99, 0)')
         self.assertEqual(self.effective_dose(), ('Varies ·', 4))
 
-    def test_later_fixed_correction_overrides_variable_flag(self):
+    def test_current_variable_setting_overrides_even_a_fixed_correction(self):
         self.insert(variable_dose=1, dose_amount=None)
         self.insert(id=2, transaction_type='ADMINISTRATION_CORRECTION', reversal_of_transaction_id=1,
                     variable_dose=0, dose_amount=5, quantity_change=0)
         self.db.execute('INSERT INTO u_student_medication VALUES (7, NULL, 1)')
-        self.assertEqual(self.effective_dose(), ('5.0', 4))
+        self.assertEqual(self.effective_dose(), ('Varies ·', 4))
 
     def test_inventory_and_missed_report_expressions(self):
         for name in ('cdol_medication_inventory.html', 'cdol_missed_daily_administration.html'):

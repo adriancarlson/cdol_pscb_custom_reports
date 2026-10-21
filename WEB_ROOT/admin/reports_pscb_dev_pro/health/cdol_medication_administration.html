@@ -173,7 +173,7 @@
                             ELSE TO_CHAR(students.grade_level)
                         END AS grade_level,
                         NVL(effective.medication_name, medication.medication_name) AS medication_name,
-                        CASE WHEN effective.variable_dose = 1 THEN 'Varies ·'
+                        CASE WHEN NVL(medication.variable_dose, 0) = 1 OR effective.variable_dose = 1 THEN 'Varies ·'
                             ELSE TO_CHAR(NVL(effective.dose_amount,
                                 CASE WHEN NVL(medication.variable_dose, 0) = 0 THEN medication.dose_amount END))
                         END AS dose_amount,
