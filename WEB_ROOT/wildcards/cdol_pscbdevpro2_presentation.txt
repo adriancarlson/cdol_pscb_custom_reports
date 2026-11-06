@@ -2,6 +2,18 @@
      Keep the vendor results initializer and report queries in their existing run conditions. -->
 <link href="/pscb_dev_pro/scripts/pdfmake/multiple-select.min.css" rel="stylesheet">
 <style>
+    /* Keep expanded filter menus above the Tabulator headers and frozen cells. */
+    form.cdol-pscb-report-filters {
+        position: relative;
+        z-index: 20;
+    }
+
+    form.cdol-pscb-report-filters > .box-round {
+        overflow: visible;
+        /* Contain floated buttons without clipping absolutely positioned menus. */
+        display: flow-root;
+    }
+
     .box-round > h2 {
         background-color: ~[if#cdolPscbHeader.pref.pscbtableheadercolor=]#d0ece7[else#cdolPscbHeader]~[pref:pscbtableheadercolor][/if#cdolPscbHeader];
     }
