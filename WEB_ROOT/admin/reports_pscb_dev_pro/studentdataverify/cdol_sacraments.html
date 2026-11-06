@@ -8,7 +8,6 @@
         ~[wc:commonscripts]
         <link href="/images/css/screen.css" rel="stylesheet" media="screen">
         <link href="/images/css/print.css" rel="stylesheet" media="print">
-        ~[wc:pscbdevpro_init]
     </head>
 
     <body>
@@ -16,7 +15,7 @@
             href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html" target="_top">PSCB DEV Custom Reports</a> &gt;
         <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_contacts_menu.html" target="_top">Contacts</a> &gt;
         Student Sacraments ~[wc:admin_navigation_frame_css]
-        <form name="searchform" action="#" method="POST">
+        <form name="searchform" action="cdol_sacraments.html" method="GET">
             <h1>Student Sacraments</h1>
             <div class="box-round" style="overflow: hidden;">
                 <h2>Report Filters</h2>
@@ -24,7 +23,8 @@
                     <thead>
                         <tr>
                             <th style="white-space: nowrap;" width="180px">Student Selection</th>
-                            <th style="white-space: nowrap;">Grade Selection</th>
+                            <th style="white-space: nowrap;" width="150px">Grade Selection</th>
+                            <th style="white-space: nowrap;">Include Parents</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -37,10 +37,11 @@
                                 </select>
                             </td>
                             <td>
-                                <select name="gr" name="gr">
+                                <select name="gr" id="gr">
                                     <option value='' ~[if.~[gpv:gr]=]selected[/if]>All Grades</option>
                                     ~[tlist_sql;
                                     SELECT DISTINCT GRADE_LEVEL,
+                                    DECODE('~(gpv.gr;sqlText)', TO_CHAR(grade_level), 'selected', '') AS isselected,
                                     CASE
                                     WHEN TO_CHAR(grade_level) = -1 then 'PK'
                                     WHEN TO_CHAR(grade_level) = 0 then 'K'
@@ -52,9 +53,14 @@
                                     THEN '%' ELSE TO_CHAR(~(curschoolid)) END
                                     AND ENROLL_STATUS = 0
                                     ORDER BY GRADE_LEVEL]
-                                    <option value="'~(gr)'">~(prettygrade)</option>
+                                    <option value="~(gr)" ~(isselected)>~(prettygrade)</option>
                                     [/tlist_sql]
                                 </select>
+                            </td>
+                            <td>
+                                <input type="checkbox" name="includeParents" id="includeParents" value="1"
+                                    ~[if#parentsChecked.~(gpv.includeParents;sqlText)=1]checked[/if#parentsChecked]>
+                                <label for="includeParents">Include Parents</label>
                             </td>
                         </tr>
                     </tbody>
@@ -62,85 +68,123 @@
                 <div class="button-row left">
                     <span style="color: red;">&nbsp;&nbsp;Select parameters and click submit</span>
                     <input type="hidden" name="showData" value="1">
-                    <input type="hidden" name="ac" value="prim">~[submitbutton]
+                    <button type="submit">Run Report</button>
                 </div>
             </div>
         </form>
         ~[if#showData.~(gpv.showData;sqlText)=1]
-        <div class="box-round">
-            <h2 class="pscbdevBkgColor">&nbsp;&nbsp;Student Sacraments</h2>
-            <table cellspacing="0" cellpadding="4" class="tablesorter grid center" id="pscbDevPro" groupRowsByCol="1"
-                color1="#ffffff" color2="#d7edfe">
-                <thead>
-                    <tr>
-                        <th class="left">Student Number</th>
-                        <th class="left">Name</th>
-                        <th class="left filter-select">Grade Level</th>
-                        <th class="left filter-select">Gender</th>
-                        <th class="left filter-select">Religion</th>
-                        <th class="left filter-select">Parish</th>
-                        <th class="left">Parish City</th>
-                        <th class="left">Parish State</th>
-                        <th class="left">Baptism Date</th>
-                        <th class="left filter-select">Baptism Parish</th>
-                        <th class="left">Baptism City</th>
-                        <th class="left">Baptism State</th>
-                        <th class="left">Confession Date</th>
-                        <th class="left filter-select">Confession Parish</th>
-                        <th class="left">Confession City</th>
-                        <th class="left">Confession State</th>
-                        <th class="left">Communion Date</th>
-                        <th class="left filter-select">Communion Parish</th>
-                        <th class="left">Communion City</th>
-                        <th class="left">Communion State</th>
-                        <th class="left">Confirmation Date</th>
-                        <th class="left filter-select">Confirmation Parish</th>
-                        <th class="left">Confirmation City</th>
-                        <th class="left">Confirmation State</th>
-                        ~[if.district.office]<th class="left ">School</th>[/if]
-                    </tr>
-                </thead>
-                <tbody>
-                    ~[tlist_sql;
-                    SELECT
-                    s.dcid,
-                    s.student_number,
-                    s.lastfirst,
-                    CASE
-                    WHEN TO_CHAR(s.grade_level) = -1 then 'PK'
-                    WHEN TO_CHAR(s.grade_level) = 0 then 'K'
-                    WHEN TO_CHAR(s.grade_level) = 99 then 'Graduated'
-                    ELSE TO_CHAR(s.grade_level)
-                    END as PRETTY_GRADE,
-                    CASE
-                    WHEN UPPER(s.gender) = 'M' THEN 'Male'
-                    WHEN UPPER(s.gender) = 'F' THEN 'Female'
-                    ELSE s.gender
-                    END as GENDER,
-                    CASE WHEN NCEA.RELIGIOUSAFFILIATION= 'C' THEN 'Catholic' WHEN NCEA.RELIGIOUSAFFILIATION= 'N'
-                    THEN
-                    'Non-Catholic'ELSE ''
-                    END AS Religion,
-                    SAC.STUDENT_PARISH,
-                    SAC.STUDENT_PARISH_CITY,
-                    SAC.STUDENT_PARISH_STATE,
-                    to_char(SAC.STUDENT_BAPTISM_DATE,'MM/DD/YYYY')as "Baptism_Date",
-                    SAC.STUDENT_BAPTISM_PARISH,
-                    SAC.STUDENT_BAPTISM_CITY,
-                    SAC.STUDENT_BAPTISM_STATE,
-                    to_char(SAC.STUDENT_CONFESSION_DATE,'MM/DD/YYYY')as "Confession_Date",
-                    SAC.STUDENT_CONFESSION_PARISH,
-                    SAC.STUDENT_CONFESSION_CITY,
-                    SAC.STUDENT_CONFESSION_STATE,
-                    to_char(SAC.STUDENT_COMMUNION_DATE,'MM/DD/YYYY')as "Communion_Date",
-                    SAC.STUDENT_COMMUNION_PARISH,
-                    SAC.STUDENT_COMMUNION_CITY,
-                    SAC.STUDENT_COMMUNION_STATE,
-                    to_char(SAC.STUDENT_CONFIRMATION_DATE,'MM/DD/YYYY')as "Confirmation_Date",
-                    SAC.STUDENT_CONFIRMATION_PARISH,
-                    SAC.STUDENT_CONFIRMATION_CITY,
-                    SAC.STUDENT_CONFIRMATION_STATE,
-                    sch.abbreviation
+        ~[wc:pscbdevpro2_init]
+        <script>
+        function sacramentStudentLink(cell) {
+            var link = document.createElement("a");
+            link.textContent = cell.getValue() == null ? "" : String(cell.getValue());
+            link.href = "/admin/students/sacramental.html?frn=001" + encodeURIComponent(cell.getData().studentsdcid);
+            link.target = "_blank";
+            link.rel = "noopener noreferrer";
+            return link;
+        }
+
+        var tableColumns = [
+            {"title":"Student Number","field":"student_number","sorter":"string","headerFilter":"input","formatter":sacramentStudentLink},
+            {"title":"Name","field":"student_name","sorter":"string","headerFilter":"input","formatter":"plaintext"},
+            {"title":"Grade Level","field":"grade_level","sorter":"string","headerFilter":"list","formatter":"plaintext","headerFilterParams":{"valuesLookup":true,"sort":"asc","clearable":true},"headerFilterFunc":"="},
+            {"title":"Gender","field":"gender","sorter":"string","headerFilter":"list","formatter":"plaintext","headerFilterParams":{"valuesLookup":true,"sort":"asc","clearable":true},"headerFilterFunc":"="},
+            {"title":"Religion","field":"religion","sorter":"string","headerFilter":"list","formatter":"plaintext","headerFilterParams":{"valuesLookup":true,"sort":"asc","clearable":true},"headerFilterFunc":"="},
+            {"title":"Parish","field":"parish","sorter":"string","headerFilter":"list","formatter":"plaintext","headerFilterParams":{"valuesLookup":true,"sort":"asc","clearable":true},"headerFilterFunc":"="},
+            {"title":"Parish City","field":"parish_city","sorter":"string","headerFilter":"input","formatter":"plaintext"},
+            {"title":"Parish State","field":"parish_state","sorter":"string","headerFilter":"input","formatter":"plaintext"},
+            {"title":"Baptism Date","field":"baptism_date","sorter":"string","headerFilter":"input","formatter":"plaintext"},
+            {"title":"Baptism Parish","field":"baptism_parish","sorter":"string","headerFilter":"list","formatter":"plaintext","headerFilterParams":{"valuesLookup":true,"sort":"asc","clearable":true},"headerFilterFunc":"="},
+            {"title":"Baptism City","field":"baptism_city","sorter":"string","headerFilter":"input","formatter":"plaintext"},
+            {"title":"Baptism State","field":"baptism_state","sorter":"string","headerFilter":"input","formatter":"plaintext"},
+            {"title":"Confession Date","field":"confession_date","sorter":"string","headerFilter":"input","formatter":"plaintext"},
+            {"title":"Confession Parish","field":"confession_parish","sorter":"string","headerFilter":"list","formatter":"plaintext","headerFilterParams":{"valuesLookup":true,"sort":"asc","clearable":true},"headerFilterFunc":"="},
+            {"title":"Confession City","field":"confession_city","sorter":"string","headerFilter":"input","formatter":"plaintext"},
+            {"title":"Confession State","field":"confession_state","sorter":"string","headerFilter":"input","formatter":"plaintext"},
+            {"title":"Communion Date","field":"communion_date","sorter":"string","headerFilter":"input","formatter":"plaintext"},
+            {"title":"Communion Parish","field":"communion_parish","sorter":"string","headerFilter":"list","formatter":"plaintext","headerFilterParams":{"valuesLookup":true,"sort":"asc","clearable":true},"headerFilterFunc":"="},
+            {"title":"Communion City","field":"communion_city","sorter":"string","headerFilter":"input","formatter":"plaintext"},
+            {"title":"Communion State","field":"communion_state","sorter":"string","headerFilter":"input","formatter":"plaintext"},
+            {"title":"Confirmation Date","field":"confirmation_date","sorter":"string","headerFilter":"input","formatter":"plaintext"},
+            {"title":"Confirmation Parish","field":"confirmation_parish","sorter":"string","headerFilter":"list","formatter":"plaintext","headerFilterParams":{"valuesLookup":true,"sort":"asc","clearable":true},"headerFilterFunc":"="},
+            {"title":"Confirmation City","field":"confirmation_city","sorter":"string","headerFilter":"input","formatter":"plaintext"},
+            {"title":"Confirmation State","field":"confirmation_state","sorter":"string","headerFilter":"input","formatter":"plaintext"},
+            ~[if.district.office]
+            {"title":"School","field":"school","sorter":"string","headerFilter":"list","formatter":"plaintext","headerFilterParams":{"valuesLookup":true,"sort":"asc","clearable":true},"headerFilterFunc":"="},
+            [/if]
+            ~[if#parentsColumns.~(gpv.includeParents;sqlText)=1]
+            {"title":"Father","field":"father_name","sorter":"string","headerFilter":"input","formatter":"plaintext"},
+            {"title":"Mother","field":"mother_name","sorter":"string","headerFilter":"input","formatter":"plaintext"},
+            {"title":"Mother Maiden Name","field":"mother_maiden_name","sorter":"string","headerFilter":"input","formatter":"plaintext"},
+            [/if#parentsColumns]
+        ];
+        var tableData = ~[tlist_sql;
+~[if#parentsCte.~(gpv.includeParents;sqlText)=1]
+                    WITH parent_contacts AS (
+                        SELECT DISTINCT sca.studentdcid, p.id, sca.contactpriorityorder,
+                            rel.code AS relationship,
+                            CASE
+                                WHEN TRIM(p.lastname) IS NOT NULL AND TRIM(p.firstname) IS NOT NULL
+                                THEN TRIM(p.lastname) || ', ' || TRIM(p.firstname)
+                                ELSE COALESCE(TRIM(p.lastname), TRIM(p.firstname))
+                            END AS parent_name,
+                            u.person_maiden_name
+                        FROM studentcontactassoc sca
+                        JOIN person p ON p.id = sca.personid
+                        JOIN studentcontactdetail scd ON scd.studentcontactassocid = sca.studentcontactassocid
+                        JOIN codeset rel ON rel.codesetid = scd.relationshiptypecodesetid
+                        LEFT JOIN u_person_additional_info u ON u.personid = p.id
+                        WHERE rel.code IN ('Father', 'Mother')
+                            AND p.isactive = 1
+                            AND TRUNC(SYSDATE) BETWEEN NVL(scd.startdate, TRUNC(SYSDATE))
+                                AND NVL(scd.enddate, TRUNC(SYSDATE))
+                    ), parents AS (
+                        SELECT studentdcid,
+                            LISTAGG(CASE WHEN relationship = 'Father' THEN parent_name END, ' | ')
+                                WITHIN GROUP (ORDER BY contactpriorityorder, id) AS father_name,
+                            LISTAGG(CASE WHEN relationship = 'Mother' THEN parent_name END, ' | ')
+                                WITHIN GROUP (ORDER BY contactpriorityorder, id) AS mother_name,
+                            LISTAGG(CASE WHEN relationship = 'Mother' THEN person_maiden_name END, ' | ')
+                                WITHIN GROUP (ORDER BY contactpriorityorder, id) AS mother_maiden_name
+                        FROM parent_contacts
+                        GROUP BY studentdcid
+                    )
+                    [/if#parentsCte]
+                    SELECT COALESCE(REPLACE(JSON_ARRAYAGG(JSON_OBJECT(
+                        'studentsdcid' VALUE s.dcid
+                        , 'student_number' VALUE TO_CHAR(s.student_number)
+                        , 'student_name' VALUE s.lastfirst
+                        ~[if#parentsJson.~(gpv.includeParents;sqlText)=1]
+                        , 'father_name' VALUE parents.father_name
+                        , 'mother_name' VALUE parents.mother_name
+                        , 'mother_maiden_name' VALUE parents.mother_maiden_name
+                        [/if#parentsJson]
+                        , 'grade_level' VALUE CASE s.grade_level WHEN -1 THEN 'PK' WHEN 0 THEN 'K' WHEN 99 THEN 'Graduated' ELSE TO_CHAR(s.grade_level) END
+                        , 'gender' VALUE CASE UPPER(s.gender) WHEN 'M' THEN 'Male' WHEN 'F' THEN 'Female' ELSE s.gender END
+                        , 'religion' VALUE CASE NCEA.RELIGIOUSAFFILIATION WHEN 'C' THEN 'Catholic' WHEN 'N' THEN 'Non-Catholic' ELSE '' END
+                        , 'parish' VALUE SAC.STUDENT_PARISH
+                        , 'parish_city' VALUE SAC.STUDENT_PARISH_CITY
+                        , 'parish_state' VALUE SAC.STUDENT_PARISH_STATE
+                        , 'baptism_date' VALUE TO_CHAR(SAC.STUDENT_BAPTISM_DATE, 'MM/DD/YYYY')
+                        , 'baptism_parish' VALUE SAC.STUDENT_BAPTISM_PARISH
+                        , 'baptism_city' VALUE SAC.STUDENT_BAPTISM_CITY
+                        , 'baptism_state' VALUE SAC.STUDENT_BAPTISM_STATE
+                        , 'confession_date' VALUE TO_CHAR(SAC.STUDENT_CONFESSION_DATE, 'MM/DD/YYYY')
+                        , 'confession_parish' VALUE SAC.STUDENT_CONFESSION_PARISH
+                        , 'confession_city' VALUE SAC.STUDENT_CONFESSION_CITY
+                        , 'confession_state' VALUE SAC.STUDENT_CONFESSION_STATE
+                        , 'communion_date' VALUE TO_CHAR(SAC.STUDENT_COMMUNION_DATE, 'MM/DD/YYYY')
+                        , 'communion_parish' VALUE SAC.STUDENT_COMMUNION_PARISH
+                        , 'communion_city' VALUE SAC.STUDENT_COMMUNION_CITY
+                        , 'communion_state' VALUE SAC.STUDENT_COMMUNION_STATE
+                        , 'confirmation_date' VALUE TO_CHAR(SAC.STUDENT_CONFIRMATION_DATE, 'MM/DD/YYYY')
+                        , 'confirmation_parish' VALUE SAC.STUDENT_CONFIRMATION_PARISH
+                        , 'confirmation_city' VALUE SAC.STUDENT_CONFIRMATION_CITY
+                        , 'confirmation_state' VALUE SAC.STUDENT_CONFIRMATION_STATE
+                        , 'school' VALUE sch.abbreviation
+                        NULL ON NULL RETURNING CLOB
+                    ) ORDER BY sch.abbreviation, s.lastfirst, s.dcid RETURNING CLOB), '<', '\u003c'),
+                        TO_CLOB(CHR(91) || CHR(93))) AS report_json
                     FROM Students s
                     ~[if#ss.~(gpv.ss;sqlText)=cur] INNER JOIN ~[temp.table.current.selection:students] temp ON
                     (s.dcid =
@@ -151,51 +195,20 @@
                     ON s.DCID = SAC.STUDENTSDCID
                     LEFT JOIN S_STU_NCEA_X NCEA
                     ON s.DCID = NCEA.STUDENTSDCID
+                    ~[if#parentsJoin.~(gpv.includeParents;sqlText)=1]
+                    LEFT JOIN parents ON parents.studentdcid = s.dcid
+                    [/if#parentsJoin]
                     WHERE s.enroll_status in (-1,0)
                     ~[if.is.a.school] AND s.schoolid = ~(curschoolid) [/if.is.a.school]
-                    ~[if#gr.~(gpv.gr;sqlText)#] AND s.grade_level = ~(gpv.gr) [/if#gr]
-                    ORDER BY sch.abbreviation, s.lastfirst
-                    ;alternatecolor;nonemessage=<tr>
-                        <td colspan="100%">No Records were found.</td>
-                    </tr>]
-                    <tr class="Record" data-StudentID="~(dcid)">
-                        <td class="nowrap"><a href="/admin/students/sacramental.html?frn=001~(dcid)"
-                                target="_blank">~(studentnumb)</a>
-                        </td>
-                        <td class="nowrap">~(name;t)</td>
-                        <td class="center">~(grade_level)</td>
-                        <td>~(gender;t)</td>
-                        <td class="nowrap">~(Religion;t)</td>
-                        <td class="nowrap">~(parish;t)</td>
-                        <td>~(parishcity;t)</td>
-                        <td>~(parishstate;t)</td>
-                        <td>~(baptism_date;t)</td>
-                        <td class="nowrap">~(baptism_parish;t)</td>
-                        <td>~(baptism_city;t)</td>
-                        <td>~(baptism_state;t)</td>
-                        <td>~(confession_date;t)</td>
-                        <td class="nowrap">~(confession_parish;t)</td>
-                        <td>~(confession_city;t)</td>
-                        <td>~(confession_state;t)</td>
-                        <td>~(communion_date;t)</td>
-                        <td class="nowrap">~(communion_parish;t)</td>
-                        <td>~(communion_city;t)</td>
-                        <td>~(communion_state;t)</td>
-                        <td>~(confirmation_date;t)</td>
-                        <td class="nowrap">~(confirmation_parish;t)</td>
-                        <td>~(confirmation_city;t)</td>
-                        <td>~(confirmation_state;t)</td>
-                        ~[if.district.office]<td>~(school;t)</td>[/if]
-                    </tr>
-                    [/tlist_sql]
-                </tbody>
-            </table>
-        </div>
-        <div style="clear: both;">
-            <p class="center">Report generated at ~[time] on ~[date]</p>
-        </div>
+                    ~[if#gr.~(gpv.gr;sqlText)#] AND TO_CHAR(s.grade_level) = '~(gpv.gr;sqlText)' [/if#gr]
+        ;]~(1)[/tlist_sql];
+        tableData.forEach(function (row) {
+            Object.keys(row).forEach(function (field) {
+                if (row[field] === null) row[field] = "";
+            });
+        });
+        </script>
         [/if#showData]
         ~[wc:admin_footer_frame_css]
     </body>
-
 </html>
