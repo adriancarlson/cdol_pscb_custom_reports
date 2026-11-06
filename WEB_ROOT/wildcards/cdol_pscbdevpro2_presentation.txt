@@ -1,0 +1,36 @@
+<!-- Presentation shared by PSCB Dev Pro 2 reports, including the initial filter page.
+     Keep the vendor results initializer and report queries in their existing run conditions. -->
+<link href="/pscb_dev_pro/scripts/pdfmake/multiple-select.min.css" rel="stylesheet">
+<style>
+    .box-round > h2 {
+        background-color: ~[if#cdolPscbHeader.pref.pscbtableheadercolor=]#d0ece7[else#cdolPscbHeader]~[pref:pscbtableheadercolor][/if#cdolPscbHeader];
+    }
+</style>
+<script>
+    $j(function () {
+        // When present, the vendor initializer owns the logo and select widgets.
+        if (document.getElementById('ngctrl')) {
+            return;
+        }
+
+        var heading = document.querySelector('h1');
+        if (heading && !heading.querySelector('img[src="/pscb_dev_pro/images/pscbdevlogo.svg"]')) {
+            var logo = document.createElement('img');
+            logo.src = '/pscb_dev_pro/images/pscbdevlogo.svg';
+            logo.width = 100;
+            logo.alt = 'PSCB Dev Pro';
+            logo.style.marginBottom = '-3px';
+            logo.style.paddingRight = '0.4em';
+            heading.insertBefore(logo, heading.firstChild);
+        }
+
+        require(['/pscb_dev_pro/scripts/pdfmake/multiple-select.min.js'], function () {
+            $j('form select').each(function () {
+                var select = $j(this);
+                if (!select.data('multipleSelect')) {
+                    select.multipleSelect();
+                }
+            });
+        });
+    });
+</script>
