@@ -1536,6 +1536,50 @@
 							]
 						}
 					]
+				},
+				{
+					"htmlID": "navPSCBDevProSubMenuFACTS-cdol",
+					"title": "FACTS",
+					"pageURL": null,
+					"version": "26.11.0.11",
+					"contextType": "main",
+					"isNewTab": null,
+					"isLandingPage": null,
+					"iconName": null,
+					"requiredContext": null,
+					"districtLevelContext": 0,
+					"sortOrder": 170,
+					"parentHTMLID": "navPSCBDevProReportsMenu",
+					"children": [
+						{
+							"htmlID": "cdol_facts_customers",
+							"title": "FACTS - Customers🔹",
+							"pageURL": "~[if.is.a.school]/admin/reports_pscb_dev_pro/facts/cdol_facts_customers.html[/if.is.a.school]",
+							"version": "26.11.0.11",
+							"contextType": "main",
+							"isNewTab": null,
+							"isLandingPage": null,
+							"iconName": null,
+							"requiredContext": null,
+							"districtLevelContext": 0,
+							"sortOrder": 10,
+							"parentHTMLID": "navPSCBDevProSubMenuFACTS-cdol"
+						},
+						{
+							"htmlID": "cdol_facts_students",
+							"title": "FACTS - Students🔹",
+							"pageURL": "~[if.is.a.school]/admin/reports_pscb_dev_pro/facts/cdol_facts_students.html[/if.is.a.school]",
+							"version": "26.11.0.11",
+							"contextType": "main",
+							"isNewTab": null,
+							"isLandingPage": null,
+							"iconName": null,
+							"requiredContext": null,
+							"districtLevelContext": 0,
+							"sortOrder": 20,
+							"parentHTMLID": "navPSCBDevProSubMenuFACTS-cdol"
+						}
+					]
 				}
 			]
 		}

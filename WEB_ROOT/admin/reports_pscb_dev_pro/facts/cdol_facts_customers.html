@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FACTS - Customers</title>
+    ~[wc:commonscripts]
+    <link href="/images/css/screen.css" rel="stylesheet" media="screen">
+    <link href="/images/css/print.css" rel="stylesheet" media="print">
+    <style>
+        #tabulatorTable .tabulator-cell.facts-reference,
+        #tabulatorTable .tabulator-col.facts-reference {
+            background-color: #d7edfe;
+        }
+    </style>
+</head>
+<body>
+    ~[wc:admin_header_css]<a href="/admin/home.html" target="_top">Start Page</a>
+    &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html">PSCB DEV Custom Reports</a>
+    &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_facts_menu.html">FACTS</a>
+    &gt; FACTS - Customers~[wc:admin_navigation_frame_css]
+    <h1>FACTS - Customers</h1>
+    ~[if#schoolOnly.is.a.school]
+    <form action="cdol_facts_customers.html" method="GET">
+        <div class="box-round">
+            <h2>Report Filters</h2>
+            <label for="factsScope">Students</label>
+            <select name="scope" id="factsScope">
+                <option value="incoming" ~[if.~(gpv.scope)=incoming]selected[/if]>Incoming Students</option>
+                <option value="current" ~[if.~(gpv.scope)=current]selected[/if]>Current Students</option>
+                <option value="both" ~[if.~(gpv.scope)=both]selected[/if]>Both</option>
+            </select>
+            <div class="button-row left"><input type="hidden" name="showData" value="1"><button type="submit">Run Report</button></div>
+        </div>
+    </form>
+    ~[if#run.~(gpv.showData;sqlText)=1]
+    ~[wc:pscbdevpro2_init]
+    <script>
+        function factsRecordLink(cell) {
+            var value = cell.getValue();
+            var link = document.createElement("a");
+            link.textContent = value == null ? "" : String(value);
+            var row = cell.getData();
+            link.href = cell.getField() === "student_number"
+                ? "/admin/students/contacts.html?frn=001" + encodeURIComponent(row.studentsdcid)
+                : "/admin/contacts/edit.html#?contactid=" + encodeURIComponent(row.personid);
+            link.target = "_blank";
+            link.rel = "noopener noreferrer";
+            return link;
+        }
+
+        var tableColumns = [
+            {"title": "Current School", "field": "current_school", "sorter": "string", "headerFilter": "list", "headerFilterParams": {"valuesLookup": true, "sort": "asc", "clearable": true}, "headerFilterFunc": "=", "formatter": "plaintext", "cssClass": "facts-reference"},
+            {"title": "Student Number", "field": "student_number", "sorter": "string", "headerFilter": "input", "formatter": factsRecordLink, "cssClass": "facts-reference"},
+            {"title": "Student Name", "field": "student_name", "sorter": "string", "headerFilter": "input", "formatter": "plaintext", "cssClass": "facts-reference"},
+            {"title": "Current Grade", "field": "current_grade", "sorter": "number", "headerFilter": "list", "headerFilterParams": {"valuesLookup": true, "sort": "asc", "clearable": true}, "headerFilterFunc": "=", "formatter": "plaintext", "cssClass": "facts-reference"},
+            {"title": "Next Year Grade", "field": "next_year_grade", "sorter": "number", "headerFilter": "list", "headerFilterParams": {"valuesLookup": true, "sort": "asc", "clearable": true}, "headerFilterFunc": "=", "formatter": "plaintext", "cssClass": "facts-reference"},
+            {"title": "Relationship", "field": "relationship", "sorter": "string", "headerFilter": "list", "headerFilterParams": {"valuesLookup": true, "sort": "asc", "clearable": true}, "headerFilterFunc": "=", "formatter": "plaintext", "cssClass": "facts-reference"},
+            {"title": "FirstName*", "field": "first_name", "sorter": "string", "headerFilter": "input", "formatter": factsRecordLink},
+            {"title": "PreferredName", "field": "preferred_name", "sorter": "string", "headerFilter": "input", "formatter": "plaintext"},
+            {"title": "LastName*", "field": "last_name", "sorter": "string", "headerFilter": "input", "formatter": factsRecordLink},
+            {"title": "CustomerID*", "field": "customer_id", "sorter": "string", "headerFilter": "input", "formatter": "plaintext"},
+            {"title": "StreetAddress", "field": "street", "sorter": "string", "headerFilter": "input", "formatter": "plaintext"},
+            {"title": "StreetAddress2", "field": "street2", "sorter": "string", "headerFilter": "input", "formatter": "plaintext"},
+            {"title": "City", "field": "city", "sorter": "string", "headerFilter": "input", "formatter": "plaintext"},
+            {"title": "State", "field": "state", "sorter": "string", "headerFilter": "input", "formatter": "plaintext"},
+            {"title": "PostalCode", "field": "postal_code", "sorter": "string", "headerFilter": "input", "formatter": "plaintext"},
+            {"title": "Country", "field": "country", "sorter": "string", "headerFilter": "input", "formatter": "plaintext"},
+            {"title": "DaytimePhone", "field": "daytime_phone", "sorter": "string", "headerFilter": "input", "formatter": "plaintext"},
+            {"title": "EveningPhone", "field": "evening_phone", "sorter": "string", "headerFilter": "input", "formatter": "plaintext"},
+            {"title": "CellPhone", "field": "cell_phone", "sorter": "string", "headerFilter": "input", "formatter": "plaintext"},
+            {"title": "EmailAddress", "field": "email", "sorter": "string", "headerFilter": "input", "formatter": "plaintext"},
+            {"title": "EmailAddress2", "field": "email2", "sorter": "string", "headerFilter": "input", "formatter": "plaintext"},
+            {"title": "EmailAddress3", "field": "email3", "sorter": "string", "headerFilter": "input", "formatter": "plaintext"},
+            {"title": "Coach", "field": "coach", "sorter": "string", "headerFilter": "input", "formatter": "plaintext"},
+            {"title": "Staff", "field": "staff", "sorter": "string", "headerFilter": "input", "formatter": "plaintext"}
+        ];
+        var tableData = ~[tlist_sql;
+WITH student_candidates AS (
+    SELECT s.*,
+        CASE WHEN s.schoolid = ~(curschoolid) AND s.enroll_status = 0 THEN 1 ELSE 0 END is_current,
+        CASE WHEN eoy.not_attending IS NULL AND (
+            (s.schoolid = ~(curschoolid) AND s.enroll_status = -1)
+            -- Feeder school/grade rules from cdol_student_checkers/data/studentData.json.
+            OR (~(curschoolid) = 101 AND s.schoolid IN (102,104,105,107,108,109,110,111,120) AND s.grade_level = 8)
+            OR (~(curschoolid) = 115 AND s.schoolid IN (140,262) AND s.grade_level = 6)
+            OR (~(curschoolid) = 130 AND ((s.schoolid = 131 AND s.grade_level = 5) OR (s.schoolid = 282 AND s.grade_level = 8)))
+            OR (~(curschoolid) = 160 AND s.schoolid = 264 AND s.grade_level = 5)
+            OR (~(curschoolid) = 189 AND s.schoolid = 437 AND s.grade_level = 5)
+            OR (~(curschoolid) = 210 AND s.schoolid = 211 AND s.grade_level = 6)
+            OR (~(curschoolid) IN (102,104,105,107,108,109,110,111,120) AND s.schoolid = ~(curschoolid) AND s.grade_level = 8)
+            OR (~(curschoolid) IN (140,211,262) AND s.schoolid = ~(curschoolid) AND s.grade_level = 6)
+            OR (~(curschoolid) IN (131,264,437) AND s.schoolid = ~(curschoolid) AND s.grade_level = 5)
+        ) THEN 1 ELSE 0 END is_incoming
+    FROM students s
+    LEFT JOIN u_student_eoy eoy ON eoy.studentsdcid = s.dcid
+    WHERE s.enroll_status IN (-1, 0) AND ~(curschoolid) <> 0
+), scoped_students AS (
+    SELECT s.*,
+        CASE WHEN s.is_incoming = 1
+            AND ('~(gpv.scope;sqlText)' = 'incoming' OR s.is_current = 0)
+            THEN s.sched_nextyeargrade ELSE s.grade_level END export_grade
+    FROM student_candidates s
+    WHERE ('~(gpv.scope;sqlText)' = 'current' AND s.is_current = 1)
+        OR ('~(gpv.scope;sqlText)' = 'incoming' AND s.is_incoming = 1)
+        OR ('~(gpv.scope;sqlText)' = 'both' AND (s.is_current = 1 OR s.is_incoming = 1))
+), eligible_relationships AS (
+    SELECT s.dcid studentdcid, p.id personid, rel.code relationship,
+        MIN(sca.contactpriorityorder) contact_priority
+    FROM scoped_students s
+    JOIN studentcontactassoc sca ON sca.studentdcid = s.dcid
+    JOIN studentcontactdetail scd ON scd.studentcontactassocid = sca.studentcontactassocid
+    JOIN person p ON p.id = sca.personid AND p.isactive = 1
+    JOIN codeset rel ON rel.codesetid = scd.relationshiptypecodesetid
+    WHERE rel.code IN ('Father','Foster Parent','Guardian','Host Parent','Mother','Step-Father','Step-Mother')
+        AND TRUNC(SYSDATE) BETWEEN NVL(scd.startdate, TRUNC(SYSDATE)) AND NVL(scd.enddate, TRUNC(SYSDATE))
+    GROUP BY s.dcid, p.id, rel.code
+), contact_pairs AS (
+    SELECT studentdcid, personid, MIN(contact_priority) contact_priority,
+        LISTAGG(relationship, ' | ') WITHIN GROUP (ORDER BY relationship) relationship
+    FROM eligible_relationships
+    GROUP BY studentdcid, personid
+), report_people AS (
+    SELECT DISTINCT personid FROM contact_pairs
+), ranked_addresses AS (
+    SELECT paa.personid, pa.street, TRIM(pa.linetwo || ' ' || pa.unit) street2,
+        pa.city, state.code state, pa.postalcode, country.code country,
+        ROW_NUMBER() OVER (PARTITION BY paa.personid ORDER BY
+            CASE LOWER(TRIM(address_type.code)) WHEN 'mailing' THEN 0 WHEN 'home' THEN 1 ELSE 2 END,
+            paa.addresspriorityorder NULLS LAST,
+            paa.personaddressassocid) rn
+    FROM report_people rp
+    JOIN personaddressassoc paa ON paa.personid = rp.personid
+    JOIN personaddress pa ON pa.personaddressid = paa.personaddressid
+    LEFT JOIN codeset address_type ON address_type.codesetid = paa.addresstypecodesetid
+    LEFT JOIN codeset state ON state.codesetid = pa.statescodesetid
+    LEFT JOIN codeset country ON country.codesetid = pa.countrycodesetid
+    WHERE (LOWER(TRIM(address_type.code)) IN ('mailing', 'home', 'not set') OR TRIM(address_type.code) IS NULL)
+        AND TRUNC(SYSDATE) BETWEEN NVL(paa.startdate, TRUNC(SYSDATE)) AND NVL(paa.enddate, TRUNC(SYSDATE))
+), email_candidates AS (
+    SELECT pea.personid, ea.emailaddress, pea.emailaddresspriorityorder, pea.emailaddressid,
+        ROW_NUMBER() OVER (PARTITION BY pea.personid ORDER BY NVL(pea.isprimaryemailaddress,0) DESC,
+            pea.emailaddresspriorityorder NULLS LAST, pea.emailaddressid) primary_rank
+    FROM report_people rp
+    JOIN personemailaddressassoc pea ON pea.personid = rp.personid
+    JOIN emailaddress ea ON ea.emailaddressid = pea.emailaddressid
+    WHERE TRIM(ea.emailaddress) IS NOT NULL
+), ranked_emails AS (
+    SELECT personid, emailaddress,
+        ROW_NUMBER() OVER (PARTITION BY personid ORDER BY
+            CASE WHEN primary_rank = 1 THEN 0 ELSE 1 END,
+            emailaddresspriorityorder NULLS LAST, emailaddressid) rn
+    FROM email_candidates
+), phone_candidates AS (
+    SELECT pp.personid, pp.phonenumberasentered phone, LOWER(TRIM(phone_type.code)) phone_type,
+        pp.ispreferred, pp.phonenumberpriorityorder, pp.personphonenumberassocid
+    FROM report_people rp
+    JOIN personphonenumberassoc pp ON pp.personid = rp.personid
+    LEFT JOIN codeset phone_type ON phone_type.codesetid = pp.phonetypecodesetid
+    WHERE TRIM(pp.phonenumberasentered) IS NOT NULL
+), ranked_phones AS (
+    SELECT personid, phone,
+        ROW_NUMBER() OVER (PARTITION BY personid ORDER BY
+            CASE WHEN phone_type = 'mobile' THEN 0 WHEN ispreferred = 1 THEN 1 ELSE 2 END,
+            phonenumberpriorityorder NULLS LAST, personphonenumberassocid) rn
+    FROM phone_candidates
+), ranked_home_phones AS (
+    SELECT personid, phone,
+        ROW_NUMBER() OVER (PARTITION BY personid ORDER BY
+            phonenumberpriorityorder NULLS LAST, personphonenumberassocid) rn
+    FROM phone_candidates
+    WHERE phone_type = 'home'
+)
+SELECT COALESCE(REPLACE(JSON_ARRAYAGG(JSON_OBJECT(
+    'current_school' VALUE school.name,
+    'studentsdcid' VALUE s.dcid,
+    'personid' VALUE p.id,
+    'student_number' VALUE TO_CHAR(s.student_number),
+    'student_name' VALUE s.lastfirst,
+    'current_grade' VALUE s.grade_level,
+    'next_year_grade' VALUE s.sched_nextyeargrade,
+    'first_name' VALUE p.firstname,
+    'preferred_name' VALUE '',
+    'last_name' VALUE p.lastname,
+    'customer_id' VALUE '',
+    'street' VALUE a.street,
+    'street2' VALUE a.street2,
+    'city' VALUE a.city,
+    'state' VALUE a.state,
+    'postal_code' VALUE a.postalcode,
+    'country' VALUE a.country,
+    'daytime_phone' VALUE '',
+    'evening_phone' VALUE home_phone.phone,
+    'cell_phone' VALUE ph.phone,
+    'email' VALUE em.emailaddress,
+    'email2' VALUE em2.emailaddress,
+    'email3' VALUE em3.emailaddress,
+    'coach' VALUE '',
+    'staff' VALUE '',
+    'relationship' VALUE cp.relationship
+    NULL ON NULL RETURNING CLOB
+) ORDER BY school.name, s.last_name, s.first_name, s.dcid, cp.contact_priority NULLS LAST, p.lastname, p.firstname, p.id RETURNING CLOB), '<', '\u003c'),
+    TO_CLOB(CHR(91) || CHR(93))) report_json
+FROM scoped_students s
+LEFT JOIN schools school ON school.school_number = s.schoolid
+JOIN contact_pairs cp ON cp.studentdcid = s.dcid
+JOIN person p ON p.id = cp.personid
+LEFT JOIN ranked_addresses a ON a.personid = p.id AND a.rn = 1
+LEFT JOIN ranked_emails em ON em.personid = p.id AND em.rn = 1
+LEFT JOIN ranked_emails em2 ON em2.personid = p.id AND em2.rn = 2
+LEFT JOIN ranked_emails em3 ON em3.personid = p.id AND em3.rn = 3
+LEFT JOIN ranked_phones ph ON ph.personid = p.id AND ph.rn = 1
+LEFT JOIN ranked_home_phones home_phone ON home_phone.personid = p.id AND home_phone.rn = 1
+;]~(1)[/tlist_sql];
+        tableData.forEach(function (row) {
+            Object.keys(row).forEach(function (field) {
+                if (row[field] === null) row[field] = "";
+            });
+        });
+    </script>
+    [/if#run]
+    [else#schoolOnly]
+    <p>Select a school to run the FACTS reports.</p>
+    [/if#schoolOnly]
+    ~[wc:admin_footer_frame_css]
+</body>
+</html>

@@ -1,0 +1,6 @@
+~[if#factsHome.is.a.school]
+<tr class="~[evenoddrow]">
+    <td><a href="/admin/reports_pscb_dev_pro/pdevpro_reports_facts_menu.html">FACTS</a></td>
+    <td>Customer and student reports for FACTS imports.</td>
+</tr>
+[/if#factsHome]

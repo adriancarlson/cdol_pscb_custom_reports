@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FACTS - Students</title>
+    ~[wc:commonscripts]
+    <link href="/images/css/screen.css" rel="stylesheet" media="screen">
+    <link href="/images/css/print.css" rel="stylesheet" media="print">
+    <style>
+        #tabulatorTable .tabulator-cell.facts-reference,
+        #tabulatorTable .tabulator-col.facts-reference {
+            background-color: #d7edfe;
+        }
+    </style>
+</head>
+<body>
+    ~[wc:admin_header_css]<a href="/admin/home.html" target="_top">Start Page</a>
+    &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html">PSCB DEV Custom Reports</a>
+    &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_facts_menu.html">FACTS</a>
+    &gt; FACTS - Students~[wc:admin_navigation_frame_css]
+    <h1>FACTS - Students</h1>
+    ~[if#schoolOnly.is.a.school]
+    <form action="cdol_facts_students.html" method="GET">
+        <div class="box-round">
+            <h2>Report Filters</h2>
+            <label for="factsScope">Students</label>
+            <select name="scope" id="factsScope">
+                <option value="incoming" ~[if.~(gpv.scope)=incoming]selected[/if]>Incoming Students</option>
+                <option value="current" ~[if.~(gpv.scope)=current]selected[/if]>Current Students</option>
+                <option value="both" ~[if.~(gpv.scope)=both]selected[/if]>Both</option>
+            </select>
+            <div class="button-row left"><input type="hidden" name="showData" value="1"><button type="submit">Run Report</button></div>
+        </div>
+    </form>
+    ~[if#run.~(gpv.showData;sqlText)=1]
+    ~[wc:pscbdevpro2_init]
+    <script>
+        function factsStudentLink(cell) {
+            var link = document.createElement("a");
+            var value = cell.getValue();
+            link.textContent = value == null ? "" : String(value);
+            link.href = "/admin/students/generaldemographics.html?frn=001" + encodeURIComponent(cell.getData().studentsdcid);
+            link.target = "_blank";
+            link.rel = "noopener noreferrer";
+            return link;
+        }
+
+        var tableColumns = [
+            {"title": "Current School", "field": "current_school", "sorter": "string", "headerFilter": "list", "headerFilterParams": {"valuesLookup": true, "sort": "asc", "clearable": true}, "headerFilterFunc": "=", "formatter": "plaintext", "cssClass": "facts-reference"},
+            {"title": "Next Year Grade", "field": "next_year_grade", "sorter": "number", "headerFilter": "list", "headerFilterParams": {"valuesLookup": true, "sort": "asc", "clearable": true}, "headerFilterFunc": "=", "formatter": "plaintext", "cssClass": "facts-reference"},
+            {"title": "Customer ID*", "field": "customer_id", "sorter": "string", "headerFilter": "input", "formatter": "plaintext"},
+            {"title": "Student First Name*", "field": "first_name", "sorter": "string", "headerFilter": "input", "formatter": "plaintext"},
+            {"title": "Preferred Name", "field": "preferred_name", "sorter": "string", "headerFilter": "input", "formatter": "plaintext"},
+            {"title": "Student Last Name*", "field": "last_name", "sorter": "string", "headerFilter": "input", "formatter": "plaintext"},
+            {"title": "Student ID*", "field": "student_id", "sorter": "string", "headerFilter": "input", "formatter": factsStudentLink},
+            {"title": "Student Grade*", "field": "grade", "sorter": "string", "headerFilter": "list", "headerFilterParams": {"valuesLookup": true, "sort": "asc", "clearable": true}, "headerFilterFunc": "=", "formatter": "plaintext"},
+            {"title": "Location Code", "field": "location_code", "sorter": "string", "headerFilter": "list", "headerFilterParams": {"valuesLookup": true, "sort": "asc", "clearable": true}, "headerFilterFunc": "=", "formatter": "plaintext"}
+        ];
+        var tableData = ~[tlist_sql;
+WITH student_candidates AS (
+    SELECT s.*,
+        CASE WHEN s.schoolid = ~(curschoolid) AND s.enroll_status = 0 THEN 1 ELSE 0 END is_current,
+        CASE WHEN eoy.not_attending IS NULL AND (
+            (s.schoolid = ~(curschoolid) AND s.enroll_status = -1)
+            -- Feeder school/grade rules from cdol_student_checkers/data/studentData.json.
+            OR (~(curschoolid) = 101 AND s.schoolid IN (102,104,105,107,108,109,110,111,120) AND s.grade_level = 8)
+            OR (~(curschoolid) = 115 AND s.schoolid IN (140,262) AND s.grade_level = 6)
+            OR (~(curschoolid) = 130 AND ((s.schoolid = 131 AND s.grade_level = 5) OR (s.schoolid = 282 AND s.grade_level = 8)))
+            OR (~(curschoolid) = 160 AND s.schoolid = 264 AND s.grade_level = 5)
+            OR (~(curschoolid) = 189 AND s.schoolid = 437 AND s.grade_level = 5)
+            OR (~(curschoolid) = 210 AND s.schoolid = 211 AND s.grade_level = 6)
+            OR (~(curschoolid) IN (102,104,105,107,108,109,110,111,120) AND s.schoolid = ~(curschoolid) AND s.grade_level = 8)
+            OR (~(curschoolid) IN (140,211,262) AND s.schoolid = ~(curschoolid) AND s.grade_level = 6)
+            OR (~(curschoolid) IN (131,264,437) AND s.schoolid = ~(curschoolid) AND s.grade_level = 5)
+        ) THEN 1 ELSE 0 END is_incoming
+    FROM students s
+    LEFT JOIN u_student_eoy eoy ON eoy.studentsdcid = s.dcid
+    WHERE s.enroll_status IN (-1, 0) AND ~(curschoolid) <> 0
+), scoped_students AS (
+    SELECT s.*,
+        CASE WHEN s.is_incoming = 1
+            AND ('~(gpv.scope;sqlText)' = 'incoming' OR s.is_current = 0)
+            THEN s.sched_nextyeargrade ELSE s.grade_level END export_grade
+    FROM student_candidates s
+    WHERE ('~(gpv.scope;sqlText)' = 'current' AND s.is_current = 1)
+        OR ('~(gpv.scope;sqlText)' = 'incoming' AND s.is_incoming = 1)
+        OR ('~(gpv.scope;sqlText)' = 'both' AND (s.is_current = 1 OR s.is_incoming = 1))
+)
+SELECT COALESCE(REPLACE(JSON_ARRAYAGG(JSON_OBJECT(
+    'current_school' VALUE school.name,
+    'studentsdcid' VALUE s.dcid,
+    'student_number' VALUE TO_CHAR(s.student_number),
+    'student_name' VALUE s.lastfirst,
+    'next_year_grade' VALUE s.sched_nextyeargrade,
+    'customer_id' VALUE '',
+    'first_name' VALUE s.first_name,
+    'preferred_name' VALUE '',
+    'last_name' VALUE s.last_name,
+    'student_id' VALUE TO_CHAR(s.student_number),
+    'grade' VALUE TO_CHAR(s.export_grade),
+    'location_code' VALUE sac.student_parish
+    NULL ON NULL RETURNING CLOB
+) ORDER BY school.name, s.last_name, s.first_name, s.dcid RETURNING CLOB), '<', '\u003c'),
+    TO_CLOB(CHR(91) || CHR(93))) report_json
+FROM scoped_students s
+LEFT JOIN schools school ON school.school_number = s.schoolid
+LEFT JOIN u_student_sacramental sac ON sac.studentsdcid = s.dcid
+;]~(1)[/tlist_sql];
+        tableData.forEach(function (row) {
+            Object.keys(row).forEach(function (field) {
+                if (row[field] === null) row[field] = "";
+            });
+        });
+    </script>
+    [/if#run]
+    [else#schoolOnly]
+    <p>Select a school to run the FACTS reports.</p>
+    [/if#schoolOnly]
+    ~[wc:admin_footer_frame_css]
+</body>
+</html>

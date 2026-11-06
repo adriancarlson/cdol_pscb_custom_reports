@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PSCB DEV Custom Reports - FACTS</title>
+    ~[wc:commonscripts]
+    <link href="/images/css/screen.css" rel="stylesheet" media="screen">
+    <link href="/images/css/print.css" rel="stylesheet" media="print">
+</head>
+<body>
+    ~[wc:admin_header_css]<a href="/admin/home.html" target="_top">Start Page</a>
+    &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html">PSCB DEV Custom Reports</a>
+    &gt; FACTS~[wc:admin_navigation_css]
+    <h1>Custom Reports - FACTS</h1>
+    ~[if#schoolOnly.is.a.school]
+    <div class="box-round">
+        <table class="grid" cellspacing="0" cellpadding="4">
+            <thead><tr><th class="left">FACTS</th><th class="left">Description</th></tr></thead>
+            <tbody>
+                <tr><td><a href="/admin/reports_pscb_dev_pro/facts/cdol_facts_customers.html">FACTS - Customers</a></td>
+                    <td>Eligible contacts, one row per contact–student pair, with a FACTS customer template export.</td></tr>
+                <tr><td><a href="/admin/reports_pscb_dev_pro/facts/cdol_facts_students.html">FACTS - Students</a></td>
+                    <td>Student import template with PowerSchool Student Number and student parish.</td></tr>
+            </tbody>
+        </table>
+    </div>
+    [else#schoolOnly]<p>Select a school to run the FACTS reports.</p>[/if#schoolOnly]
+    ~[wc:admin_footer_css]
+</body>
+</html>
