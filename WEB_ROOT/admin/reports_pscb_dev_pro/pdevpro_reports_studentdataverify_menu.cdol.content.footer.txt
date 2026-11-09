@@ -17,6 +17,12 @@
 		<td>List students and their T-shirt sizes</td>
 	</tr>
 	[/if#shirtSize]
+	~[if.~(decode;~(curschoolid);0;disp;189;disp;437;disp;nodisp)=disp]
+	<tr>
+		<td><a href="/admin/reports_pscb_dev_pro/studentdataverify/cdol_hastings_new_students.html">New to Hastings Catholic Schools</a></td>
+		<td>List preschool through grade 12 students entering Hastings Catholic Schools this school year.</td>
+	</tr>
+	[/if]
 	<tr id="studentFamilyRep">
 		<td><a href="/admin/reports_pscb_dev_pro/studentdataverify/cdol_student_family_rep.html">Family Rep</a>
 		</td>

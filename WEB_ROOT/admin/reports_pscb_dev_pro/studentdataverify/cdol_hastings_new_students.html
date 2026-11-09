@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>New to Hastings Catholic Schools</title>
+        ~[wc:commonscripts]
+        <link href="/images/css/screen.css" rel="stylesheet" media="screen">
+        <link href="/images/css/print.css" rel="stylesheet" media="print">
+        ~[wc:pscbdevpro_init]
+    </head>
+
+    <body>
+        ~[wc:admin_header_css]<!-- breadcrumb start --><a href="/admin/home.html">Start Page</a>
+        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_home.html">PSCB Custom Reports</a>
+        &gt; <a href="/admin/reports_pscb_dev_pro/pdevpro_reports_studentdataverify_menu.html">Student Data
+            Verification</a>
+        &gt; New to Hastings Catholic Schools<!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
+        <h1>New to Hastings Catholic Schools</h1>
+        <div class="box-round">
+            <table cellspacing="0" cellpadding="4" class="tablesorter grid" id="pscbDevPro">
+                <thead>
+                    <tr>
+                        <th>Student Number</th>
+                        <th>Student Name</th>
+                        <th class="filter-select">School</th>
+                        <th class="filter-select">Grade</th>
+                        <th class="filter-select">Enrollment Record</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ~[tlist_sql;
+                    WITH school_year AS (
+                    SELECT (EXTRACT(YEAR FROM ADD_MONTHS(SYSDATE, -6)) - 1990) * 100 AS year_term_id
+                    FROM dual
+                    )
+                    SELECT students.dcid, students.student_number, students.lastfirst,
+                    schools.name AS school_name,
+                    CASE
+                    WHEN students.grade_level < 0 THEN 'PK' WHEN students.grade_level=0 THEN 'K' ELSE
+                        TO_CHAR(students.grade_level) END AS grade_label, CASE students.enroll_status WHEN -1
+                        THEN 'Pre-registered' ELSE 'Active' END AS enrollment_record FROM students JOIN schools ON
+                        schools.school_number=students.schoolid JOIN u_student_enrollment_logic ON
+                        u_student_enrollment_logic.studentsdcid=students.dcid CROSS JOIN school_year WHERE
+                        students.schoolid IN (189, 437) AND ~(curschoolid) IN (0, students.schoolid) AND
+                        students.enroll_status IN (-1, 0) AND students.grade_level <=12 AND (
+                        u_student_enrollment_logic.preenroll_year_id=school_year.year_term_id OR (
+                        u_student_enrollment_logic.renewal_year_id=school_year.year_term_id AND
+                        u_student_enrollment_logic.psee_school_id NOT IN (189, 437) ) ) ORDER BY schools.name,
+                        students.grade_level, students.lastfirst, students.id ;nonemessage=<tr nodata>
+                        <td colspan="5">No new students found for the current school year.</td>
+                        </tr>]
+                        <tr class="Record" data-StudentID="~(dcid)">
+                            <td>~(student_number;t)</td>
+                            <td>~(lastfirst;t)</td>
+                            <td>~(school_name;t)</td>
+                            <td>~(grade_label;t)</td>
+                            <td>~(enrollment_record;t)</td>
+                        </tr>
+                        [/tlist_sql]
+                </tbody>
+            </table>
+        </div>
+        ~[wc:admin_footer_frame_css]
+    </body>
+
+</html>

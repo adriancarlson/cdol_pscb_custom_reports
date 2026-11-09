@@ -1478,6 +1478,20 @@
 									"districtLevelContext": 0
 								},
 								{
+									"htmlID": "cdol_hastings_new_students",
+									"title": "New to Hastings Catholic Schools🔹",
+									"pageURL": "~[if.~(decode;~(curschoolid);0;disp;189;disp;437;disp;nodisp)=disp]/admin/reports_pscb_dev_pro/studentdataverify/cdol_hastings_new_students.html[/if]",
+									"version": "26.11.2.2",
+									"contextType": "main",
+									"isNewTab": null,
+									"isLandingPage": null,
+									"iconName": null,
+									"requiredContext": null,
+									"sortOrder": 195,
+									"parentHTMLID": "navPSCBDevProSubMenuStudentDataVerification-cdol",
+									"districtLevelContext": 0
+								},
+								{
 									"htmlID": "cdol_previous_grade_school",
 									"title": "Previous Grade School🔹",
 									"pageURL": "~[if.~(decode;~(curschoolid);101;disp;115;disp;130;disp;160;disp;189;disp;210;disp;nodisp)=disp]/admin/reports_pscb_dev_pro/studentdataverify/cdol_previous_grade_school.html[/if]",
